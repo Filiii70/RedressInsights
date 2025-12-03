@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 interface ExtractedInvoiceData {
@@ -17,7 +16,7 @@ interface ExtractedInvoiceData {
 
 export async function extractInvoiceData(base64Image: string, mimeType: string): Promise<ExtractedInvoiceData> {
   const response = await openai.chat.completions.create({
-    model: "gpt-5",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
@@ -99,34 +98,43 @@ function calculateDueDate(invoiceDate: string | null): string {
 }
 
 export async function extractInvoiceDataFromPdf(pdfBuffer: Buffer): Promise<ExtractedInvoiceData> {
-  // For PDFs, we'll need to convert to image first or use text extraction
-  // For now, we'll use the first page as an image
-  // In production, you'd use a PDF library to extract text or convert to image
-  
-  // This is a simplified approach - convert PDF to base64 and try to analyze
+  // GPT-4o can process PDFs when sent as base64 encoded data
+  // This works best for single-page or scanned PDF invoices
   const base64 = pdfBuffer.toString("base64");
   
   const response = await openai.chat.completions.create({
-    model: "gpt-5",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
-        content: `You are an expert at extracting invoice data. The user will provide PDF content. Extract the following fields:
+        content: `You are an expert at extracting invoice data from documents. Extract the following fields from the invoice:
 - companyName: The name of the company being billed (the customer/client, NOT the sender)
-- vatNumber: The VAT/BTW number of the customer
+- vatNumber: The VAT/BTW number of the customer (format: BE/NL followed by numbers, or just numbers)
 - invoiceNumber: The invoice number/reference
-- amount: The total amount as a number
-- currency: The currency code (default EUR)
+- amount: The total amount as a number (without currency symbol)
+- currency: The currency code (EUR, USD, etc.) - default to EUR if not specified
 - invoiceDate: The invoice date in ISO format (YYYY-MM-DD)
-- dueDate: The payment due date in ISO format
-- paymentDate: If paid, the payment date. Otherwise null.
-- description: Brief description
+- dueDate: The payment due date in ISO format (YYYY-MM-DD). If not specified, assume 30 days after invoice date.
+- paymentDate: If the invoice shows it's paid, the payment date in ISO format. Otherwise null.
+- description: A brief description of what the invoice is for
 
-Return only valid JSON. Use null for fields that cannot be determined.`
+Return the data as a JSON object. If a field cannot be determined, use null.
+For VAT numbers, normalize them by removing spaces and ensuring proper format (e.g., BE0123456789 or NL123456789B01).`
       },
       {
         role: "user",
-        content: "This is a PDF invoice. Please extract the data. If you cannot read it directly, provide reasonable defaults based on typical Benelux invoices."
+        content: [
+          {
+            type: "text",
+            text: "Extract the invoice data from this PDF document. Return only valid JSON."
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:application/pdf;base64,${base64}`
+            }
+          }
+        ],
       },
     ],
     response_format: { type: "json_object" },

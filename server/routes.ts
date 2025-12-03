@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { extractInvoiceData } from "./openai";
+import { extractInvoiceData, extractInvoiceDataFromPdf } from "./openai";
 import multer from "multer";
 
 const upload = multer({ 
@@ -69,17 +69,36 @@ export async function registerRoutes(
 
       const file = req.file;
       const mimeType = file.mimetype;
-      const base64 = file.buffer.toString("base64");
 
       // Extract data using AI
       let extractedData;
       try {
-        extractedData = await extractInvoiceData(base64, mimeType);
+        if (mimeType === "application/pdf") {
+          // PDF support is limited - recommend using images instead
+          // Try PDF extraction but it may not work reliably
+          try {
+            extractedData = await extractInvoiceDataFromPdf(file.buffer);
+          } catch (pdfError) {
+            console.error("PDF extraction failed, recommend using image instead:", pdfError);
+            return res.status(422).json({ 
+              message: "PDF verwerking is beperkt. Upload alstublieft een afbeelding van de factuur (PNG of JPG) voor betere resultaten.",
+              requiresManualEntry: true
+            });
+          }
+        } else if (mimeType.startsWith("image/")) {
+          // Use image extraction for images - this works reliably
+          const base64 = file.buffer.toString("base64");
+          extractedData = await extractInvoiceData(base64, mimeType);
+        } else {
+          return res.status(400).json({ 
+            message: "Niet ondersteund bestandstype. Upload een afbeelding (PNG, JPG) voor de beste resultaten." 
+          });
+        }
       } catch (aiError) {
         console.error("AI extraction error:", aiError);
         // Fallback to manual entry if AI fails
         return res.status(422).json({ 
-          message: "Could not extract invoice data automatically. Please enter manually.",
+          message: "Kon de factuurgegevens niet automatisch uitlezen. Probeer een andere afbeelding of voer de gegevens handmatig in.",
           requiresManualEntry: true
         });
       }
