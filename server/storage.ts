@@ -1,38 +1,416 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { 
+  companies, invoices, paymentBehavior, sectorBenchmarks,
+  type Company, type InsertCompany, 
+  type Invoice, type InsertInvoice,
+  type PaymentBehavior, type InsertPaymentBehavior,
+  type CompanyWithBehavior, type InvoiceWithCompany, type DashboardStats,
+  type ActionPlan
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Companies
+  getCompany(id: string): Promise<CompanyWithBehavior | undefined>;
+  getCompanyByVat(vatNumber: string): Promise<CompanyWithBehavior | undefined>;
+  getAllCompanies(): Promise<CompanyWithBehavior[]>;
+  getRiskyCompanies(minScore: number): Promise<CompanyWithBehavior[]>;
+  createCompany(company: InsertCompany): Promise<Company>;
+  updateCompany(id: string, company: Partial<InsertCompany>): Promise<Company | undefined>;
+
+  // Invoices
+  getInvoice(id: string): Promise<InvoiceWithCompany | undefined>;
+  getInvoicesByCompany(companyId: string): Promise<Invoice[]>;
+  getAllInvoices(): Promise<InvoiceWithCompany[]>;
+  getRecentInvoices(limit: number): Promise<InvoiceWithCompany[]>;
+  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  updateInvoice(id: string, invoice: Partial<Invoice>): Promise<Invoice | undefined>;
+
+  // Payment Behavior
+  getPaymentBehavior(companyId: string): Promise<PaymentBehavior | undefined>;
+  upsertPaymentBehavior(behavior: InsertPaymentBehavior & { companyId: string }): Promise<PaymentBehavior>;
+  recalculatePaymentBehavior(companyId: string): Promise<void>;
+
+  // Dashboard
+  getDashboardStats(): Promise<DashboardStats>;
+
+  // Action Plan
+  getActionPlan(companyId: string): Promise<ActionPlan>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+export class DatabaseStorage implements IStorage {
+  // Companies
+  async getCompany(id: string): Promise<CompanyWithBehavior | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    if (!company) return undefined;
 
-  constructor() {
-    this.users = new Map();
+    const [behavior] = await db.select().from(paymentBehavior).where(eq(paymentBehavior.companyId, id));
+    return { ...company, paymentBehavior: behavior || null };
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getCompanyByVat(vatNumber: string): Promise<CompanyWithBehavior | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.vatNumber, vatNumber));
+    if (!company) return undefined;
+
+    const [behavior] = await db.select().from(paymentBehavior).where(eq(paymentBehavior.companyId, company.id));
+    return { ...company, paymentBehavior: behavior || null };
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getAllCompanies(): Promise<CompanyWithBehavior[]> {
+    const allCompanies = await db.select().from(companies).orderBy(desc(companies.createdAt));
+    
+    const result: CompanyWithBehavior[] = [];
+    for (const company of allCompanies) {
+      const [behavior] = await db.select().from(paymentBehavior).where(eq(paymentBehavior.companyId, company.id));
+      result.push({ ...company, paymentBehavior: behavior || null });
+    }
+    return result;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async getRiskyCompanies(minScore: number): Promise<CompanyWithBehavior[]> {
+    const behaviors = await db.select()
+      .from(paymentBehavior)
+      .where(gte(paymentBehavior.riskScore, minScore))
+      .orderBy(desc(paymentBehavior.riskScore));
+
+    const result: CompanyWithBehavior[] = [];
+    for (const behavior of behaviors) {
+      const [company] = await db.select().from(companies).where(eq(companies.id, behavior.companyId));
+      if (company) {
+        result.push({ ...company, paymentBehavior: behavior });
+      }
+    }
+    return result;
+  }
+
+  async createCompany(company: InsertCompany): Promise<Company> {
+    const [newCompany] = await db.insert(companies).values(company).returning();
+    return newCompany;
+  }
+
+  async updateCompany(id: string, company: Partial<InsertCompany>): Promise<Company | undefined> {
+    const [updated] = await db.update(companies).set(company).where(eq(companies.id, id)).returning();
+    return updated;
+  }
+
+  // Invoices
+  async getInvoice(id: string): Promise<InvoiceWithCompany | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    if (!invoice) return undefined;
+
+    const [company] = await db.select().from(companies).where(eq(companies.id, invoice.companyId));
+    return { ...invoice, company: company! };
+  }
+
+  async getInvoicesByCompany(companyId: string): Promise<Invoice[]> {
+    return db.select().from(invoices).where(eq(invoices.companyId, companyId)).orderBy(desc(invoices.dueDate));
+  }
+
+  async getAllInvoices(): Promise<InvoiceWithCompany[]> {
+    const allInvoices = await db.select().from(invoices).orderBy(desc(invoices.createdAt));
+    
+    const result: InvoiceWithCompany[] = [];
+    for (const invoice of allInvoices) {
+      const [company] = await db.select().from(companies).where(eq(companies.id, invoice.companyId));
+      if (company) {
+        result.push({ ...invoice, company });
+      }
+    }
+    return result;
+  }
+
+  async getRecentInvoices(limit: number): Promise<InvoiceWithCompany[]> {
+    const recentInvoices = await db.select().from(invoices).orderBy(desc(invoices.createdAt)).limit(limit);
+    
+    const result: InvoiceWithCompany[] = [];
+    for (const invoice of recentInvoices) {
+      const [company] = await db.select().from(companies).where(eq(companies.id, invoice.companyId));
+      if (company) {
+        result.push({ ...invoice, company });
+      }
+    }
+    return result;
+  }
+
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    // Calculate days late if overdue
+    const now = new Date();
+    const dueDate = new Date(invoice.dueDate);
+    let status: "pending" | "paid" | "overdue" = "pending";
+    let daysLate = 0;
+
+    if (invoice.paymentDate) {
+      status = "paid";
+      const paymentDate = new Date(invoice.paymentDate);
+      if (paymentDate > dueDate) {
+        daysLate = Math.ceil((paymentDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+      }
+    } else if (now > dueDate) {
+      status = "overdue";
+      daysLate = Math.ceil((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    const [newInvoice] = await db.insert(invoices).values({
+      ...invoice,
+      status,
+      daysLate,
+    }).returning();
+
+    // Recalculate payment behavior for the company
+    await this.recalculatePaymentBehavior(invoice.companyId);
+
+    return newInvoice;
+  }
+
+  async updateInvoice(id: string, invoice: Partial<Invoice>): Promise<Invoice | undefined> {
+    const [updated] = await db.update(invoices).set(invoice).where(eq(invoices.id, id)).returning();
+    if (updated) {
+      await this.recalculatePaymentBehavior(updated.companyId);
+    }
+    return updated;
+  }
+
+  // Payment Behavior
+  async getPaymentBehavior(companyId: string): Promise<PaymentBehavior | undefined> {
+    const [behavior] = await db.select().from(paymentBehavior).where(eq(paymentBehavior.companyId, companyId));
+    return behavior;
+  }
+
+  async upsertPaymentBehavior(behavior: InsertPaymentBehavior & { companyId: string }): Promise<PaymentBehavior> {
+    const existing = await this.getPaymentBehavior(behavior.companyId);
+    
+    if (existing) {
+      const [updated] = await db.update(paymentBehavior)
+        .set({ ...behavior, lastUpdated: new Date() })
+        .where(eq(paymentBehavior.companyId, behavior.companyId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(paymentBehavior).values(behavior).returning();
+      return created;
+    }
+  }
+
+  async recalculatePaymentBehavior(companyId: string): Promise<void> {
+    const companyInvoices = await this.getInvoicesByCompany(companyId);
+    
+    if (companyInvoices.length === 0) return;
+
+    const totalInvoices = companyInvoices.length;
+    const paidInvoices = companyInvoices.filter(i => i.status === "paid").length;
+    const totalAmount = companyInvoices.reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+    const paidAmount = companyInvoices
+      .filter(i => i.status === "paid")
+      .reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+    
+    const avgDaysLate = companyInvoices.reduce((sum, i) => sum + (i.daysLate || 0), 0) / totalInvoices;
+    
+    // Calculate risk score (0-100)
+    // Factors: avg days late, payment rate, overdue rate
+    const paymentRate = paidInvoices / totalInvoices;
+    const overdueRate = companyInvoices.filter(i => i.status === "overdue").length / totalInvoices;
+    
+    let riskScore = 50; // Base score
+    riskScore += Math.min(avgDaysLate * 1.5, 30); // +30 max for days late
+    riskScore += overdueRate * 20; // +20 max for overdue rate
+    riskScore -= paymentRate * 20; // -20 for good payment rate
+    riskScore = Math.max(0, Math.min(100, Math.round(riskScore)));
+
+    // Determine trend based on recent invoices
+    const recentInvoices = companyInvoices.slice(0, 5);
+    const olderInvoices = companyInvoices.slice(5, 10);
+    
+    let trend: "improving" | "stable" | "worsening" = "stable";
+    if (recentInvoices.length >= 3 && olderInvoices.length >= 3) {
+      const recentAvgLate = recentInvoices.reduce((sum, i) => sum + (i.daysLate || 0), 0) / recentInvoices.length;
+      const olderAvgLate = olderInvoices.reduce((sum, i) => sum + (i.daysLate || 0), 0) / olderInvoices.length;
+      
+      if (recentAvgLate < olderAvgLate - 3) trend = "improving";
+      else if (recentAvgLate > olderAvgLate + 3) trend = "worsening";
+    }
+
+    await this.upsertPaymentBehavior({
+      companyId,
+      totalInvoices,
+      paidInvoices,
+      avgDaysLate: avgDaysLate.toFixed(2),
+      totalAmount: totalAmount.toFixed(2),
+      paidAmount: paidAmount.toFixed(2),
+      riskScore,
+      trend,
+    });
+  }
+
+  // Dashboard
+  async getDashboardStats(): Promise<DashboardStats> {
+    const allInvoices = await db.select().from(invoices);
+    
+    const pendingInvoices = allInvoices.filter(i => i.status === "pending");
+    const overdueInvoices = allInvoices.filter(i => i.status === "overdue");
+    const paidInvoices = allInvoices.filter(i => i.status === "paid");
+
+    const totalOutstanding = [...pendingInvoices, ...overdueInvoices]
+      .reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+    
+    const totalPaid = paidInvoices
+      .reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+
+    const avgDaysLate = allInvoices.length > 0
+      ? allInvoices.reduce((sum, i) => sum + (i.daysLate || 0), 0) / allInvoices.length
+      : 0;
+
+    const behaviors = await db.select().from(paymentBehavior);
+    const highRiskClients = behaviors.filter(b => (b.riskScore || 0) > 70).length;
+
+    return {
+      totalOutstanding,
+      totalPaid,
+      avgDaysLate,
+      highRiskClients,
+      pendingInvoices: pendingInvoices.length,
+      overdueInvoices: overdueInvoices.length,
+    };
+  }
+
+  // Action Plan
+  async getActionPlan(companyId: string): Promise<ActionPlan> {
+    const behavior = await this.getPaymentBehavior(companyId);
+    const company = await this.getCompany(companyId);
+    const riskScore = behavior?.riskScore || 50;
+    const avgDaysLate = parseFloat(behavior?.avgDaysLate?.toString() || "0");
+
+    let urgencyLevel: "low" | "medium" | "high" | "critical" = "low";
+    let recommendedPaymentTerms = "30 dagen";
+    let actions: string[] = [];
+    let emailScript = "";
+    let phoneScript = "";
+    let escalationAdvice = "";
+
+    if (riskScore <= 30) {
+      urgencyLevel = "low";
+      recommendedPaymentTerms = "30 dagen";
+      actions = [
+        "Standaard facturatie met 30 dagen betaaltermijn",
+        "Automatische herinnering na vervaldatum",
+        "Periodieke review van betalingsgedrag"
+      ];
+      emailScript = `Geachte heer/mevrouw,
+
+Hierbij ontvangt u onze factuur voor de geleverde diensten/producten.
+
+De betalingstermijn is 30 dagen na factuurdatum.
+
+Bij vragen kunt u contact met ons opnemen.
+
+Met vriendelijke groet`;
+      phoneScript = "Standaard opvolging niet nodig bij deze klant.";
+      escalationAdvice = "Bij dit risicoprofiel is escalatie normaal niet nodig. Monitor wel het betalingsgedrag.";
+    } else if (riskScore <= 60) {
+      urgencyLevel = "medium";
+      recommendedPaymentTerms = "14 dagen";
+      actions = [
+        "Verkort de betaaltermijn naar 14 dagen",
+        "Stuur een vriendelijke herinnering 3 dagen voor vervaldatum",
+        "Bel op de dag van de vervaldatum als er nog niet betaald is",
+        "Houd het openstaand saldo goed in de gaten"
+      ];
+      emailScript = `Geachte heer/mevrouw,
+
+Hierbij ontvangt u onze factuur voor de geleverde diensten/producten.
+
+Gezien onze samenwerking hanteren wij een betaaltermijn van 14 dagen.
+
+Mocht u vragen hebben over deze factuur, neem dan gerust contact met ons op.
+
+Met vriendelijke groet`;
+      phoneScript = `Goedendag, u spreekt met [naam] van [bedrijf].
+
+Ik bel in verband met factuur [nummer] die vandaag vervalt.
+Kunt u aangeven wanneer wij de betaling mogen verwachten?
+
+[Noteer de beloofde betaaldatum en zet een reminder]`;
+      escalationAdvice = "Als na 2 telefonische opvolgingen nog geen betaling, stuur een formele aanmaning per aangetekende brief.";
+    } else if (riskScore <= 80) {
+      urgencyLevel = "high";
+      recommendedPaymentTerms = "7 dagen of vooruitbetaling";
+      actions = [
+        "Overweeg vooruitbetaling of aanbetaling te vragen",
+        "Maximale betaaltermijn van 7 dagen",
+        "Bel voorafgaand aan levering om betaling te bevestigen",
+        "Stel een kredietlimiet in voor deze klant",
+        "Overweeg leveringen te pauzeren bij openstaande facturen"
+      ];
+      emailScript = `Geachte heer/mevrouw,
+
+Voordat wij uw bestelling kunnen verwerken, verzoeken wij u vriendelijk om een aanbetaling van 50% te voldoen.
+
+Na ontvangst van deze aanbetaling zullen wij uw bestelling direct in behandeling nemen.
+
+Het resterende bedrag dient binnen 7 dagen na levering te worden voldaan.
+
+Voor vragen kunt u contact met ons opnemen.
+
+Met vriendelijke groet`;
+      phoneScript = `Goedendag, u spreekt met [naam] van [bedrijf].
+
+Ik bel over factuur [nummer] die [X] dagen over de vervaldatum is.
+Wij zien dat er nog een openstaand saldo is van €[bedrag].
+
+Kunt u mij vertellen wanneer wij de betaling kunnen verwachten?
+
+[Als geen concrete datum]
+Begrijp ik het goed dat u op dit moment geen exacte datum kunt noemen?
+In dat geval moet ik u informeren dat wij verdere leveringen moeten opschorten totdat het openstaande saldo is voldaan.`;
+      escalationAdvice = "Schakel na 14 dagen over naar formele incasso. Overweeg een incassobureau in te schakelen. Stop alle leveringen totdat er betaald is.";
+    } else {
+      urgencyLevel = "critical";
+      recommendedPaymentTerms = "Alleen vooruitbetaling";
+      actions = [
+        "ALLEEN vooruitbetaling accepteren",
+        "Stop alle lopende leveringen onmiddellijk",
+        "Neem direct telefonisch contact op met de klant",
+        "Schakel juridische ondersteuning in indien nodig",
+        "Documenteer alle communicatie zorgvuldig"
+      ];
+      emailScript = `AANGETEKEND
+
+Geachte heer/mevrouw,
+
+Ondanks eerdere herinneringen hebben wij tot op heden geen betaling ontvangen voor de volgende openstaande facturen:
+
+[Lijst facturen]
+
+Totaal openstaand: €[bedrag]
+
+Wij verzoeken u dringend om binnen 7 dagen tot betaling over te gaan.
+
+Bij uitblijven van betaling zien wij ons genoodzaakt de vordering uit handen te geven aan ons incassobureau, waarbij alle bijkomende kosten voor uw rekening komen.
+
+Hoogachtend`;
+      phoneScript = `Goedendag, u spreekt met [naam] van [bedrijf].
+
+Ik bel in verband met de openstaande facturen ter waarde van €[bedrag].
+Deze facturen zijn inmiddels [X] dagen over de vervaldatum.
+
+Wij hebben u eerder herinneringen gestuurd maar geen reactie ontvangen.
+
+Ik moet u informeren dat als wij vandaag geen concrete betalingsregeling kunnen afspreken, wij genoodzaakt zijn de zaak over te dragen aan ons incassobureau.
+
+Wat kunnen wij afspreken?
+
+[Documenteer alles wat wordt afgesproken]`;
+      escalationAdvice = "Schakel onmiddellijk over naar formeel incassotraject. Overweeg betalingsregeling alleen met strikte voorwaarden en schriftelijke bevestiging. Raadpleeg juridisch adviseur voor eventuele dagvaarding.";
+    }
+
+    return {
+      recommendedPaymentTerms,
+      urgencyLevel,
+      actions,
+      emailScript,
+      phoneScript,
+      escalationAdvice,
+    };
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
