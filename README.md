@@ -1,289 +1,289 @@
-# Redress - B2B Payment Behavior Registry
+# Redress - B2B Betalingsgedrag Register
 
-**The Graydon for KMO's — realtime, crowd-sourced and affordable**
+**De Graydon voor KMO's — realtime, crowd-sourced en betaalbaar**
 
-Redress is a modern B2B financial data platform for tracking and analyzing payment behavior of companies in the Benelux region. It offers real-time, crowd-sourced payment data for SMEs (KMO's), allowing businesses to assess credit risk before engaging with customers.
+Redress is een modern B2B financieel dataplatform voor het volgen en analyseren van betalingsgedrag van bedrijven in de Benelux. Het biedt realtime, crowd-sourced betalingsgegevens voor KMO's, waarmee bedrijven het kredietrisico kunnen beoordelen voordat ze met klanten samenwerken.
 
-## 🎯 What is Redress?
+## 🎯 Wat is Redress?
 
-Redress is a crowd-sourced SME payment behavior registry that helps businesses:
+Redress is een crowd-sourced KMO betalingsgedrag register dat bedrijven helpt om:
 
-- **Upload invoices** and automatically extract data using AI (OCR)
-- **Track payment behavior** of companies based on real invoice data
-- **Assess credit risk** with risk scores from 0-100
-- **Get actionable insights** with automatic action plan recommendations
-- **Benchmark against sectors** to understand relative performance
+- **Facturen uploaden** en automatisch data extraheren met AI (OCR)
+- **Betalingsgedrag volgen** van bedrijven op basis van echte factuurdata
+- **Kredietrisico beoordelen** met risicoscores van 0-100
+- **Bruikbare inzichten krijgen** met automatische actieplan aanbevelingen
+- **Benchmarken tegen sectoren** om relatieve prestaties te begrijpen
 
-## ✨ Key Features
+## ✨ Belangrijkste Functies
 
-### Invoice Management
-- AI-powered invoice scanning with automatic data extraction
-- Extracts: company name, VAT number, invoice date, amount, due date
-- Supports Belgian (BE) and Dutch (NL) VAT number formats
-- File upload limit: 10MB per invoice image
+### Factuurbeheer
+- AI-gestuurde factuurscanning met automatische data-extractie
+- Extraheert: bedrijfsnaam, BTW-nummer, factuurdatum, bedrag, vervaldatum
+- Ondersteunt Belgische (BE) en Nederlandse (NL) BTW-nummerformaten
+- Bestandslimiet: 10MB per factuurafbeelding
 
-### Company Analysis
-- Risk scores (0-100) based on payment history
-- Average days to payment tracking
-- Payment trend analysis (improving/stable/declining)
+### Bedrijfsanalyse
+- Risicoscores (0-100) gebaseerd op betalingsgeschiedenis
+- Gemiddelde dagen tot betaling tracking
+- Betalingstrend analyse (verbeterend/stabiel/achteruitgaand)
 - Sector benchmarking
 
 ### Dashboard
-- Real-time overview of outstanding invoices
-- High-risk company alerts
-- Payment behavior statistics
-- Recent invoice activity
+- Realtime overzicht van openstaande facturen
+- Hoog-risico bedrijf waarschuwingen
+- Betalingsgedrag statistieken
+- Recente factuuractiviteit
 
-### Risk Analysis
-- Color-coded risk levels:
-  - **Low** (0-30): Good payment behavior
-  - **Medium** (31-50): Some delays, monitor closely
-  - **High** (51-70): Frequent late payments
-  - **Critical** (71-100): Very poor payment behavior
-- Automated action plan recommendations
-- Historical trend visualization
+### Risico Analyse
+- Kleurgecodeerde risiconiveaus:
+  - **Laag** (0-30): Goed betalingsgedrag
+  - **Gemiddeld** (31-50): Enkele vertragingen, nauwlettend volgen
+  - **Hoog** (51-70): Frequente late betalingen
+  - **Kritiek** (71-100): Zeer slecht betalingsgedrag
+- Automatische actieplan aanbevelingen
+- Historische trend visualisatie
 
-## 🛡️ GDPR Compliant
+## 🛡️ AVG/GDPR Compliant
 
-Redress is designed to be GDPR compliant:
-- **Only business data** is stored (VAT numbers, company names, invoice data)
-- **No personal data** is collected or stored
-- All data relates to B2B transactions only
+Redress is ontworpen om AVG-compliant te zijn:
+- **Alleen bedrijfsgegevens** worden opgeslagen (BTW-nummers, bedrijfsnamen, factuurgegevens)
+- **Geen persoonsgegevens** worden verzameld of opgeslagen
+- Alle data betreft uitsluitend B2B transacties
 
-## 🏗️ Tech Stack
+## 🏗️ Technische Stack
 
 ### Frontend
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **TailwindCSS** for styling
-- **shadcn/ui** component library
-- **TanStack Query** for data fetching
-- **Recharts** for data visualization
-- **Wouter** for routing
+- **React 18** met TypeScript
+- **Vite** voor snelle ontwikkeling en building
+- **TailwindCSS** voor styling
+- **shadcn/ui** componentenbibliotheek
+- **TanStack Query** voor data ophalen
+- **Recharts** voor data visualisatie
+- **Wouter** voor routing
 
 ### Backend
-- **Express.js** with TypeScript
-- **Drizzle ORM** for database operations
-- **PostgreSQL** (Neon serverless) for data storage
-- **OpenAI GPT-4 Vision** for invoice OCR extraction
+- **Express.js** met TypeScript
+- **Drizzle ORM** voor database operaties
+- **PostgreSQL** (Neon serverless) voor data opslag
+- **OpenAI GPT-4 Vision** voor factuur OCR extractie
 
-## 📁 Project Structure
+## 📁 Projectstructuur
 
 ```
-├── client/                 # Frontend React application
+├── client/                 # Frontend React applicatie
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   │   ├── dashboard.tsx       # Main dashboard
-│   │   │   ├── upload.tsx          # Invoice upload
-│   │   │   ├── companies.tsx       # Company list
-│   │   │   ├── company-detail.tsx  # Company detail view
-│   │   │   ├── risk-analysis.tsx   # Risk analysis page
-│   │   │   └── trends.tsx          # Payment trends
+│   │   ├── components/     # Herbruikbare UI componenten
+│   │   ├── pages/          # Pagina componenten
+│   │   │   ├── dashboard.tsx       # Hoofd dashboard
+│   │   │   ├── upload.tsx          # Factuur upload
+│   │   │   ├── companies.tsx       # Bedrijvenlijst
+│   │   │   ├── company-detail.tsx  # Bedrijfsdetail weergave
+│   │   │   ├── risk-analysis.tsx   # Risico analyse pagina
+│   │   │   └── trends.tsx          # Betalingstrends
 │   │   ├── hooks/          # Custom React hooks
-│   │   └── lib/            # Utilities and helpers
-├── server/                 # Backend Express application
+│   │   └── lib/            # Hulpprogramma's en helpers
+├── server/                 # Backend Express applicatie
 │   ├── routes.ts           # API endpoints
-│   ├── storage.ts          # Database operations
-│   └── openai.ts           # AI invoice extraction
-├── shared/                 # Shared types and schemas
+│   ├── storage.ts          # Database operaties
+│   └── openai.ts           # AI factuur extractie
+├── shared/                 # Gedeelde types en schema's
 │   └── schema.ts           # Database schema (Drizzle)
 └── README.md
 ```
 
 ## 📊 Database Schema
 
-### Companies Table
-| Field | Type | Description |
-|-------|------|-------------|
-| id | serial | Primary key |
-| vatNumber | varchar | Unique VAT/BTW number (BE/NL format) |
-| name | varchar | Company name |
-| sector | varchar | Industry sector |
-| city | varchar | City location |
-| country | varchar | Country (BE/NL) |
+### Bedrijven Tabel (companies)
+| Veld | Type | Beschrijving |
+|------|------|--------------|
+| id | serial | Primaire sleutel |
+| vatNumber | varchar | Uniek BTW-nummer (BE/NL formaat) |
+| name | varchar | Bedrijfsnaam |
+| sector | varchar | Sector/branche |
+| city | varchar | Vestigingsplaats |
+| country | varchar | Land (BE/NL) |
 
-### Invoices Table
-| Field | Type | Description |
-|-------|------|-------------|
-| id | serial | Primary key |
-| companyId | integer | Foreign key to companies |
-| invoiceNumber | varchar | Invoice reference number |
-| invoiceDate | date | Date invoice was issued |
-| dueDate | date | Payment due date |
-| amount | numeric | Invoice amount in EUR |
+### Facturen Tabel (invoices)
+| Veld | Type | Beschrijving |
+|------|------|--------------|
+| id | serial | Primaire sleutel |
+| companyId | integer | Verwijzing naar bedrijf |
+| invoiceNumber | varchar | Factuurnummer |
+| invoiceDate | date | Factuurdatum |
+| dueDate | date | Vervaldatum |
+| amount | numeric | Factuurbedrag in EUR |
 | status | varchar | pending / paid / overdue |
-| paidDate | date | Date payment was received |
+| paidDate | date | Betaaldatum |
 
-### Payment Records Table
-| Field | Type | Description |
-|-------|------|-------------|
-| id | serial | Primary key |
-| companyId | integer | Foreign key to companies |
-| invoiceId | integer | Foreign key to invoices |
-| daysLate | integer | Days past due date |
-| amount | numeric | Payment amount |
-| paymentDate | date | When payment was made |
+### Betalingsregistraties Tabel (payment_records)
+| Veld | Type | Beschrijving |
+|------|------|--------------|
+| id | serial | Primaire sleutel |
+| companyId | integer | Verwijzing naar bedrijf |
+| invoiceId | integer | Verwijzing naar factuur |
+| daysLate | integer | Dagen na vervaldatum |
+| amount | numeric | Betalingsbedrag |
+| paymentDate | date | Betaaldatum |
 
-### Company Stats Table
-| Field | Type | Description |
-|-------|------|-------------|
-| id | serial | Primary key |
-| companyId | integer | Foreign key to companies |
-| riskScore | integer | Risk score 0-100 |
-| avgDaysToPayment | numeric | Average days to pay |
-| totalInvoices | integer | Total invoices tracked |
-| paidOnTime | integer | Invoices paid on time |
-| paidLate | integer | Invoices paid late |
+### Bedrijfsstatistieken Tabel (company_stats)
+| Veld | Type | Beschrijving |
+|------|------|--------------|
+| id | serial | Primaire sleutel |
+| companyId | integer | Verwijzing naar bedrijf |
+| riskScore | integer | Risicoscore 0-100 |
+| avgDaysToPayment | numeric | Gemiddelde dagen tot betaling |
+| totalInvoices | integer | Totaal aantal facturen |
+| paidOnTime | integer | Op tijd betaalde facturen |
+| paidLate | integer | Te laat betaalde facturen |
 | trend | varchar | improving / stable / declining |
 
 ## 🔌 API Endpoints
 
-### Invoices
+### Facturen
 
 **POST /api/invoices/upload**
-Upload an invoice image for AI extraction.
+Upload een factuurafbeelding voor AI extractie.
 - Content-Type: `multipart/form-data`
-- Body: `file` (image, max 10MB)
-- Returns: Extracted invoice data (company, VAT, amount, dates)
+- Body: `file` (afbeelding, max 10MB)
+- Retourneert: Geëxtraheerde factuurdata (bedrijf, BTW, bedrag, datums)
 
 **GET /api/invoices**
-Get all invoices.
-- Returns: Array of invoice objects
+Haal alle facturen op.
+- Retourneert: Array van factuur objecten
 
 **POST /api/invoices**
-Create a new invoice manually.
+Maak handmatig een nieuwe factuur aan.
 - Body: `{ companyId, invoiceNumber, invoiceDate, dueDate, amount }`
 
 **PATCH /api/invoices/:id/status**
-Update invoice payment status.
+Update factuur betalingsstatus.
 - Body: `{ status: "paid" | "pending" | "overdue", paidDate? }`
 
-### Companies
+### Bedrijven
 
 **GET /api/companies**
-Get all companies with their stats.
-- Returns: Array of company objects with risk scores
+Haal alle bedrijven met hun statistieken op.
+- Retourneert: Array van bedrijfsobjecten met risicoscores
 
 **GET /api/companies/:id**
-Get company detail with payment history.
-- Returns: Company object with invoices and stats
+Haal bedrijfsdetails met betalingsgeschiedenis op.
+- Retourneert: Bedrijfsobject met facturen en statistieken
 
 **GET /api/companies/search?vat=BE0123456789**
-Search company by VAT number.
-- Returns: Company object or null
+Zoek bedrijf op BTW-nummer.
+- Retourneert: Bedrijfsobject of null
 
 ### Dashboard
 
 **GET /api/dashboard/stats**
-Get dashboard statistics.
-- Returns: `{ totalOutstanding, avgDaysToPayment, highRiskCount, overdueCount }`
+Haal dashboard statistieken op.
+- Retourneert: `{ totalOutstanding, avgDaysToPayment, highRiskCount, overdueCount }`
 
-### Risk Analysis
+### Risico Analyse
 
 **GET /api/risk/analysis**
-Get risk analysis data for all companies.
-- Returns: Array of companies with risk scores and trends
+Haal risico analyse data voor alle bedrijven op.
+- Retourneert: Array van bedrijven met risicoscores en trends
 
-## 🚀 Getting Started
+## 🚀 Aan de Slag
 
-### Prerequisites
+### Vereisten
 - Node.js 18+
-- PostgreSQL database (or use Replit's built-in Neon database)
-- OpenAI API key
+- PostgreSQL database (of gebruik Replit's ingebouwde Neon database)
+- OpenAI API sleutel
 
-### Environment Variables
+### Omgevingsvariabelen
 
-Create a `.env` file in the root directory:
+Maak een `.env` bestand in de hoofdmap:
 
 ```env
 # Database
-DATABASE_URL=postgresql://user:password@host:port/database
+DATABASE_URL=postgresql://gebruiker:wachtwoord@host:poort/database
 
-# OpenAI (for invoice OCR)
-OPENAI_API_KEY=sk-your-openai-api-key
+# OpenAI (voor factuur OCR)
+OPENAI_API_KEY=sk-jouw-openai-api-sleutel
 
-# Session
-SESSION_SECRET=your-random-session-secret
+# Sessie
+SESSION_SECRET=jouw-willekeurige-sessie-geheim
 ```
 
-### Running on Replit
+### Draaien op Replit
 
-1. The database is automatically provisioned (Neon PostgreSQL)
-2. Add your `OPENAI_API_KEY` in the Secrets tab
-3. Click "Run" - the app starts automatically on port 5000
+1. De database wordt automatisch ingericht (Neon PostgreSQL)
+2. Voeg je `OPENAI_API_KEY` toe in de Secrets tab
+3. Klik "Run" - de app start automatisch op poort 5000
 
-### Running Locally
+### Lokaal Draaien
 
-1. Clone the repository:
+1. Clone de repository:
 ```bash
 git clone https://github.com/Filiii70/redress-kmo-register.git
 cd redress-kmo-register
 ```
 
-2. Install dependencies:
+2. Installeer dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables (copy `.env.example` to `.env`)
+3. Stel omgevingsvariabelen in (kopieer `.env.example` naar `.env`)
 
 4. Push database schema:
 ```bash
 npm run db:push
 ```
 
-5. Start the development server:
+5. Start de development server:
 ```bash
 npm run dev
 ```
 
-The application will be available at `http://localhost:5000`
+De applicatie is beschikbaar op `http://localhost:5000`
 
-## 🤖 Invoice OCR Flow
+## 🤖 Factuur OCR Werkwijze
 
-1. User uploads invoice image (PNG, JPG, PDF)
-2. Image is sent to OpenAI GPT-4 Vision API
-3. AI extracts:
-   - Company name
-   - VAT/BTW number (normalized to BE/NL format)
-   - Invoice date
-   - Due date
-   - Amount
-4. User confirms extracted data
-5. Invoice is saved and linked to company
-6. Company risk score is recalculated
+1. Gebruiker uploadt factuurafbeelding (PNG, JPG, PDF)
+2. Afbeelding wordt naar OpenAI GPT-4 Vision API gestuurd
+3. AI extraheert:
+   - Bedrijfsnaam
+   - BTW-nummer (genormaliseerd naar BE/NL formaat)
+   - Factuurdatum
+   - Vervaldatum
+   - Bedrag
+4. Gebruiker bevestigt geëxtraheerde data
+5. Factuur wordt opgeslagen en gekoppeld aan bedrijf
+6. Bedrijfsrisicoscore wordt herberekend
 
-### Supported VAT Formats
-- Belgian: `BE0123456789` or `BE 0123 456 789`
-- Dutch: `NL123456789B01`
+### Ondersteunde BTW Formaten
+- Belgisch: `BE0123456789` of `BE 0123 456 789`
+- Nederlands: `NL123456789B01`
 
-## 💰 Pricing Model (Planned)
+## 💰 Prijsmodel (Gepland)
 
-| Plan | Price | Features |
+| Plan | Prijs | Functies |
 |------|-------|----------|
-| Free | €0/month | Basic lookups, limited data |
-| Pro | €29/month | Unlimited lookups, full history |
-| API | €99/month | API access, bulk operations |
+| Gratis | €0/maand | Basis opzoekingen, beperkte data |
+| Pro | €29/maand | Onbeperkte opzoekingen, volledige historie |
+| API | €99/maand | API toegang, bulk operaties |
 
-## 🤝 Network Effect
+## 🤝 Netwerkeffect
 
-Redress becomes more valuable as more users contribute invoice data. The platform creates a crowd-sourced database of payment behavior that benefits all participants:
+Redress wordt waardevoller naarmate meer gebruikers factuurdata bijdragen. Het platform creëert een crowd-sourced database van betalingsgedrag waar alle deelnemers van profiteren:
 
-- More invoices = More accurate risk scores
-- More companies = Broader coverage
-- Real-time data = Current insights
+- Meer facturen = Nauwkeurigere risicoscores
+- Meer bedrijven = Bredere dekking
+- Realtime data = Actuele inzichten
 
-**Target: 100-500 active users** to reach critical mass for reliable payment behavior data.
+**Doel: 100-500 actieve gebruikers** om kritieke massa te bereiken voor betrouwbare betalingsgedrag data.
 
-## 📄 License
+## 📄 Licentie
 
-This project is proprietary software. All rights reserved.
+Dit project is eigendomssoftware. Alle rechten voorbehouden.
 
 ## 📞 Contact
 
-For questions or support, please contact the development team.
+Voor vragen of ondersteuning, neem contact op met het ontwikkelteam.
 
 ---
 
-**Built for the Benelux SME community**
+**Gebouwd voor de Benelux KMO gemeenschap**
