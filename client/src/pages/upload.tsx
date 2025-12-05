@@ -52,11 +52,13 @@ export default function Upload() {
                 Upload tijdelijk uitgeschakeld
               </h3>
               <p className="text-sm text-muted-foreground mb-4 max-w-md">
-                We werken aan verbeteringen voor de factuur upload functie. 
-                Deze functionaliteit is binnenkort weer beschikbaar.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Neem contact op voor handmatige invoer van factuurgegevens.
+                Neem contact met ons op via{" "}
+                <a 
+                  href="mailto:hello@kmo-alert.be" 
+                  className="text-primary font-medium hover:underline"
+                >
+                  hello@kmo-alert.be
+                </a>
               </p>
             </CardContent>
           </Card>
