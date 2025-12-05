@@ -74,18 +74,11 @@ export async function registerRoutes(
       let extractedData;
       try {
         if (mimeType === "application/pdf") {
-          // PDF extraction - convert to image then process
-          console.log("Processing PDF upload...");
-          try {
-            extractedData = await extractInvoiceDataFromPdf(file.buffer);
-            console.log("PDF extraction successful:", extractedData);
-          } catch (pdfError) {
-            console.error("PDF extraction failed:", pdfError);
-            return res.status(422).json({ 
-              message: "PDF verwerking mislukt. Probeer een screenshot van de factuur te uploaden (PNG of JPG).",
-              requiresManualEntry: true
-            });
-          }
+          // PDF's worden niet direct ondersteund - vraag om screenshot
+          return res.status(400).json({ 
+            message: "PDF bestanden worden niet ondersteund. Maak een screenshot van je factuur en upload die als PNG of JPG.",
+            requiresManualEntry: false
+          });
         } else if (mimeType.startsWith("image/")) {
           // Use image extraction for images - this works reliably
           const base64 = file.buffer.toString("base64");

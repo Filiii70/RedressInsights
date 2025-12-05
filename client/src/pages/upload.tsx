@@ -69,7 +69,7 @@ export default function Upload() {
                   </div>
                   <h4 className="font-medium mb-1">Upload</h4>
                   <p className="text-sm text-muted-foreground">
-                    Sleep je factuur (PDF of afbeelding) naar het upload veld
+                    Maak een screenshot van je factuur en sleep het naar het upload veld
                   </p>
                 </div>
                 <div className="flex flex-col items-center text-center p-4">
