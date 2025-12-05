@@ -60,13 +60,13 @@ export function InvoiceUploadZone() {
     setIsDragging(false);
     
     const droppedFiles = Array.from(e.dataTransfer.files).filter(
-      (file) => file.type.startsWith("image/")
+      (file) => file.type === "application/pdf" || file.type.startsWith("image/")
     );
     
     if (droppedFiles.length === 0) {
       toast({
-        title: "Alleen afbeeldingen",
-        description: "Upload een screenshot van je factuur als PNG of JPG. PDF's worden niet ondersteund.",
+        title: "Ongeldig bestandstype",
+        description: "Upload een PDF of afbeelding (PNG, JPG).",
         variant: "destructive",
       });
       return;
@@ -148,7 +148,7 @@ export function InvoiceUploadZone() {
               Bestand selecteren
               <input
                 type="file"
-                accept="image/*"
+                accept=".pdf,image/*"
                 multiple
                 className="hidden"
                 onChange={handleFileSelect}
@@ -157,7 +157,7 @@ export function InvoiceUploadZone() {
             </label>
           </Button>
           <p className="mt-4 text-xs text-muted-foreground">
-            Ondersteunde formaten: PNG, JPG (maak een screenshot van je factuur)
+            Ondersteunde formaten: PDF, PNG, JPG
           </p>
         </CardContent>
       </Card>

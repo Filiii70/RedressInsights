@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import pdf2img from "pdf-img-convert";
+import * as pdfParseModule from "pdf-parse";
+const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 
 const openai = new OpenAI({ 
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -102,60 +103,43 @@ function calculateDueDate(invoiceDate: string | null): string {
 }
 
 export async function extractInvoiceDataFromPdf(pdfBuffer: Buffer): Promise<ExtractedInvoiceData> {
-  // Convert PDF to image first using pdf-img-convert
-  console.log("Converting PDF to image...");
+  console.log("Extracting text from PDF...");
   
   try {
-    // Convert PDF buffer to images (first page only for invoices)
-    const images = await pdf2img.convert(pdfBuffer, {
-      width: 2000,
-      page_numbers: [1],
-      base64: true
-    });
+    // Extract text from PDF using pdf-parse
+    const pdfData = await pdfParse(pdfBuffer);
+    const pdfText = pdfData.text;
     
-    if (!images || images.length === 0) {
-      throw new Error("Failed to convert PDF to image");
+    if (!pdfText || pdfText.trim().length === 0) {
+      throw new Error("Could not extract text from PDF - the PDF might be scanned/image-based");
     }
     
-    const base64Image = images[0] as string;
-    console.log("PDF converted to image successfully, sending to AI...");
+    console.log("PDF text extracted, sending to AI for analysis...");
     
-    // Now use the standard image extraction with the converted image
+    // Send extracted text to GPT-4o for structured data extraction
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `You are an expert at extracting invoice data from images. Extract the following fields from the invoice image:
-- companyName: The name of the company being billed (the customer/client, NOT the sender)
-- vatNumber: The VAT/BTW number of the customer (format: BE/NL followed by numbers, or just numbers)
-- invoiceNumber: The invoice number/reference
-- amount: The total amount as a number (without currency symbol)
+          content: `You are an expert at extracting invoice data from text. You will receive raw text extracted from a PDF invoice. Extract the following fields:
+- companyName: The name of the company being billed (the customer/client, NOT the sender/supplier)
+- vatNumber: The VAT/BTW number of the customer (format: BE/NL followed by numbers). Look for patterns like "BTW", "VAT", "TVA", "BE0", "NL"
+- invoiceNumber: The invoice number/reference (look for "Factuurnummer", "Invoice", "Factuur nr", etc.)
+- amount: The total amount as a number (without currency symbol). Look for "Totaal", "Total", "Te betalen"
 - currency: The currency code (EUR, USD, etc.) - default to EUR if not specified
-- invoiceDate: The invoice date in ISO format (YYYY-MM-DD)
-- dueDate: The payment due date in ISO format (YYYY-MM-DD). If not specified, assume 30 days after invoice date.
-- paymentDate: If the invoice shows it's paid, the payment date in ISO format. Otherwise null.
+- invoiceDate: The invoice date in ISO format (YYYY-MM-DD). Look for "Factuurdatum", "Invoice date", "Datum"
+- dueDate: The payment due date in ISO format (YYYY-MM-DD). Look for "Vervaldatum", "Due date", "Betaaldatum". If not found, assume 30 days after invoice date.
+- paymentDate: If the invoice shows it's already paid, the payment date. Otherwise null.
 - description: A brief description of what the invoice is for
 
 Return the data as a JSON object. If a field cannot be determined, use null.
 For VAT numbers, normalize them by removing spaces and ensuring proper format (e.g., BE0123456789 or NL123456789B01).
-For dates, if only day/month is visible, assume the current year.
-If the amount includes VAT, extract the total including VAT.`
+Parse dates in various formats (DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD) and convert to ISO format.`
         },
         {
           role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Extract the invoice data from this image. Return only valid JSON."
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/png;base64,${base64Image}`
-              }
-            }
-          ],
+          content: `Extract the invoice data from this text. Return only valid JSON.\n\n${pdfText}`
         },
       ],
       response_format: { type: "json_object" },
