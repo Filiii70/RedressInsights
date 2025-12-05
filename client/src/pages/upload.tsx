@@ -1,18 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InvoiceUploadZone } from "@/components/invoice-upload-zone";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { Link } from "wouter";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Building2, FileCheck, Clock, Sparkles } from "lucide-react";
+import { Building2, FileCheck, Clock, Sparkles, Construction, AlertTriangle } from "lucide-react";
 import type { InvoiceWithCompany } from "@shared/schema";
 
 function formatCurrency(amount: number | string) {
@@ -49,9 +40,26 @@ export default function Upload() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Upload Zone */}
+        {/* Upload Zone - Temporarily Disabled */}
         <div className="lg:col-span-2">
-          <InvoiceUploadZone />
+          <Card className="overflow-visible border-2 border-dashed border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+            <CardContent className="flex min-h-64 flex-col items-center justify-center p-8 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/10 mb-4">
+                <Construction className="h-8 w-8 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
+                Upload tijdelijk uitgeschakeld
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4 max-w-md">
+                We werken aan verbeteringen voor de factuur upload functie. 
+                Deze functionaliteit is binnenkort weer beschikbaar.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Neem contact op voor handmatige invoer van factuurgegevens.
+              </p>
+            </CardContent>
+          </Card>
 
           {/* How it works */}
           <Card className="mt-6 overflow-visible">
