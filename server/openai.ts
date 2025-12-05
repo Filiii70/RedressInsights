@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { PDFParse } from "pdf-parse";
 
 const openai = new OpenAI({ 
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -19,6 +18,13 @@ interface ExtractedInvoiceData {
 }
 
 export async function extractInvoiceData(base64Image: string, mimeType: string): Promise<ExtractedInvoiceData> {
+  // Ensure base64 is clean (no data URL prefix if already included)
+  const cleanBase64 = base64Image.includes(',') 
+    ? base64Image.split(',')[1] 
+    : base64Image;
+  
+  const dataUrl = `data:${mimeType};base64,${cleanBase64}`;
+  
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [
@@ -50,7 +56,7 @@ If the amount includes VAT, extract the total including VAT.`
           {
             type: "image_url",
             image_url: {
-              url: `data:${mimeType};base64,${base64Image}`
+              url: dataUrl
             }
           }
         ],
@@ -102,74 +108,35 @@ function calculateDueDate(invoiceDate: string | null): string {
 }
 
 export async function extractInvoiceDataFromPdf(pdfBuffer: Buffer): Promise<ExtractedInvoiceData> {
-  console.log("Extracting text from PDF...");
+  console.log("Processing PDF - converting to image for Vision API...");
   
   try {
-    // Extract text from PDF using pdf-parse v2 API
-    const parser = new PDFParse({ data: pdfBuffer });
-    const result = await parser.getText();
-    const pdfText = result.text;
+    // Convert PDF to image using pdf-img-convert
+    const pdfConvert = await import("pdf-img-convert");
     
-    // Clean up parser resources
-    await parser.destroy();
-    
-    if (!pdfText || pdfText.trim().length === 0) {
-      throw new Error("Could not extract text from PDF - the PDF might be scanned/image-based");
-    }
-    
-    console.log("PDF text extracted, sending to AI for analysis...");
-    
-    // Send extracted text to GPT-4o for structured data extraction
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert at extracting invoice data from text. You will receive raw text extracted from a PDF invoice. Extract the following fields:
-- companyName: The name of the company being billed (the customer/client, NOT the sender/supplier)
-- vatNumber: The VAT/BTW number of the customer (format: BE/NL followed by numbers). Look for patterns like "BTW", "VAT", "TVA", "BE0", "NL"
-- invoiceNumber: The invoice number/reference (look for "Factuurnummer", "Invoice", "Factuur nr", etc.)
-- amount: The total amount as a number (without currency symbol). Look for "Totaal", "Total", "Te betalen"
-- currency: The currency code (EUR, USD, etc.) - default to EUR if not specified
-- invoiceDate: The invoice date in ISO format (YYYY-MM-DD). Look for "Factuurdatum", "Invoice date", "Datum"
-- dueDate: The payment due date in ISO format (YYYY-MM-DD). Look for "Vervaldatum", "Due date", "Betaaldatum". If not found, assume 30 days after invoice date.
-- paymentDate: If the invoice shows it's already paid, the payment date. Otherwise null.
-- description: A brief description of what the invoice is for
-
-Return the data as a JSON object. If a field cannot be determined, use null.
-For VAT numbers, normalize them by removing spaces and ensuring proper format (e.g., BE0123456789 or NL123456789B01).
-Parse dates in various formats (DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD) and convert to ISO format.`
-        },
-        {
-          role: "user",
-          content: `Extract the invoice data from this text. Return only valid JSON.\n\n${pdfText}`
-        },
-      ],
-      response_format: { type: "json_object" },
-      max_completion_tokens: 1024,
+    // Convert first page of PDF to PNG image
+    const pagesAsImages = await pdfConvert.convert(pdfBuffer, {
+      width: 2000,
+      height: 2800,
+      page_numbers: [1],
     });
-
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No response from OpenAI");
-    }
-
-    const data = JSON.parse(content);
-    console.log("AI extraction successful:", data);
     
-    return {
-      companyName: data.companyName || "Unknown Company",
-      vatNumber: normalizeVatNumber(data.vatNumber || "BE0000000000"),
-      invoiceNumber: data.invoiceNumber || null,
-      amount: parseFloat(data.amount) || 0,
-      currency: data.currency || "EUR",
-      invoiceDate: data.invoiceDate || new Date().toISOString().split("T")[0],
-      dueDate: data.dueDate || calculateDueDate(data.invoiceDate),
-      paymentDate: data.paymentDate || null,
-      description: data.description || null,
-    };
+    if (!pagesAsImages || pagesAsImages.length === 0) {
+      throw new Error("Could not convert PDF to image");
+    }
+    
+    // Get the first page as a buffer (it's a Uint8Array)
+    const imageBuffer = Buffer.from(pagesAsImages[0] as Uint8Array);
+    const base64Image = imageBuffer.toString("base64");
+    
+    console.log("PDF converted to image, sending to Vision API...");
+    
+    // Use Vision API to extract data from the image
+    return await extractInvoiceData(base64Image, "image/png");
+    
   } catch (error) {
-    console.error("PDF extraction error:", error);
-    throw error;
+    console.error("PDF to image conversion failed:", error);
+    throw new Error("Could not process PDF - image conversion failed. Please try uploading an image (PNG/JPG) instead.");
   }
 }
+
