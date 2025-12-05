@@ -1,6 +1,5 @@
 import OpenAI from "openai";
-import * as pdfParseModule from "pdf-parse";
-const pdfParse = (pdfParseModule as any).default || pdfParseModule;
+import { PDFParse } from "pdf-parse";
 
 const openai = new OpenAI({ 
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -106,9 +105,13 @@ export async function extractInvoiceDataFromPdf(pdfBuffer: Buffer): Promise<Extr
   console.log("Extracting text from PDF...");
   
   try {
-    // Extract text from PDF using pdf-parse
-    const pdfData = await pdfParse(pdfBuffer);
-    const pdfText = pdfData.text;
+    // Extract text from PDF using pdf-parse v2 API
+    const parser = new PDFParse({ data: pdfBuffer });
+    const result = await parser.getText();
+    const pdfText = result.text;
+    
+    // Clean up parser resources
+    await parser.destroy();
     
     if (!pdfText || pdfText.trim().length === 0) {
       throw new Error("Could not extract text from PDF - the PDF might be scanned/image-based");
