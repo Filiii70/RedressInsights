@@ -1,8 +1,8 @@
-# Redress - B2B Payment Behavior Platform
+# KMO-Alert - B2B Payment Behavior Platform
 
 ## Overview
 
-Redress is a B2B financial data platform for tracking and analyzing payment behavior of companies in the Benelux region. It's designed as a modern alternative to traditional credit reporting services, offering real-time, crowd-sourced payment data for SMEs (KMO's). The platform allows businesses to upload invoices, automatically extract data using AI, and analyze payment patterns to assess credit risk before engaging with customers.
+KMO-Alert is a B2B financial data platform for tracking and analyzing payment behavior of companies in the Benelux region. It's designed as a modern alternative to traditional credit reporting services, offering real-time, crowd-sourced payment data for SMEs (KMO's). The platform allows businesses to upload invoices, automatically extract data using AI, and analyze payment patterns to assess credit risk before engaging with customers.
 
 ## User Preferences
 

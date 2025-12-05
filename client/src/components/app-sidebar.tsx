@@ -68,7 +68,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold tracking-tight" data-testid="text-brand-name">
-              Redress
+              KMO-Alert
             </span>
             <span className="text-xs text-muted-foreground">
               Betalingsgedrag Register

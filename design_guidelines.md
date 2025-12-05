@@ -1,4 +1,4 @@
-# Redress Design Guidelines
+# KMO-Alert Design Guidelines
 **B2B Financial Data Platform - Professional Fintech Aesthetic**
 
 ## Design Approach
@@ -55,7 +55,7 @@
 
 ### Navigation
 **Top Bar** (sticky):
-- Logo + "Redress" text (left)
+- Logo + "KMO-Alert" text (left)
 - Main nav: Dashboard, Invoices, Companies, Analytics (center-left)
 - Search bar with company/VAT lookup (center)
 - Notifications + User avatar (right)

@@ -1,12 +1,12 @@
-# Redress - B2B Betalingsgedrag Register
+# KMO-Alert - B2B Betalingsgedrag Register
 
 **De Graydon voor KMO's — realtime, crowd-sourced en betaalbaar**
 
-Redress is een modern B2B financieel dataplatform voor het volgen en analyseren van betalingsgedrag van bedrijven in de Benelux. Het biedt realtime, crowd-sourced betalingsgegevens voor KMO's, waarmee bedrijven het kredietrisico kunnen beoordelen voordat ze met klanten samenwerken.
+KMO-Alert is een modern B2B financieel dataplatform voor het volgen en analyseren van betalingsgedrag van bedrijven in de Benelux. Het biedt realtime, crowd-sourced betalingsgegevens voor KMO's, waarmee bedrijven het kredietrisico kunnen beoordelen voordat ze met klanten samenwerken.
 
-## 🎯 Wat is Redress?
+## 🎯 Wat is KMO-Alert?
 
-Redress is een crowd-sourced KMO betalingsgedrag register dat bedrijven helpt om:
+KMO-Alert is een crowd-sourced KMO betalingsgedrag register dat bedrijven helpt om:
 
 - **Facturen uploaden** en automatisch data extraheren met AI (OCR)
 - **Betalingsgedrag volgen** van bedrijven op basis van echte factuurdata
@@ -45,7 +45,7 @@ Redress is een crowd-sourced KMO betalingsgedrag register dat bedrijven helpt om
 
 ## 🛡️ AVG/GDPR Compliant
 
-Redress is ontworpen om AVG-compliant te zijn:
+KMO-Alert is ontworpen om AVG-compliant te zijn:
 - **Alleen bedrijfsgegevens** worden opgeslagen (BTW-nummers, bedrijfsnamen, factuurgegevens)
 - **Geen persoonsgegevens** worden verzameld of opgeslagen
 - Alle data betreft uitsluitend B2B transacties
@@ -268,7 +268,7 @@ De applicatie is beschikbaar op `http://localhost:5000`
 
 ## 🤝 Netwerkeffect
 
-Redress wordt waardevoller naarmate meer gebruikers factuurdata bijdragen. Het platform creëert een crowd-sourced database van betalingsgedrag waar alle deelnemers van profiteren:
+KMO-Alert wordt waardevoller naarmate meer gebruikers factuurdata bijdragen. Het platform creëert een crowd-sourced database van betalingsgedrag waar alle deelnemers van profiteren:
 
 - Meer facturen = Nauwkeurigere risicoscores
 - Meer bedrijven = Bredere dekking
