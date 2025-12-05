@@ -23,21 +23,36 @@ export function InvoiceUploadZone() {
       const formData = new FormData();
       formData.append("invoice", file);
       
-      const response = await fetch("/api/invoices/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Upload failed");
+      try {
+        const response = await fetch("/api/invoices/upload", {
+          method: "POST",
+          body: formData,
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Upload failed");
+        }
+        
+        return response.json();
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if ((error as Error).name === 'AbortError') {
+          throw new Error("Upload timeout - probeer een kleinere afbeelding");
+        }
+        throw error;
       }
-      
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/invoices/recent"] });
       toast({
         title: "Factuur geüpload",
         description: "De factuur is succesvol verwerkt.",
