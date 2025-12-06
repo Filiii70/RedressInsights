@@ -11,10 +11,10 @@ function getEventIcon(eventType: string) {
       return CreditCard;
     case 'risk_alert':
       return AlertTriangle;
-    case 'risk_improved':
+    case 'risk_improvement':
       return TrendingUp;
-    case 'risk_worsened':
-      return TrendingDown;
+    case 'company_added':
+      return Activity;
     default:
       return Activity;
   }

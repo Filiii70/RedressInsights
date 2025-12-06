@@ -65,6 +65,14 @@ Preferred communication style: Simple, everyday language.
 - Action plan generation based on risk levels (low/medium/high/critical)
 - Dashboard statistics aggregation for real-time insights
 
+**Engagement & FOMO System**
+- **Activity Feed**: Real-time event logging for all platform activities (invoice uploads, payment registrations, risk alerts)
+- **Live Ticker**: Scrolling marquee component on dashboard showing recent activity stream
+- **FOMO Badge**: Sidebar notification badge showing count of new activities since last visit (24-hour window)
+- **Daily Email Summaries**: Personalized morning digest with new invoices, payments, overdue alerts, and risky companies
+- Event types tracked: invoice_uploaded, payment_registered, risk_alert, risk_improvement, company_added
+- Severity levels: info, warning, critical - for visual prioritization
+
 ### External Dependencies
 
 **AI/ML Services**
