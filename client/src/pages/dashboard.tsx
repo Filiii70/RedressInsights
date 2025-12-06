@@ -154,21 +154,30 @@ export default function Dashboard() {
           ))
         ) : (
           <>
-            <Card>
+            <Card className="border-green-200 bg-green-50/50">
               <CardContent className="p-3 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Betaald</p>
+                  <p className="text-xs text-muted-foreground truncate">Ontvangen</p>
                   <p className="text-sm font-bold text-green-600 truncate">{formatCurrency(stats?.totalPaid || 0)}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-orange-200 bg-orange-50/50">
+              <CardContent className="p-3 flex items-center gap-2">
+                <Euro className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground truncate">Te innen</p>
+                  <p className="text-sm font-bold text-orange-600 truncate">{formatCurrency(stats?.totalOutstanding || 0)}</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 flex items-center gap-2">
-                <Euro className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                <Clock className="h-4 w-4 text-red-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Openstaand</p>
-                  <p className="text-sm font-bold text-orange-600 truncate">{formatCurrency(stats?.totalOutstanding || 0)}</p>
+                  <p className="text-xs text-muted-foreground truncate">Achterstallig</p>
+                  <p className="text-sm font-bold text-red-600">{stats?.overdueInvoices || 0}</p>
                 </div>
               </CardContent>
             </Card>
@@ -176,17 +185,8 @@ export default function Dashboard() {
               <CardContent className="p-3 flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Facturen</p>
-                  <p className="text-sm font-bold">{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-3 flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary flex-shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Klanten</p>
-                  <p className="text-sm font-bold">{stats?.highRiskClients || 0}</p>
+                  <p className="text-xs text-muted-foreground truncate">Open facturen</p>
+                  <p className="text-sm font-bold">{stats?.pendingInvoices || 0}</p>
                 </div>
               </CardContent>
             </Card>
