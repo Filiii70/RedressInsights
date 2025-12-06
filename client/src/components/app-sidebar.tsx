@@ -15,6 +15,7 @@ import {
   Trophy,
   Flame,
   Info,
+  Search,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import type { UserStreakInfo } from "@shared/schema";
@@ -32,6 +33,12 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainMenuItems = [
+  {
+    title: "BTW Check",
+    url: "/btw-check",
+    icon: Search,
+    highlight: true,
+  },
   {
     title: "Dashboard",
     url: "/",
@@ -138,10 +145,12 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.url}
-                    className="data-[active=true]:bg-sidebar-accent h-8"
+                    className={`data-[active=true]:bg-sidebar-accent h-8 ${
+                      'highlight' in item && item.highlight ? 'bg-primary/10 border border-primary/30 font-medium' : ''
+                    }`}
                   >
-                    <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase()}`}>
-                      <item.icon className="h-3.5 w-3.5" />
+                    <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(' ', '-')}`}>
+                      <item.icon className={`h-3.5 w-3.5 ${'highlight' in item && item.highlight ? 'text-primary' : ''}`} />
                       <span className="text-sm">{item.title}</span>
                       {item.title === "Dashboard" && newActivityCount > 0 && (
                         <span className="ml-auto flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-medium">

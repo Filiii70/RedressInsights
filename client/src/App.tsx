@@ -20,6 +20,7 @@ import RegisterPayment from "@/pages/register-payment";
 import Settings from "@/pages/settings";
 import Leaderboard from "@/pages/leaderboard";
 import About from "@/pages/about";
+import BTWCheck from "@/pages/btw-check";
 
 function AppLayout() {
   const style = {
@@ -41,6 +42,7 @@ function AppLayout() {
             <div className="mx-auto max-w-7xl h-full min-h-0">
               <Switch>
                 <Route path="/" component={Dashboard} />
+                <Route path="/btw-check" component={BTWCheck} />
                 <Route path="/invoices" component={Invoices} />
                 <Route path="/companies" component={Companies} />
                 <Route path="/companies/:id" component={CompanyDetail} />
