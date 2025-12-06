@@ -145,13 +145,13 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.url}
-                    className={`data-[active=true]:bg-sidebar-accent h-8 ${
-                      'highlight' in item && item.highlight ? 'bg-primary/10 border border-primary/30 font-medium' : ''
+                    className={`data-[active=true]:bg-sidebar-accent h-7 ${
+                      'highlight' in item && item.highlight ? 'bg-primary text-primary-foreground font-semibold shadow-sm' : ''
                     }`}
                   >
                     <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(' ', '-')}`}>
-                      <item.icon className={`h-3.5 w-3.5 ${'highlight' in item && item.highlight ? 'text-primary' : ''}`} />
-                      <span className="text-sm">{item.title}</span>
+                      <item.icon className={`h-3 w-3 ${'highlight' in item && item.highlight ? 'text-primary-foreground' : ''}`} />
+                      <span className="text-xs">{item.title}</span>
                       {item.title === "Dashboard" && newActivityCount > 0 && (
                         <span className="ml-auto flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-medium">
                           <Activity className="h-2 w-2" />
@@ -177,11 +177,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.url}
-                    className="data-[active=true]:bg-sidebar-accent h-8"
+                    className="data-[active=true]:bg-sidebar-accent h-7"
                   >
                     <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(' ', '-')}`}>
-                      <item.icon className="h-3.5 w-3.5" />
-                      <span className="text-sm">{item.title}</span>
+                      <item.icon className="h-3 w-3" />
+                      <span className="text-xs">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -197,34 +197,40 @@ export function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={location === "/about"}
-              className="data-[active=true]:bg-sidebar-accent h-8"
+              className="data-[active=true]:bg-destructive/20 h-7 bg-destructive/10 border border-destructive/30"
             >
               <Link href="/about" data-testid="link-nav-about">
-                <Info className="h-3.5 w-3.5" />
-                <span className="text-sm">Over KMO-Alert</span>
+                <Info className="h-3 w-3 text-destructive" />
+                <span className="text-xs font-medium text-destructive">Over KMO-Alert</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton data-testid="button-nav-login" className="h-8">
-              <LogIn className="h-3.5 w-3.5" />
-              <span className="text-sm">Inloggen</span>
+            <SidebarMenuButton data-testid="button-nav-login" className="h-7">
+              <LogIn className="h-3 w-3" />
+              <span className="text-xs">Inloggen</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={location === "/settings"}
-              className="data-[active=true]:bg-sidebar-accent h-8"
+              className="data-[active=true]:bg-sidebar-accent h-7"
             >
               <Link href="/settings" data-testid="link-nav-settings">
-                <Settings className="h-3.5 w-3.5" />
-                <span className="text-sm">Instellingen</span>
+                <Settings className="h-3 w-3" />
+                <span className="text-xs">Instellingen</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <p className="text-[9px] text-muted-foreground text-center mt-2">v1.0 - Benelux</p>
+        <a 
+          href="mailto:hello@kmo-alert.be" 
+          className="text-[9px] text-center mt-2 block text-primary hover:underline"
+          data-testid="link-contact-email"
+        >
+          hello@kmo-alert.be
+        </a>
       </SidebarFooter>
     </Sidebar>
   );

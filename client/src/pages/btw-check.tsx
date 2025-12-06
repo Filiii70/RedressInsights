@@ -88,47 +88,47 @@ export default function BTWCheck() {
     <div className="h-full flex flex-col gap-4">
       {/* Header */}
       <div className="flex-shrink-0 text-center">
-        <h1 className="text-xl font-bold flex items-center justify-center gap-2">
-          <Search className="h-5 w-5 text-primary" />
+        <h1 className="text-base font-bold flex items-center justify-center gap-1.5">
+          <Search className="h-4 w-4 text-primary" />
           BTW-nummer Check
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Controleer of een bedrijf betrouwbaar is voor factuurvoorwaarden
+        <p className="text-xs text-muted-foreground">
+          Controleer betalingsgedrag van Benelux bedrijven
         </p>
       </div>
 
       {/* Search Box - Prominent */}
       <Card className="flex-shrink-0 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-background">
-        <CardContent className="p-6">
-          <div className="max-w-xl mx-auto">
-            <label className="text-sm font-medium mb-2 block">Voer BTW-nummer in</label>
-            <div className="flex gap-3">
+        <CardContent className="p-4">
+          <div className="max-w-lg mx-auto">
+            <label className="text-xs font-medium mb-1.5 block">Voer BTW-nummer in</label>
+            <div className="flex gap-2">
               <Input
-                placeholder="BE0123456789 of NL123456789B01"
+                placeholder="BE0123456789, NL123456789B01 of LU12345678"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="text-base h-12"
+                className="text-sm h-9"
                 data-testid="input-btw-search-main"
               />
               <Button 
                 onClick={handleSearch} 
                 disabled={isLoading || searchInput.length < 8}
-                className="h-12 px-6"
+                className="h-9 px-4"
                 data-testid="button-btw-search-main"
               >
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <Search className="h-5 w-5 mr-2" />
+                    <Search className="h-4 w-4 mr-1" />
                     Zoeken
                   </>
                 )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              Belgische (BE) en Nederlandse (NL) BTW-nummers worden ondersteund
+            <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+              BE (Belgie), NL (Nederland) en LU (Luxemburg) BTW-nummers
             </p>
           </div>
         </CardContent>
@@ -143,11 +143,11 @@ export default function BTWCheck() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Building2 className="h-5 w-5 text-primary flex-shrink-0" />
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
                         <span className="truncate" data-testid="text-company-name">{result.name}</span>
                       </CardTitle>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
                         <span>{result.vatNumber}</span>
                         <span>•</span>
                         <span>{result.sector}</span>
@@ -156,8 +156,8 @@ export default function BTWCheck() {
                       </div>
                     </div>
                     {riskInfo && (
-                      <Badge className={`${riskInfo.bgColor} text-white text-sm px-3 py-1`} data-testid="badge-risk-score">
-                        <RiskIcon className="h-4 w-4 mr-1.5" />
+                      <Badge className={`${riskInfo.bgColor} text-white text-xs px-2 py-0.5`} data-testid="badge-risk-score">
+                        <RiskIcon className="h-3 w-3 mr-1" />
                         {riskScore}% - {riskInfo.label}
                       </Badge>
                     )}
@@ -165,18 +165,18 @@ export default function BTWCheck() {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  {/* Risk Advice - Large and prominent */}
+                  {/* Risk Advice */}
                   {riskInfo && (
-                    <div className={`p-4 rounded-lg border-2 ${
+                    <div className={`p-3 rounded-lg border ${
                       riskScore! <= 50 ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
                       riskScore! <= 70 ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' :
                       'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
                     }`}>
-                      <div className="flex items-start gap-3">
-                        <RiskIcon className={`h-6 w-6 flex-shrink-0 ${riskInfo.color}`} />
+                      <div className="flex items-start gap-2">
+                        <RiskIcon className={`h-4 w-4 flex-shrink-0 mt-0.5 ${riskInfo.color}`} />
                         <div>
-                          <p className={`font-bold ${riskInfo.color}`}>Advies voor Factuurvoorwaarden</p>
-                          <p className="text-sm mt-1" data-testid="text-advice">{riskInfo.advice}</p>
+                          <p className={`text-xs font-bold ${riskInfo.color}`}>Advies</p>
+                          <p className="text-xs mt-0.5" data-testid="text-advice">{riskInfo.advice}</p>
                         </div>
                       </div>
                     </div>
@@ -184,56 +184,56 @@ export default function BTWCheck() {
 
                   {/* Stats Grid */}
                   {result.paymentBehavior && (
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-4 gap-2">
                       <Card>
-                        <CardContent className="p-3 text-center">
-                          <FileText className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-                          <div className="text-xl font-bold">{result.paymentBehavior.totalInvoices}</div>
-                          <div className="text-xs text-muted-foreground">Facturen</div>
+                        <CardContent className="p-2 text-center">
+                          <FileText className="h-3 w-3 mx-auto text-muted-foreground mb-0.5" />
+                          <div className="text-sm font-bold">{result.paymentBehavior.totalInvoices}</div>
+                          <div className="text-[10px] text-muted-foreground">Facturen</div>
                         </CardContent>
                       </Card>
                       <Card>
-                        <CardContent className="p-3 text-center">
-                          <CheckCircle className="h-4 w-4 mx-auto text-green-500 mb-1" />
-                          <div className="text-xl font-bold text-green-600">{result.paymentBehavior.paidInvoices}</div>
-                          <div className="text-xs text-muted-foreground">Betaald</div>
+                        <CardContent className="p-2 text-center">
+                          <CheckCircle className="h-3 w-3 mx-auto text-green-500 mb-0.5" />
+                          <div className="text-sm font-bold text-green-600">{result.paymentBehavior.paidInvoices}</div>
+                          <div className="text-[10px] text-muted-foreground">Betaald</div>
                         </CardContent>
                       </Card>
                       <Card>
-                        <CardContent className="p-3 text-center">
-                          <Clock className="h-4 w-4 mx-auto text-orange-500 mb-1" />
-                          <div className="text-xl font-bold text-orange-600">
+                        <CardContent className="p-2 text-center">
+                          <Clock className="h-3 w-3 mx-auto text-orange-500 mb-0.5" />
+                          <div className="text-sm font-bold text-orange-600">
                             {parseFloat(result.paymentBehavior.avgDaysLate || '0').toFixed(0)}
                           </div>
-                          <div className="text-xs text-muted-foreground">Dagen laat</div>
+                          <div className="text-[10px] text-muted-foreground">Dagen laat</div>
                         </CardContent>
                       </Card>
                       <Card>
-                        <CardContent className="p-3 text-center">
-                          <div className="flex justify-center mb-1">
+                        <CardContent className="p-2 text-center">
+                          <div className="flex justify-center mb-0.5">
                             {getTrendIcon(result.paymentBehavior.trend)}
                           </div>
-                          <div className="text-xl font-bold capitalize">
+                          <div className="text-sm font-bold capitalize">
                             {result.paymentBehavior.trend === 'improving' ? 'Beter' :
                              result.paymentBehavior.trend === 'worsening' ? 'Slechter' : 'Stabiel'}
                           </div>
-                          <div className="text-xs text-muted-foreground">Trend</div>
+                          <div className="text-[10px] text-muted-foreground">Trend</div>
                         </CardContent>
                       </Card>
                     </div>
                   )}
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <Link href={`/companies/${result.id}`} className="flex-1">
-                      <Button variant="outline" className="w-full" data-testid="button-view-details">
-                        Bekijk volledige analyse
+                      <Button variant="outline" size="sm" className="w-full text-xs" data-testid="button-view-details">
+                        Volledige analyse
                       </Button>
                     </Link>
                     <Link href="/upload" className="flex-1">
-                      <Button className="w-full" data-testid="button-upload-invoice">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Factuur uploaden
+                      <Button size="sm" className="w-full text-xs" data-testid="button-upload-invoice">
+                        <FileText className="h-3 w-3 mr-1" />
+                        Upload factuur
                       </Button>
                     </Link>
                   </div>
@@ -242,20 +242,20 @@ export default function BTWCheck() {
             ) : (
               /* Company Not Found */
               <Card className="border-2 border-dashed">
-                <CardContent className="p-8 text-center">
-                  <XCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                  <h3 className="text-lg font-medium">Bedrijf niet gevonden</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <CardContent className="p-6 text-center">
+                  <XCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <h3 className="text-sm font-medium">Bedrijf niet gevonden</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
                     BTW-nummer "<strong>{searchVat}</strong>" is niet bekend in ons netwerk.
                   </p>
-                  <p className="text-sm text-muted-foreground mt-3">
-                    Dit betekent dat er nog geen betalingsdata is gedeeld over dit bedrijf.
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Nog geen betalingsdata gedeeld over dit bedrijf.
                   </p>
-                  <div className="mt-4">
+                  <div className="mt-3">
                     <Link href="/upload">
-                      <Button data-testid="button-upload-new">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Voeg toe via factuur upload
+                      <Button size="sm" className="text-xs" data-testid="button-upload-new">
+                        <FileText className="h-3 w-3 mr-1" />
+                        Toevoegen via factuur
                       </Button>
                     </Link>
                   </div>
@@ -267,25 +267,25 @@ export default function BTWCheck() {
 
         {/* Empty state - before search */}
         {!searchVat && (
-          <div className="max-w-xl mx-auto text-center py-8">
-            <Shield className="h-16 w-16 mx-auto text-primary/30 mb-4" />
-            <h3 className="text-lg font-medium">Hoe werkt het?</h3>
-            <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-              <div className="p-3 rounded-lg bg-muted/50">
-                <div className="text-2xl mb-2">1</div>
-                <p>Voer het BTW-nummer in</p>
+          <div className="max-w-md mx-auto text-center py-4">
+            <Shield className="h-10 w-10 mx-auto text-primary/30 mb-2" />
+            <h3 className="text-sm font-medium">Hoe werkt het?</h3>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+              <div className="p-2 rounded-lg bg-muted/50">
+                <div className="text-base font-bold mb-1">1</div>
+                <p>BTW-nummer invoeren</p>
               </div>
-              <div className="p-3 rounded-lg bg-muted/50">
-                <div className="text-2xl mb-2">2</div>
-                <p>Bekijk de risicoscore</p>
+              <div className="p-2 rounded-lg bg-muted/50">
+                <div className="text-base font-bold mb-1">2</div>
+                <p>Risicoscore bekijken</p>
               </div>
-              <div className="p-3 rounded-lg bg-muted/50">
-                <div className="text-2xl mb-2">3</div>
-                <p>Bepaal je factuurvoorwaarden</p>
+              <div className="p-2 rounded-lg bg-muted/50">
+                <div className="text-base font-bold mb-1">3</div>
+                <p>Voorwaarden bepalen</p>
               </div>
             </div>
-            <p className="mt-6 text-muted-foreground text-sm">
-              Data gebaseerd op betalingservaringen van {">"}500 KMO's in de Benelux
+            <p className="mt-4 text-muted-foreground text-[10px]">
+              Data van 500+ KMO's in Belgie, Nederland en Luxemburg
             </p>
           </div>
         )}
