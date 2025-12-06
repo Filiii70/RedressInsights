@@ -58,8 +58,8 @@ export default function Dashboard() {
     queryKey: ["/api/dashboard/stats"],
   });
 
-  const { data: recentInvoices, isLoading: invoicesLoading } = useQuery<InvoiceWithCompany[]>({
-    queryKey: ["/api/invoices", "recent"],
+  const { data: criticalInvoices, isLoading: invoicesLoading } = useQuery<InvoiceWithCompany[]>({
+    queryKey: ["/api/invoices/critical"],
   });
 
   const { data: riskyCompanies, isLoading: companiesLoading } = useQuery<CompanyWithBehavior[]>({
@@ -162,18 +162,17 @@ export default function Dashboard() {
                   <Skeleton key={i} className="h-8 w-full" />
                 ))}
               </div>
-            ) : recentInvoices && recentInvoices.length > 0 ? (
+            ) : criticalInvoices && criticalInvoices.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs py-1">Bedrijf</TableHead>
                     <TableHead className="text-xs py-1">Bedrag</TableHead>
-                    <TableHead className="text-xs py-1">Verval</TableHead>
-                    <TableHead className="text-xs py-1">Status</TableHead>
+                    <TableHead className="text-xs py-1">Te laat</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentInvoices.slice(0, 6).map((invoice) => (
+                  {criticalInvoices.slice(0, 6).map((invoice) => (
                     <TableRow key={invoice.id} className="text-xs" data-testid={`row-invoice-${invoice.id}`}>
                       <TableCell className="py-1.5 font-medium truncate max-w-[120px]">
                         <Link href={`/companies/${invoice.companyId}`} className="hover:underline">
@@ -183,12 +182,8 @@ export default function Dashboard() {
                       <TableCell className="py-1.5 font-mono text-xs">
                         {formatCurrency(invoice.amount)}
                       </TableCell>
-                      <TableCell className="py-1.5">{formatDate(invoice.dueDate)}</TableCell>
                       <TableCell className="py-1.5">
-                        <InvoiceStatusBadge
-                          status={invoice.status as "pending" | "paid" | "overdue"}
-                          daysLate={invoice.daysLate || 0}
-                        />
+                        <span className="text-red-600 font-medium">{invoice.daysLate || 0}d</span>
                       </TableCell>
                     </TableRow>
                   ))}

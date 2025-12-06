@@ -66,6 +66,17 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/invoices/critical", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const invoices = await storage.getCriticalInvoices(limit);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching critical invoices:", error);
+      res.status(500).json({ message: "Failed to fetch critical invoices" });
+    }
+  });
+
   app.get("/api/invoices/:id", async (req, res) => {
     try {
       const invoice = await storage.getInvoice(req.params.id);

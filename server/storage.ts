@@ -32,6 +32,7 @@ export interface IStorage {
   getInvoicesByCompany(companyId: string): Promise<Invoice[]>;
   getAllInvoices(): Promise<InvoiceWithCompany[]>;
   getRecentInvoices(limit: number): Promise<InvoiceWithCompany[]>;
+  getCriticalInvoices(limit: number): Promise<InvoiceWithCompany[]>;
   createInvoice(invoice: InsertInvoice): Promise<Invoice>;
   updateInvoice(id: string, invoice: Partial<Invoice>): Promise<Invoice | undefined>;
 
@@ -162,6 +163,24 @@ export class DatabaseStorage implements IStorage {
     
     const result: InvoiceWithCompany[] = [];
     for (const invoice of recentInvoices) {
+      const [company] = await db.select().from(companies).where(eq(companies.id, invoice.companyId));
+      if (company) {
+        result.push({ ...invoice, company });
+      }
+    }
+    return result;
+  }
+
+  async getCriticalInvoices(limit: number): Promise<InvoiceWithCompany[]> {
+    // Get overdue invoices sorted by daysLate descending (worst first)
+    const criticalInvoices = await db.select()
+      .from(invoices)
+      .where(eq(invoices.status, "overdue"))
+      .orderBy(desc(invoices.daysLate))
+      .limit(limit);
+    
+    const result: InvoiceWithCompany[] = [];
+    for (const invoice of criticalInvoices) {
       const [company] = await db.select().from(companies).where(eq(companies.id, invoice.companyId));
       if (company) {
         result.push({ ...invoice, company });
