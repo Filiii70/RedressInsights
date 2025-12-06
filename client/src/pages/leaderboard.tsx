@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Zap, Trophy } from "lucide-react";
-import { Link } from "wouter";
 import type { LeaderboardEntry } from "@shared/schema";
 
 function getRankEmoji(rank: number) {
@@ -53,55 +52,54 @@ export default function Leaderboard() {
       <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded px-2 py-1 border border-yellow-500/30">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px]">🏆</span>
-          <h1 className="text-[11px] font-bold" data-testid="text-leaderboard-title">Top 10 Bijdragers</h1>
+          <h1 className="text-[11px] font-bold" data-testid="text-leaderboard-title">Top 10 Netwerkleden</h1>
           <span className="text-[10px]">🏆</span>
         </div>
+        <p className="text-[8px] text-center text-muted-foreground">Leden die het meest bijdragen aan het platform</p>
       </div>
 
-      {/* Top 10 list - clickable */}
+      {/* Top 10 list - netwerkleden die bijdragen */}
       <div className="flex-1 flex flex-col gap-0.5 min-h-0 overflow-auto">
         {leaderboard && leaderboard.length > 0 ? (
           leaderboard.slice(0, 10).map((entry) => (
-            <Link
-              key={entry.companyId || entry.userId}
-              href={`/companies/${entry.companyId}`}
-              data-testid={`link-leaderboard-${entry.rank}`}
+            <Card 
+              key={entry.userId || entry.rank}
+              className={`${getRankBg(entry.rank)}`}
+              data-testid={`card-leaderboard-${entry.rank}`}
             >
-              <Card className={`hover-elevate cursor-pointer ${getRankBg(entry.rank)}`}>
-                <CardContent className="p-1 px-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] w-4 text-center flex-shrink-0">
-                      {getRankEmoji(entry.rank)}
-                    </span>
-                    
-                    <Avatar className="h-5 w-5 flex-shrink-0">
-                      <AvatarImage src={entry.profileImageUrl || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium">
-                        {getInitials(entry.userName)}
-                      </AvatarFallback>
-                    </Avatar>
+              <CardContent className="p-1 px-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] w-4 text-center flex-shrink-0">
+                    {getRankEmoji(entry.rank)}
+                  </span>
+                  
+                  <Avatar className="h-5 w-5 flex-shrink-0">
+                    <AvatarImage src={entry.profileImageUrl || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium">
+                      {getInitials(entry.userName)}
+                    </AvatarFallback>
+                  </Avatar>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-medium truncate flex items-center gap-0.5">
-                        {entry.userName}
-                        {entry.rank === 1 && <span className="text-[9px]">👑</span>}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-1 flex-shrink-0 text-[9px] text-muted-foreground">
-                      <span>📄{entry.invoicesUploaded}</span>
-                      <span>💳{entry.paymentsRegistered}</span>
-                      {entry.currentStreak > 0 && <span>🔥{entry.currentStreak}</span>}
-                    </div>
-
-                    <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 flex-shrink-0">
-                      <Zap className="h-2 w-2 mr-0.5" />
-                      {entry.totalActivity}
-                    </Badge>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-medium truncate flex items-center gap-0.5">
+                      {entry.userName}
+                      {entry.rank === 1 && <span className="text-[9px]">👑</span>}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
+
+                  <div className="flex items-center gap-1 flex-shrink-0 text-[9px] text-muted-foreground">
+                    <span>📄{entry.invoicesUploaded}</span>
+                    <span>💳{entry.paymentsRegistered}</span>
+                    {entry.currentStreak > 0 && <span>🔥{entry.currentStreak}</span>}
+                  </div>
+
+                  <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 flex-shrink-0">
+                    <Zap className="h-2 w-2 mr-0.5" />
+                    {entry.totalActivity}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
           ))
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
