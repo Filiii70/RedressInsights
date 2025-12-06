@@ -32,8 +32,8 @@ function AppLayout() {
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-auto p-6">
-            <div className="mx-auto max-w-7xl h-full">
+          <main className="flex-1 overflow-hidden p-4">
+            <div className="mx-auto max-w-7xl h-full min-h-0">
               <Switch>
                 <Route path="/" component={Dashboard} />
                 <Route path="/invoices" component={Invoices} />
