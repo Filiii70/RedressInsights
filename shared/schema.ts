@@ -25,6 +25,7 @@ export const companies = pgTable("companies", {
   foundingDate: text("founding_date"),
   country: text("country").default("BE"),
   address: text("address"),
+  isCustomer: boolean("is_customer").default(false), // Is this company our customer?
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -388,4 +389,42 @@ export type InsertActivityFeedItem = z.infer<typeof insertActivityFeedSchema>;
 // Activity feed with company info for display
 export type ActivityFeedWithCompany = ActivityFeedItem & {
   company?: Company | null;
+};
+
+// ============================================
+// BLACKLIST SYSTEM
+// ============================================
+
+// Blacklist entries for risky companies
+export const blacklistEntries = pgTable("blacklist_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  reason: text("reason"), // Why was this company blacklisted?
+  riskScoreAtTime: integer("risk_score_at_time"), // Risk score when blacklisted
+  status: text("status").notNull().default("active"), // 'active', 'resolved', 'reviewing'
+  notes: text("notes"), // Additional notes
+  addedBy: varchar("added_by"), // User ID who added
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const blacklistEntriesRelations = relations(blacklistEntries, ({ one }) => ({
+  company: one(companies, {
+    fields: [blacklistEntries.companyId],
+    references: [companies.id],
+  }),
+}));
+
+export const insertBlacklistEntrySchema = createInsertSchema(blacklistEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type BlacklistEntry = typeof blacklistEntries.$inferSelect;
+export type InsertBlacklistEntry = z.infer<typeof insertBlacklistEntrySchema>;
+
+// Blacklist entry with company info for display
+export type BlacklistEntryWithCompany = BlacklistEntry & {
+  company: Company;
+  paymentBehavior?: PaymentBehavior | null;
 };
