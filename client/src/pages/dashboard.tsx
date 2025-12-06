@@ -156,37 +156,37 @@ export default function Dashboard() {
           <>
             <Card>
               <CardContent className="p-3 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <Euro className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Op tijd betaald</p>
-                  <p className="text-sm font-bold text-green-600">{stats?.onTimePayments || 0}</p>
+                  <p className="text-xs text-muted-foreground truncate">Openstaand</p>
+                  <p className="text-sm font-bold truncate">{formatCurrency(stats?.totalOutstanding || 0)}</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+                <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Betrouwbaar</p>
-                  <p className="text-sm font-bold text-primary">{stats?.reliableClients || 0}</p>
+                  <p className="text-xs text-muted-foreground truncate">Te laat</p>
+                  <p className="text-sm font-bold text-orange-600">{stats?.overdueInvoices || 0}</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 flex items-center gap-2">
-                <Euro className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Ontvangen</p>
-                  <p className="text-sm font-bold truncate">{formatCurrency(stats?.paidThisMonth || 0)}</p>
+                  <p className="text-xs text-muted-foreground truncate">Gem. dagen</p>
+                  <p className="text-sm font-bold">{Math.round(stats?.avgDaysLate || 0)}d</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Verbeterd</p>
-                  <p className="text-sm font-bold text-green-600">{stats?.improvedClients || 0}</p>
+                  <p className="text-xs text-muted-foreground truncate">Hoog risico</p>
+                  <p className="text-sm font-bold text-red-600">{stats?.highRiskClients || 0}</p>
                 </div>
               </CardContent>
             </Card>
