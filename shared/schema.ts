@@ -181,14 +181,16 @@ export type UserStreakInfo = {
 
 // Leaderboard entry
 export type LeaderboardEntry = {
+  rank: number;
   userId: string;
   userName: string;
   profileImageUrl: string | null;
+  companyId: string;
   invoicesUploaded: number;
   paymentsRegistered: number;
   totalActivity: number;
   currentStreak: number;
-  rank: number;
+  longestStreak: number;
 };
 
 // Portfolio Risk Score

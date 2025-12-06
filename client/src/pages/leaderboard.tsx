@@ -3,22 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Zap } from "lucide-react";
+import { Zap, Trophy } from "lucide-react";
 import { Link } from "wouter";
 import type { LeaderboardEntry } from "@shared/schema";
-
-const fakeLeaderboard: LeaderboardEntry[] = [
-  { rank: 1, odl: "user-1", userName: "De Boer & Zonen BV", profileImageUrl: null, totalActivity: 156, invoicesUploaded: 89, paymentsRegistered: 67, currentStreak: 12, longestStreak: 15, companyId: "1" },
-  { rank: 2, userId: "user-2", userName: "Peeters Transport", profileImageUrl: null, totalActivity: 134, invoicesUploaded: 78, paymentsRegistered: 56, currentStreak: 8, longestStreak: 21, companyId: "2" },
-  { rank: 3, userId: "user-3", userName: "Janssen Bouw NV", profileImageUrl: null, totalActivity: 112, invoicesUploaded: 65, paymentsRegistered: 47, currentStreak: 5, longestStreak: 9, companyId: "3" },
-  { rank: 4, userId: "user-4", userName: "Van Dam Retail", profileImageUrl: null, totalActivity: 98, invoicesUploaded: 54, paymentsRegistered: 44, currentStreak: 3, longestStreak: 7, companyId: "4" },
-  { rank: 5, userId: "user-5", userName: "Bakker IT Solutions", profileImageUrl: null, totalActivity: 87, invoicesUploaded: 49, paymentsRegistered: 38, currentStreak: 0, longestStreak: 11, companyId: "5" },
-  { rank: 6, userId: "user-6", userName: "Vermeer Consultancy", profileImageUrl: null, totalActivity: 76, invoicesUploaded: 42, paymentsRegistered: 34, currentStreak: 2, longestStreak: 5, companyId: "6" },
-  { rank: 7, userId: "user-7", userName: "Claessens & Co", profileImageUrl: null, totalActivity: 65, invoicesUploaded: 38, paymentsRegistered: 27, currentStreak: 1, longestStreak: 4, companyId: "7" },
-  { rank: 8, userId: "user-8", userName: "Hermans Logistics", profileImageUrl: null, totalActivity: 54, invoicesUploaded: 31, paymentsRegistered: 23, currentStreak: 0, longestStreak: 6, companyId: "8" },
-  { rank: 9, userId: "user-9", userName: "Willems Trading", profileImageUrl: null, totalActivity: 48, invoicesUploaded: 28, paymentsRegistered: 20, currentStreak: 4, longestStreak: 8, companyId: "9" },
-  { rank: 10, userId: "user-10", userName: "Maes Industries", profileImageUrl: null, totalActivity: 42, invoicesUploaded: 25, paymentsRegistered: 17, currentStreak: 0, longestStreak: 3, companyId: "10" },
-];
 
 function getRankEmoji(rank: number) {
   switch (rank) {
@@ -43,11 +30,9 @@ function getInitials(name: string) {
 }
 
 export default function Leaderboard() {
-  const { data: apiLeaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
+  const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/gamification/leaderboard"],
   });
-
-  const leaderboard = (apiLeaderboard && apiLeaderboard.length > 0) ? apiLeaderboard : fakeLeaderboard;
 
   if (isLoading) {
     return (
@@ -75,12 +60,11 @@ export default function Leaderboard() {
 
       {/* Top 10 list - clickable */}
       <div className="flex-1 flex flex-col gap-0.5 min-h-0 overflow-auto">
-        {leaderboard.slice(0, 10).map((entry) => {
-          const companyId = (entry as any).companyId || entry.userId;
-          return (
+        {leaderboard && leaderboard.length > 0 ? (
+          leaderboard.slice(0, 10).map((entry) => (
             <Link
-              key={entry.userId || entry.rank}
-              href={`/companies/${companyId}`}
+              key={entry.companyId || entry.userId}
+              href={`/companies/${entry.companyId}`}
               data-testid={`link-leaderboard-${entry.rank}`}
             >
               <Card className={`hover-elevate cursor-pointer ${getRankBg(entry.rank)}`}>
@@ -118,8 +102,14 @@ export default function Leaderboard() {
                 </CardContent>
               </Card>
             </Link>
-          );
-        })}
+          ))
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+            <Trophy className="h-8 w-8 mb-2 opacity-50" />
+            <p className="text-xs">Nog geen activiteit</p>
+            <p className="text-[10px]">Upload facturen om op het leaderboard te komen</p>
+          </div>
+        )}
       </div>
 
       {/* Bottom legend */}
