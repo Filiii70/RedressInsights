@@ -73,13 +73,13 @@ export default function Leaderboard() {
   return (
     <div className="h-full flex flex-col gap-1">
       {/* Clean Banner */}
-      <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded-lg py-1.5 px-3 border border-yellow-500/30">
-        <div className="flex items-center justify-center gap-2">
-          <span>🏆</span>
-          <h1 className="text-sm font-bold" data-testid="text-leaderboard-title">Leaderboard</h1>
-          <span>🏆</span>
+      <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded px-2 py-1 border border-yellow-500/30">
+        <div className="flex items-center justify-center gap-1">
+          <span className="text-[10px]">🏆</span>
+          <h1 className="text-[11px] font-bold" data-testid="text-leaderboard-title">Leaderboard</h1>
+          <span className="text-[10px]">🏆</span>
         </div>
-        <p className="text-center text-muted-foreground text-[9px]">Top bijdragers KMO-Alert netwerk</p>
+        <p className="text-center text-muted-foreground text-[9px]">Top bijdragers KMO-Alert</p>
       </div>
 
       {/* Compact list */}
