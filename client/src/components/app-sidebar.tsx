@@ -12,8 +12,11 @@ import {
   Activity,
   Mail,
   Ban,
+  Trophy,
+  Flame,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
+import type { UserStreakInfo } from "@shared/schema";
 import {
   Sidebar,
   SidebarContent,
@@ -66,6 +69,11 @@ const analyticsItems = [
     url: "/blacklist",
     icon: Ban,
   },
+  {
+    title: "Leaderboard",
+    url: "/leaderboard",
+    icon: Trophy,
+  },
 ];
 
 export function AppSidebar() {
@@ -76,21 +84,40 @@ export function AppSidebar() {
     refetchInterval: 60000,
   });
 
+  const { data: streakInfo } = useQuery<UserStreakInfo>({
+    queryKey: ["/api/gamification/streak"],
+    refetchInterval: 300000, // 5 minutes
+    retry: false,
+  });
+
   const newActivityCount = activityCount?.count || 0;
+  const currentStreak = streakInfo?.currentStreak || 0;
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-3 py-2">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Shield className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight" data-testid="text-brand-name">
-              KMO-Alert
-            </span>
-          </div>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Shield className="h-4 w-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-bold tracking-tight" data-testid="text-brand-name">
+                KMO-Alert
+              </span>
+            </div>
+          </Link>
+          {currentStreak > 0 && (
+            <div 
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500"
+              data-testid="badge-streak"
+              title={`${currentStreak} ${currentStreak === 1 ? 'dag' : 'dagen'} streak!`}
+            >
+              <Flame className="h-3.5 w-3.5" />
+              <span className="text-xs font-bold">{currentStreak}</span>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-sidebar-border">
           <Mail className="h-3 w-3 text-muted-foreground" />
           <SiWhatsapp className="h-3 w-3 text-green-500" />

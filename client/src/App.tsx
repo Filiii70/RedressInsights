@@ -18,6 +18,7 @@ import Trends from "@/pages/trends";
 import Blacklist from "@/pages/blacklist";
 import RegisterPayment from "@/pages/register-payment";
 import Settings from "@/pages/settings";
+import Leaderboard from "@/pages/leaderboard";
 
 function AppLayout() {
   const style = {
@@ -46,6 +47,7 @@ function AppLayout() {
                 <Route path="/risk-analysis" component={RiskAnalysis} />
                 <Route path="/trends" component={Trends} />
                 <Route path="/blacklist" component={Blacklist} />
+                <Route path="/leaderboard" component={Leaderboard} />
                 <Route path="/settings" component={Settings} />
                 <Route component={NotFound} />
               </Switch>
