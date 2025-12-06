@@ -246,14 +246,7 @@ export default function Dashboard() {
         {/* Risky Companies */}
         <Card className="col-span-2 overflow-visible">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-sm flex-shrink-0">Hoogste risico</CardTitle>
-              <Button variant="ghost" size="sm" className="h-6 text-xs flex-shrink-0" asChild>
-                <Link href="/companies">
-                  Alle <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </Button>
-            </div>
+            <CardTitle className="text-sm">Risico bedrijven</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0">
             {companiesLoading ? (
