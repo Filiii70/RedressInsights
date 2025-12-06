@@ -19,7 +19,7 @@ import {
   type UserStreakInfo, type LeaderboardEntry, type PortfolioRiskScore
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, count, inArray } from "drizzle-orm";
+import { eq, desc, asc, and, gte, lte, sql, count, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Companies
@@ -1063,71 +1063,42 @@ Wat kunnen wij afspreken?
   // ============================================
 
   async getUserLeaderboard(period: 'week' | 'month' | 'all'): Promise<LeaderboardEntry[]> {
-    // Leaderboard toont GEBRUIKERS die actief data bijdragen aan het platform
-    // Dit zijn de leden die facturen uploaden over hun klanten
-    const allUsers = await db.select().from(users);
+    // LEADERBOARD: Top bedrijven met BESTE betalingsgedrag over het hele platform
+    // Dit zijn de meest betrouwbare betalers - bedrijven die je WEL kunt vertrouwen!
+    
+    // Haal alle bedrijven met betalingsgedrag op (geen isCustomer filter - hele netwerk)
+    const allBehavior = await db.select()
+      .from(paymentBehavior)
+      .orderBy(asc(paymentBehavior.riskScore));
     
     const entries: LeaderboardEntry[] = [];
     
-    for (const user of allUsers) {
-      const invoicesUploaded = user.totalInvoicesUploaded || 0;
-      const paymentsRegistered = user.totalPaymentsRegistered || 0;
-      const totalActivity = invoicesUploaded + paymentsRegistered;
-      
-      // Alleen gebruikers met activiteit tonen
-      if (totalActivity > 0) {
-        // Gebruik bedrijfsnaam als die er is, anders gebruikersnaam
-        const displayName = user.firstName && user.lastName 
-          ? `${user.firstName} ${user.lastName}` 
-          : user.email?.split('@')[0] || 'Anoniem Lid';
+    for (const behavior of allBehavior) {
+      // Alleen bedrijven met voldoende data (minimaal 3 facturen) en goede score
+      if (behavior.totalInvoices >= 3 && behavior.riskScore <= 40) {
+        const company = await this.getCompany(behavior.companyId);
+        if (!company) continue;
+        
+        // Bereken "betrouwbaarheidsscore" (omgekeerde van risico)
+        const trustScore = 100 - behavior.riskScore;
+        const avgDaysLate = parseFloat(behavior.avgDaysLate || '0');
         
         entries.push({
           rank: 0,
-          userId: user.id,
-          userName: displayName,
-          profileImageUrl: user.profileImageUrl,
-          companyId: user.id, // User ID as reference
-          invoicesUploaded,
-          paymentsRegistered,
-          totalActivity,
-          currentStreak: user.currentStreak || 0,
-          longestStreak: user.longestStreak || 0,
+          userId: company.id,
+          userName: company.name,
+          profileImageUrl: null,
+          companyId: company.id,
+          invoicesUploaded: behavior.totalInvoices,
+          paymentsRegistered: behavior.paidInvoices,
+          totalActivity: trustScore, // Gebruik trust score als "activiteit"
+          currentStreak: Math.max(0, Math.round(30 - avgDaysLate)), // Dagen op tijd
+          longestStreak: behavior.paidInvoices,
         });
       }
     }
     
-    // Als er geen echte gebruikersdata is, toon voorbeelddata van betrouwbare bijdragers
-    if (entries.length === 0) {
-      const sampleContributors = [
-        { name: "Bakkerij Peeters BVBA", invoices: 89, payments: 67, streak: 12 },
-        { name: "Transport Janssen NV", invoices: 78, payments: 56, streak: 8 },
-        { name: "Garage Claessens", invoices: 65, payments: 47, streak: 5 },
-        { name: "Elektro Plus BVBA", invoices: 54, payments: 44, streak: 3 },
-        { name: "Installatie Van Dam", invoices: 49, payments: 38, streak: 7 },
-        { name: "Drukkerij De Wolf", invoices: 42, payments: 34, streak: 2 },
-        { name: "Metaalwerken Smeets", invoices: 38, payments: 27, streak: 4 },
-        { name: "Catering Lekker BV", invoices: 31, payments: 23, streak: 1 },
-        { name: "Tuincentrum Groen", invoices: 28, payments: 20, streak: 6 },
-        { name: "Security Services", invoices: 25, payments: 17, streak: 0 },
-      ];
-      
-      sampleContributors.forEach((contrib, index) => {
-        entries.push({
-          rank: index + 1,
-          userId: `sample-${index}`,
-          userName: contrib.name,
-          profileImageUrl: null,
-          companyId: `sample-${index}`,
-          invoicesUploaded: contrib.invoices,
-          paymentsRegistered: contrib.payments,
-          totalActivity: contrib.invoices + contrib.payments,
-          currentStreak: contrib.streak,
-          longestStreak: contrib.streak + 5,
-        });
-      });
-    }
-    
-    // Sorteer op activiteit en ken ranks toe
+    // Sorteer op betrouwbaarheid (hoogste eerst) en ken ranks toe
     entries.sort((a, b) => b.totalActivity - a.totalActivity);
     entries.forEach((entry, index) => {
       entry.rank = index + 1;
