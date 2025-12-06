@@ -339,33 +339,57 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Live Ticker Banner - Horizontal at bottom */}
-      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-t flex items-center overflow-hidden">
+      {/* KMO-Alert Bedrijfsgegevens Banner - Horizontal at bottom */}
+      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
         <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[10px] font-medium text-muted-foreground">LIVE</span>
+          <Building2 className="h-3 w-3 text-primary" />
+          <span className="text-[10px] font-medium text-primary">KMO-ALERT</span>
         </div>
-        {activityFeed && activityFeed.length > 0 ? (
-          <div className="flex-1 overflow-hidden">
-            <div className="animate-scroll-horizontal flex gap-8 whitespace-nowrap">
-              {[...activityFeed, ...activityFeed].map((activity, idx) => (
-                <span
-                  key={`${activity.id}-${idx}`}
-                  onClick={() => setSelectedActivity(activity)}
-                  className="inline-flex items-center gap-2 text-xs cursor-pointer hover:text-primary transition-colors"
-                  data-testid={`live-item-${activity.id}`}
-                >
-                  {getActivityIcon(activity.eventType)}
-                  <span>{activity.message}</span>
-                </span>
-              ))}
-            </div>
+        <div className="flex-1 overflow-hidden">
+          <div className="animate-scroll-horizontal flex gap-12 whitespace-nowrap">
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-paid">
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>Ontvangen: <strong className="text-green-600">{formatCurrency(stats?.totalPaid || 0)}</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-outstanding">
+              <Euro className="h-3 w-3 text-orange-500" />
+              <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-overdue">
+              <Clock className="h-3 w-3 text-red-500" />
+              <span>Achterstallig: <strong className="text-red-600">{stats?.overdueInvoices || 0} facturen</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-pending">
+              <FileText className="h-3 w-3 text-primary" />
+              <span>Open: <strong>{stats?.pendingInvoices || 0} facturen</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-ontime">
+              <TrendingUp className="h-3 w-3 text-green-500" />
+              <span>Op tijd betaald: <strong className="text-green-600">{stats?.onTimePayments || 0}</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-reliable">
+              <Users className="h-3 w-3 text-green-500" />
+              <span>Betrouwbare klanten: <strong className="text-green-600">{stats?.reliableClients || 0}</strong></span>
+            </span>
+            {/* Duplicate for seamless loop */}
+            <span className="inline-flex items-center gap-2 text-xs">
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>Ontvangen: <strong className="text-green-600">{formatCurrency(stats?.totalPaid || 0)}</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs">
+              <Euro className="h-3 w-3 text-orange-500" />
+              <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs">
+              <Clock className="h-3 w-3 text-red-500" />
+              <span>Achterstallig: <strong className="text-red-600">{stats?.overdueInvoices || 0} facturen</strong></span>
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs">
+              <FileText className="h-3 w-3 text-primary" />
+              <span>Open: <strong>{stats?.pendingInvoices || 0} facturen</strong></span>
+            </span>
           </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-[10px] text-muted-foreground">Wachten op netwerk activiteit...</p>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Activity Detail Dialog */}
