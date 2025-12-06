@@ -163,17 +163,17 @@ export default function Leaderboard() {
 
   return (
     <div className="h-full flex flex-col gap-4">
-      <div className="flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="text-3xl">🏆</div>
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2" data-testid="text-leaderboard-title">
-              Leaderboard
-              <Sparkles className="h-5 w-5 text-yellow-500" />
-            </h1>
-            <p className="text-muted-foreground text-sm">Top bijdragers aan het KMO-Alert netwerk 🚀</p>
-          </div>
+      <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded-lg p-4 border border-yellow-500/30">
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-3xl">🏆</span>
+          <h1 className="text-2xl font-bold" data-testid="text-leaderboard-title">
+            Leaderboard
+          </h1>
+          <span className="text-3xl">🏆</span>
         </div>
+        <p className="text-center text-muted-foreground text-sm mt-1">
+          Top bijdragers aan het KMO-Alert netwerk 🚀
+        </p>
       </div>
 
       <div className="flex-1 min-h-0 overflow-auto">
