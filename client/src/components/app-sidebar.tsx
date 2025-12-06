@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   FileText,
@@ -8,6 +9,7 @@ import {
   Shield,
   Settings,
   LogIn,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,6 +63,13 @@ const analyticsItems = [
 export function AppSidebar() {
   const [location] = useLocation();
 
+  const { data: activityCount } = useQuery<{ count: number }>({
+    queryKey: ["/api/activity/new-count"],
+    refetchInterval: 60000,
+  });
+
+  const newActivityCount = activityCount?.count || 0;
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
@@ -96,6 +105,12 @@ export function AppSidebar() {
                     <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase()}`}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
+                      {item.title === "Dashboard" && newActivityCount > 0 && (
+                        <span className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium">
+                          <Activity className="h-2.5 w-2.5" />
+                          {newActivityCount > 99 ? '99+' : newActivityCount}
+                        </span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
