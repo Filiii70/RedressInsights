@@ -59,8 +59,8 @@ export default function RiskAnalysis() {
   return (
     <div className="h-full flex flex-col gap-3">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold" data-testid="text-page-title">Risico Analyse</h1>
-        <p className="text-xs text-muted-foreground">Risico-overzicht van je portfolio</p>
+        <h1 className="text-lg font-bold" data-testid="text-page-title">🎯 Risico Analyse</h1>
+        <p className="text-xs text-muted-foreground">Risico-overzicht van je portfolio 📈</p>
       </div>
 
       <div className="grid grid-cols-4 gap-2 flex-shrink-0">

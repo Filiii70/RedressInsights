@@ -64,8 +64,8 @@ export default function Companies() {
     <div className="h-full flex flex-col gap-3">
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold" data-testid="text-page-title">Bedrijven</h1>
-          <p className="text-xs text-muted-foreground">Risicoprofielen van je klanten</p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">🏢 Bedrijven</h1>
+          <p className="text-xs text-muted-foreground">Risicoprofielen van je klanten 📊</p>
         </div>
         <Button size="sm" asChild data-testid="button-upload-invoice">
           <Link href="/upload">

@@ -70,8 +70,8 @@ export default function Trends() {
     <div className="h-full flex flex-col gap-3">
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold" data-testid="text-page-title">Trends</h1>
-          <p className="text-xs text-muted-foreground">Historische trends en voorspellingen</p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">📊 Trends</h1>
+          <p className="text-xs text-muted-foreground">Historische trends en voorspellingen 🔮</p>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-32 h-8 text-xs" data-testid="select-time-range">

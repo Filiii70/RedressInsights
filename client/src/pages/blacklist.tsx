@@ -92,8 +92,8 @@ export default function Blacklist() {
   return (
     <div className="h-full flex flex-col gap-3">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold" data-testid="text-page-title">Blacklist</h1>
-        <p className="text-xs text-muted-foreground">Bedrijven met hoog risico of betalingsproblemen</p>
+        <h1 className="text-lg font-bold" data-testid="text-page-title">⚠️ Blacklist</h1>
+        <p className="text-xs text-muted-foreground">Bedrijven met hoog risico of betalingsproblemen 🚨</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2 flex-shrink-0">

@@ -138,8 +138,8 @@ export default function Dashboard() {
       {/* Compact Header */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold" data-testid="text-page-title">Dashboard</h1>
-          <p className="text-[10px] text-muted-foreground">Betalingsgedrag register</p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">📊 Dashboard</h1>
+          <p className="text-[10px] text-muted-foreground">Betalingsgedrag register 💰</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Portfolio Risk Score Widget */}

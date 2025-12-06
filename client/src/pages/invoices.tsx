@@ -73,8 +73,8 @@ export default function Invoices() {
     <div className="h-full flex flex-col gap-3">
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold" data-testid="text-page-title">Facturen</h1>
-          <p className="text-xs text-muted-foreground">Beheer al je facturen</p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">📄 Facturen</h1>
+          <p className="text-xs text-muted-foreground">Beheer al je facturen 💼</p>
         </div>
         <Button size="sm" asChild data-testid="button-upload-invoice">
           <Link href="/upload">

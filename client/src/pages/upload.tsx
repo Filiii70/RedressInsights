@@ -24,8 +24,8 @@ export default function Upload() {
   return (
     <div className="h-full flex flex-col gap-3">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold" data-testid="text-page-title">Factuur uploaden</h1>
-        <p className="text-xs text-muted-foreground">AI extractie van factuurgegevens</p>
+        <h1 className="text-lg font-bold" data-testid="text-page-title">📤 Factuur uploaden</h1>
+        <p className="text-xs text-muted-foreground">AI extractie van factuurgegevens 🤖✨</p>
       </div>
 
       <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
