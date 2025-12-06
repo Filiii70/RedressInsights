@@ -69,33 +69,12 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
-  const [isActivityAnimating, setIsActivityAnimating] = useState(false);
-
-  useEffect(() => {
-    if (!activityFeed || activityFeed.length === 0) return;
-
-    const interval = setInterval(() => {
-      setIsActivityAnimating(true);
-      setTimeout(() => {
-        setCurrentActivityIndex((prev) => (prev + 1) % activityFeed.length);
-        setIsActivityAnimating(false);
-      }, 300);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [activityFeed]);
-
-  const getActivityEmoji = (eventType: string) => {
-    switch (eventType) {
-      case 'invoice_uploaded': return '📄';
-      case 'payment_registered': return '💰';
-      case 'risk_alert': return '⚠️';
-      case 'risk_improvement': return '📈';
-      case 'company_added': return '🏢';
-      default: return '📌';
-    }
-  };
+  // Calculate 24h activity summary from feed
+  const activitySummary = activityFeed ? {
+    invoices: activityFeed.filter(a => a.eventType === 'invoice_uploaded').length,
+    payments: activityFeed.filter(a => a.eventType === 'payment_registered').length,
+    alerts: activityFeed.filter(a => a.eventType === 'risk_alert').length,
+  } : { invoices: 0, payments: 0, alerts: 0 };
 
   const riskDistributionData = [
     { name: "Laag", value: 35, color: "#22c55e" },
@@ -333,13 +312,11 @@ export default function Dashboard() {
             </div>
             {activityFeed && activityFeed.length > 0 && (
               <div className="pt-2 border-t">
-                <div 
-                  className={`flex items-center gap-2 text-xs transition-all duration-300 ${
-                    isActivityAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
-                  }`}
-                >
-                  <span>{getActivityEmoji(activityFeed[currentActivityIndex]?.eventType)}</span>
-                  <span className="truncate flex-1">{activityFeed[currentActivityIndex]?.message}</span>
+                <p className="text-[10px] text-muted-foreground mb-1">Laatste 24 uur:</p>
+                <div className="flex items-center justify-between text-xs">
+                  <span>📄 {activitySummary.invoices} facturen</span>
+                  <span>💰 {activitySummary.payments} betalingen</span>
+                  <span>⚠️ {activitySummary.alerts} alerts</span>
                 </div>
               </div>
             )}
