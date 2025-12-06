@@ -93,7 +93,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-4 gap-2 flex-shrink-0">
         {statsLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="overflow-visible">
+            <Card key={i}>
               <CardContent className="p-3">
                 <Skeleton className="h-6 w-16" />
               </CardContent>
@@ -101,7 +101,7 @@ export default function Dashboard() {
           ))
         ) : (
           <>
-            <Card className="overflow-visible">
+            <Card>
               <CardContent className="p-3 flex items-center gap-2">
                 <Euro className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <div className="min-w-0">
@@ -110,7 +110,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="overflow-visible">
+            <Card>
               <CardContent className="p-3 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <div className="min-w-0">
@@ -119,7 +119,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="overflow-visible">
+            <Card>
               <CardContent className="p-3 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
                 <div className="min-w-0">
@@ -128,7 +128,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="overflow-visible">
+            <Card>
               <CardContent className="p-3 flex items-center gap-2">
                 <FileText className="h-4 w-4 text-red-500 flex-shrink-0" />
                 <div className="min-w-0">
@@ -144,7 +144,7 @@ export default function Dashboard() {
       {/* Main Content - Two columns */}
       <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
         {/* Left: Invoices Table */}
-        <Card className="col-span-2 overflow-visible flex flex-col">
+        <Card className="col-span-2 flex flex-col min-h-0 overflow-hidden">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <div className="flex items-center justify-between gap-4">
               <CardTitle className="text-sm flex-shrink-0">Recente facturen</CardTitle>
@@ -155,7 +155,7 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-3 pt-0 flex-1 overflow-auto">
+          <CardContent className="p-3 pt-0 flex-1 min-h-0 overflow-y-auto">
             {invoicesLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -204,7 +204,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Right: Risk Chart */}
-        <Card className="overflow-visible flex flex-col">
+        <Card className="flex flex-col min-h-0 overflow-hidden">
           <CardHeader className="p-3 pb-1 flex-shrink-0">
             <CardTitle className="text-sm">Risicoverdeling</CardTitle>
           </CardHeader>
@@ -244,7 +244,7 @@ export default function Dashboard() {
       {/* Bottom Row - Compact */}
       <div className="grid grid-cols-3 gap-3 flex-shrink-0">
         {/* Risky Companies */}
-        <Card className="col-span-2 overflow-visible">
+        <Card className="col-span-2">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <CardTitle className="text-sm">Risico bedrijven</CardTitle>
           </CardHeader>
@@ -280,7 +280,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Network Stats & Notifications */}
-        <Card className="overflow-visible">
+        <Card>
           <CardHeader className="p-3 pb-2">
             <CardTitle className="text-sm">Netwerk & Alerts</CardTitle>
           </CardHeader>
