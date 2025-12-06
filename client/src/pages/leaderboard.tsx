@@ -2,21 +2,22 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Zap, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { Zap } from "lucide-react";
+import { Link } from "wouter";
 import type { LeaderboardEntry } from "@shared/schema";
 
 const fakeLeaderboard: LeaderboardEntry[] = [
-  { rank: 1, userId: "user-1", userName: "Jan de Boer", profileImageUrl: null, totalActivity: 156, invoicesUploaded: 89, paymentsRegistered: 67, currentStreak: 12, longestStreak: 15 },
-  { rank: 2, userId: "user-2", userName: "Marie Peeters", profileImageUrl: null, totalActivity: 134, invoicesUploaded: 78, paymentsRegistered: 56, currentStreak: 8, longestStreak: 21 },
-  { rank: 3, userId: "user-3", userName: "Pieter Janssen", profileImageUrl: null, totalActivity: 112, invoicesUploaded: 65, paymentsRegistered: 47, currentStreak: 5, longestStreak: 9 },
-  { rank: 4, userId: "user-4", userName: "Sophie Van Dam", profileImageUrl: null, totalActivity: 98, invoicesUploaded: 54, paymentsRegistered: 44, currentStreak: 3, longestStreak: 7 },
-  { rank: 5, userId: "user-5", userName: "Thomas Bakker", profileImageUrl: null, totalActivity: 87, invoicesUploaded: 49, paymentsRegistered: 38, currentStreak: 0, longestStreak: 11 },
-  { rank: 6, userId: "user-6", userName: "Anna Vermeer", profileImageUrl: null, totalActivity: 76, invoicesUploaded: 42, paymentsRegistered: 34, currentStreak: 2, longestStreak: 5 },
-  { rank: 7, userId: "user-7", userName: "Koen Claessens", profileImageUrl: null, totalActivity: 65, invoicesUploaded: 38, paymentsRegistered: 27, currentStreak: 1, longestStreak: 4 },
-  { rank: 8, userId: "user-8", userName: "Lisa Hermans", profileImageUrl: null, totalActivity: 54, invoicesUploaded: 31, paymentsRegistered: 23, currentStreak: 0, longestStreak: 6 },
+  { rank: 1, odl: "user-1", userName: "De Boer & Zonen BV", profileImageUrl: null, totalActivity: 156, invoicesUploaded: 89, paymentsRegistered: 67, currentStreak: 12, longestStreak: 15, companyId: "1" },
+  { rank: 2, userId: "user-2", userName: "Peeters Transport", profileImageUrl: null, totalActivity: 134, invoicesUploaded: 78, paymentsRegistered: 56, currentStreak: 8, longestStreak: 21, companyId: "2" },
+  { rank: 3, userId: "user-3", userName: "Janssen Bouw NV", profileImageUrl: null, totalActivity: 112, invoicesUploaded: 65, paymentsRegistered: 47, currentStreak: 5, longestStreak: 9, companyId: "3" },
+  { rank: 4, userId: "user-4", userName: "Van Dam Retail", profileImageUrl: null, totalActivity: 98, invoicesUploaded: 54, paymentsRegistered: 44, currentStreak: 3, longestStreak: 7, companyId: "4" },
+  { rank: 5, userId: "user-5", userName: "Bakker IT Solutions", profileImageUrl: null, totalActivity: 87, invoicesUploaded: 49, paymentsRegistered: 38, currentStreak: 0, longestStreak: 11, companyId: "5" },
+  { rank: 6, userId: "user-6", userName: "Vermeer Consultancy", profileImageUrl: null, totalActivity: 76, invoicesUploaded: 42, paymentsRegistered: 34, currentStreak: 2, longestStreak: 5, companyId: "6" },
+  { rank: 7, userId: "user-7", userName: "Claessens & Co", profileImageUrl: null, totalActivity: 65, invoicesUploaded: 38, paymentsRegistered: 27, currentStreak: 1, longestStreak: 4, companyId: "7" },
+  { rank: 8, userId: "user-8", userName: "Hermans Logistics", profileImageUrl: null, totalActivity: 54, invoicesUploaded: 31, paymentsRegistered: 23, currentStreak: 0, longestStreak: 6, companyId: "8" },
+  { rank: 9, userId: "user-9", userName: "Willems Trading", profileImageUrl: null, totalActivity: 48, invoicesUploaded: 28, paymentsRegistered: 20, currentStreak: 4, longestStreak: 8, companyId: "9" },
+  { rank: 10, userId: "user-10", userName: "Maes Industries", profileImageUrl: null, totalActivity: 42, invoicesUploaded: 25, paymentsRegistered: 17, currentStreak: 0, longestStreak: 3, companyId: "10" },
 ];
 
 function getRankEmoji(rank: number) {
@@ -41,29 +42,20 @@ function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
-function getStreakEmoji(streak: number) {
-  if (streak >= 10) return "🔥🔥";
-  if (streak >= 5) return "🔥";
-  return "";
-}
-
 export default function Leaderboard() {
-  const [showAll, setShowAll] = useState(false);
-
   const { data: apiLeaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/gamification/leaderboard"],
   });
 
   const leaderboard = (apiLeaderboard && apiLeaderboard.length > 0) ? apiLeaderboard : fakeLeaderboard;
-  const displayedEntries = showAll ? leaderboard : leaderboard.slice(0, 5);
 
   if (isLoading) {
     return (
       <div className="h-full flex flex-col gap-1">
-        <Skeleton className="h-10 w-full" />
-        <div className="flex-1 flex flex-col gap-1">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-10" />
+        <Skeleton className="h-8 w-full" />
+        <div className="flex-1 flex flex-col gap-0.5">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <Skeleton key={i} className="h-8" />
           ))}
         </div>
       </div>
@@ -76,83 +68,67 @@ export default function Leaderboard() {
       <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded px-2 py-1 border border-yellow-500/30">
         <div className="flex items-center justify-center gap-1">
           <span className="text-[10px]">🏆</span>
-          <h1 className="text-[11px] font-bold" data-testid="text-leaderboard-title">Leaderboard</h1>
+          <h1 className="text-[11px] font-bold" data-testid="text-leaderboard-title">Top 10 Bijdragers</h1>
           <span className="text-[10px]">🏆</span>
         </div>
-        <p className="text-center text-muted-foreground text-[9px]">Top bijdragers KMO-Alert</p>
       </div>
 
-      {/* Compact list */}
-      <div className="flex-1 flex flex-col gap-1 min-h-0 overflow-auto">
-        {displayedEntries.map((entry) => (
-          <Card
-            key={entry.userId}
-            className={`hover-elevate flex-shrink-0 ${getRankBg(entry.rank)}`}
-            data-testid={`card-leaderboard-${entry.rank}`}
-          >
-            <CardContent className="p-1.5 px-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm w-5 text-center flex-shrink-0">
-                  {getRankEmoji(entry.rank)}
-                </span>
-                
-                <Avatar className="h-6 w-6 flex-shrink-0">
-                  <AvatarImage src={entry.profileImageUrl || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">
-                    {getInitials(entry.userName)}
-                  </AvatarFallback>
-                </Avatar>
+      {/* Top 10 list - clickable */}
+      <div className="flex-1 flex flex-col gap-0.5 min-h-0 overflow-auto">
+        {leaderboard.slice(0, 10).map((entry) => {
+          const companyId = (entry as any).companyId || entry.userId;
+          return (
+            <Link
+              key={entry.userId || entry.rank}
+              href={`/companies/${companyId}`}
+              data-testid={`link-leaderboard-${entry.rank}`}
+            >
+              <Card className={`hover-elevate cursor-pointer ${getRankBg(entry.rank)}`}>
+                <CardContent className="p-1 px-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] w-4 text-center flex-shrink-0">
+                      {getRankEmoji(entry.rank)}
+                    </span>
+                    
+                    <Avatar className="h-5 w-5 flex-shrink-0">
+                      <AvatarImage src={entry.profileImageUrl || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium">
+                        {getInitials(entry.userName)}
+                      </AvatarFallback>
+                    </Avatar>
 
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-semibold truncate flex items-center gap-1" data-testid={`text-leaderboard-name-${entry.rank}`}>
-                    {entry.userName}
-                    {entry.rank === 1 && <span>👑</span>}
-                  </p>
-                  <p className="text-[9px] text-muted-foreground">
-                    📄{entry.invoicesUploaded} 💳{entry.paymentsRegistered} 🔥{entry.currentStreak}d
-                  </p>
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-medium truncate flex items-center gap-0.5">
+                        {entry.userName}
+                        {entry.rank === 1 && <span className="text-[9px]">👑</span>}
+                      </p>
+                    </div>
 
-                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 flex-shrink-0">
-                  <Zap className="h-2.5 w-2.5 mr-0.5" />
-                  {entry.totalActivity}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                    <div className="flex items-center gap-1 flex-shrink-0 text-[9px] text-muted-foreground">
+                      <span>📄{entry.invoicesUploaded}</span>
+                      <span>💳{entry.paymentsRegistered}</span>
+                      {entry.currentStreak > 0 && <span>🔥{entry.currentStreak}</span>}
+                    </div>
+
+                    <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 flex-shrink-0">
+                      <Zap className="h-2 w-2 mr-0.5" />
+                      {entry.totalActivity}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
-
-      {/* Show more/less button */}
-      {leaderboard.length > 5 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex-shrink-0 h-7 text-xs"
-          onClick={() => setShowAll(!showAll)}
-          data-testid="button-toggle-leaderboard"
-        >
-          {showAll ? (
-            <>
-              <ChevronUp className="h-3 w-3 mr-1" />
-              Minder
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-3 w-3 mr-1" />
-              Meer +{leaderboard.length - 5}
-            </>
-          )}
-        </Button>
-      )}
 
       {/* Bottom legend */}
-      <div className="flex-shrink-0 bg-muted/50 rounded px-2 py-1">
-        <div className="flex items-center justify-center gap-3 text-[8px] text-muted-foreground">
+      <div className="flex-shrink-0 bg-muted/50 rounded px-2 py-0.5">
+        <div className="flex items-center justify-center gap-2 text-[8px] text-muted-foreground">
           <span>📄 facturen</span>
           <span>💳 betalingen</span>
           <span>🔥 streak</span>
-          <span>⚡ totaal</span>
+          <span>⚡ score</span>
         </div>
       </div>
     </div>
