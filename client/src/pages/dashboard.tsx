@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { TrendIndicator } from "@/components/trend-indicator";
-import { LeaderboardWidget } from "@/components/leaderboard-widget";
 import { Link } from "wouter";
 import {
   Euro,
@@ -275,8 +274,36 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Weekly Leaderboard */}
-        <LeaderboardWidget />
+        {/* Network Stats & Notifications */}
+        <Card>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm">Netwerk & Alerts</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 pt-0 space-y-3">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <Users className="h-4 w-4 mx-auto text-primary mb-1" />
+                <p className="text-sm font-bold">50+</p>
+                <p className="text-[10px] text-muted-foreground">Bedrijven</p>
+              </div>
+              <div>
+                <Receipt className="h-4 w-4 mx-auto text-green-600 mb-1" />
+                <p className="text-sm font-bold">230+</p>
+                <p className="text-[10px] text-muted-foreground">Facturen</p>
+              </div>
+              <div>
+                <Bell className="h-4 w-4 mx-auto text-orange-500 mb-1" />
+                <p className="text-sm font-bold">Real-time</p>
+                <p className="text-[10px] text-muted-foreground">Alerts</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-1 border-t">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <SiWhatsapp className="h-4 w-4 text-green-500" />
+              <span className="text-[10px] text-muted-foreground">Notificaties via Email & WhatsApp</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
