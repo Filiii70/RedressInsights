@@ -19,16 +19,21 @@ const fakeLeaderboard: LeaderboardEntry[] = [
   { rank: 8, userId: "user-8", userName: "Lisa Hermans", profileImageUrl: null, totalActivity: 54, invoicesUploaded: 31, paymentsRegistered: 23, currentStreak: 0, longestStreak: 6 },
 ];
 
-function getRankDecoration(rank: number) {
+function getRankEmoji(rank: number) {
   switch (rank) {
-    case 1:
-      return { emoji: "🥇", bg: "bg-gradient-to-r from-yellow-500/20 to-amber-500/10 border-yellow-500/40" };
-    case 2:
-      return { emoji: "🥈", bg: "bg-gradient-to-r from-gray-300/20 to-gray-400/10 border-gray-400/40" };
-    case 3:
-      return { emoji: "🥉", bg: "bg-gradient-to-r from-amber-600/20 to-orange-500/10 border-amber-600/40" };
-    default:
-      return { emoji: `#${rank}`, bg: "" };
+    case 1: return "🥇";
+    case 2: return "🥈";
+    case 3: return "🥉";
+    default: return `${rank}.`;
+  }
+}
+
+function getRankBg(rank: number) {
+  switch (rank) {
+    case 1: return "bg-gradient-to-r from-yellow-500/15 to-amber-500/5 border-yellow-500/30";
+    case 2: return "bg-gradient-to-r from-gray-300/15 to-gray-400/5 border-gray-400/30";
+    case 3: return "bg-gradient-to-r from-amber-600/15 to-orange-500/5 border-amber-600/30";
+    default: return "";
   }
 }
 
@@ -54,11 +59,11 @@ export default function Leaderboard() {
 
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col gap-2 p-2">
-        <Skeleton className="h-12 w-full" />
-        <div className="flex-1 flex flex-col gap-2">
+      <div className="h-full flex flex-col gap-1">
+        <Skeleton className="h-10 w-full" />
+        <div className="flex-1 flex flex-col gap-1">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-14" />
+            <Skeleton key={i} className="h-10" />
           ))}
         </div>
       </div>
@@ -66,66 +71,56 @@ export default function Leaderboard() {
   }
 
   return (
-    <div className="h-full flex flex-col gap-2">
-      {/* Banner */}
-      <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded-lg py-2 px-4 border border-yellow-500/30">
+    <div className="h-full flex flex-col gap-1">
+      {/* Clean Banner */}
+      <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500/20 via-amber-500/10 to-orange-500/20 rounded-lg py-1.5 px-3 border border-yellow-500/30">
         <div className="flex items-center justify-center gap-2">
-          <span className="text-xl">🏆</span>
-          <h1 className="text-lg font-bold" data-testid="text-leaderboard-title">Leaderboard</h1>
-          <span className="text-xl">🏆</span>
+          <span>🏆</span>
+          <h1 className="text-sm font-bold" data-testid="text-leaderboard-title">Leaderboard</h1>
+          <span>🏆</span>
         </div>
-        <p className="text-center text-muted-foreground text-[10px]">Top bijdragers aan het KMO-Alert netwerk 🚀</p>
+        <p className="text-center text-muted-foreground text-[9px]">Top bijdragers KMO-Alert netwerk</p>
       </div>
 
-      {/* Top 5 stacked vertically */}
-      <div className="flex-1 flex flex-col gap-1.5 min-h-0">
-        {displayedEntries.map((entry) => {
-          const decoration = getRankDecoration(entry.rank);
-          return (
-            <Card
-              key={entry.userId}
-              className={`hover-elevate flex-shrink-0 ${decoration.bg}`}
-              data-testid={`card-leaderboard-${entry.rank}`}
-            >
-              <CardContent className="p-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg w-8 text-center flex-shrink-0">
-                    {decoration.emoji}
-                  </span>
-                  
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarImage src={entry.profileImageUrl || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-                      {getInitials(entry.userName)}
-                    </AvatarFallback>
-                  </Avatar>
+      {/* Compact list */}
+      <div className="flex-1 flex flex-col gap-1 min-h-0 overflow-auto">
+        {displayedEntries.map((entry) => (
+          <Card
+            key={entry.userId}
+            className={`hover-elevate flex-shrink-0 ${getRankBg(entry.rank)}`}
+            data-testid={`card-leaderboard-${entry.rank}`}
+          >
+            <CardContent className="p-1.5 px-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm w-5 text-center flex-shrink-0">
+                  {getRankEmoji(entry.rank)}
+                </span>
+                
+                <Avatar className="h-6 w-6 flex-shrink-0">
+                  <AvatarImage src={entry.profileImageUrl || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">
+                    {getInitials(entry.userName)}
+                  </AvatarFallback>
+                </Avatar>
 
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate flex items-center gap-1" data-testid={`text-leaderboard-name-${entry.rank}`}>
-                      {entry.userName}
-                      {entry.rank === 1 && <span className="text-sm">👑</span>}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      📄 {entry.invoicesUploaded} facturen · 💳 {entry.paymentsRegistered} betalingen
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {entry.currentStreak > 0 && (
-                      <span className="text-xs text-orange-500 font-medium">
-                        {entry.currentStreak}d {getStreakEmoji(entry.currentStreak)}
-                      </span>
-                    )}
-                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                      <Zap className="h-3 w-3 mr-1" />
-                      {entry.totalActivity}
-                    </Badge>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-semibold truncate flex items-center gap-1" data-testid={`text-leaderboard-name-${entry.rank}`}>
+                    {entry.userName}
+                    {entry.rank === 1 && <span>👑</span>}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">
+                    📄{entry.invoicesUploaded} 💳{entry.paymentsRegistered} 🔥{entry.currentStreak}d
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+
+                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 flex-shrink-0">
+                  <Zap className="h-2.5 w-2.5 mr-0.5" />
+                  {entry.totalActivity}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Show more/less button */}
@@ -133,31 +128,31 @@ export default function Leaderboard() {
         <Button
           variant="ghost"
           size="sm"
-          className="flex-shrink-0 w-full"
+          className="flex-shrink-0 h-7 text-xs"
           onClick={() => setShowAll(!showAll)}
           data-testid="button-toggle-leaderboard"
         >
           {showAll ? (
             <>
-              <ChevronUp className="h-4 w-4 mr-1" />
-              Minder tonen
+              <ChevronUp className="h-3 w-3 mr-1" />
+              Minder
             </>
           ) : (
             <>
-              <ChevronDown className="h-4 w-4 mr-1" />
-              Meer tonen ({leaderboard.length - 5} meer)
+              <ChevronDown className="h-3 w-3 mr-1" />
+              Meer +{leaderboard.length - 5}
             </>
           )}
         </Button>
       )}
 
-      {/* Bottom info bar */}
-      <div className="flex-shrink-0 bg-primary/5 rounded-lg px-3 py-1.5 border border-primary/20">
-        <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
-          <span>📄 +1 per factuur</span>
-          <span>💳 +1 per betaling</span>
-          <span>🔥 Streak bonus</span>
-          <span>🏆 Top 3 badge</span>
+      {/* Bottom legend */}
+      <div className="flex-shrink-0 bg-muted/50 rounded px-2 py-1">
+        <div className="flex items-center justify-center gap-3 text-[8px] text-muted-foreground">
+          <span>📄 facturen</span>
+          <span>💳 betalingen</span>
+          <span>🔥 streak</span>
+          <span>⚡ totaal</span>
         </div>
       </div>
     </div>
