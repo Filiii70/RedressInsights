@@ -1,7 +1,7 @@
 import { 
   companies, invoices, paymentBehavior, sectorBenchmarks,
   companyContacts, notifications, invoiceQuickLinks, engagementEvents, weeklySnapshots,
-  users,
+  users, activityFeed,
   type Company, type InsertCompany, 
   type Invoice, type InsertInvoice,
   type PaymentBehavior, type InsertPaymentBehavior,
@@ -13,7 +13,8 @@ import {
   type EngagementEvent, type InsertEngagementEvent,
   type WeeklySnapshot, type InsertWeeklySnapshot,
   type WeeklyLeaderboard, type EngagementStats,
-  type User, type UpsertUser
+  type User, type UpsertUser,
+  type ActivityFeedItem, type InsertActivityFeedItem, type ActivityFeedWithCompany
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
@@ -75,6 +76,12 @@ export interface IStorage {
   // User operations (Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+
+  // Activity Feed (Live Ticker)
+  getActivityFeed(limit: number): Promise<ActivityFeedWithCompany[]>;
+  getActivityFeedSince(since: Date): Promise<ActivityFeedWithCompany[]>;
+  createActivityEvent(event: InsertActivityFeedItem): Promise<ActivityFeedItem>;
+  getNewActivityCount(since: Date): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -715,6 +722,55 @@ Wat kunnen wij afspreken?
       })
       .returning();
     return user;
+  }
+
+  // Activity Feed (Live Ticker)
+  async getActivityFeed(limit: number): Promise<ActivityFeedWithCompany[]> {
+    const items = await db.select()
+      .from(activityFeed)
+      .orderBy(desc(activityFeed.createdAt))
+      .limit(limit);
+
+    const result: ActivityFeedWithCompany[] = [];
+    for (const item of items) {
+      if (item.companyId) {
+        const [company] = await db.select().from(companies).where(eq(companies.id, item.companyId));
+        result.push({ ...item, company: company || null });
+      } else {
+        result.push({ ...item, company: null });
+      }
+    }
+    return result;
+  }
+
+  async getActivityFeedSince(since: Date): Promise<ActivityFeedWithCompany[]> {
+    const items = await db.select()
+      .from(activityFeed)
+      .where(gte(activityFeed.createdAt, since))
+      .orderBy(desc(activityFeed.createdAt));
+
+    const result: ActivityFeedWithCompany[] = [];
+    for (const item of items) {
+      if (item.companyId) {
+        const [company] = await db.select().from(companies).where(eq(companies.id, item.companyId));
+        result.push({ ...item, company: company || null });
+      } else {
+        result.push({ ...item, company: null });
+      }
+    }
+    return result;
+  }
+
+  async createActivityEvent(event: InsertActivityFeedItem): Promise<ActivityFeedItem> {
+    const [created] = await db.insert(activityFeed).values(event).returning();
+    return created;
+  }
+
+  async getNewActivityCount(since: Date): Promise<number> {
+    const result = await db.select({ count: count() })
+      .from(activityFeed)
+      .where(gte(activityFeed.createdAt, since));
+    return result[0]?.count || 0;
   }
 }
 

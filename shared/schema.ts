@@ -348,3 +348,44 @@ export type EngagementStats = {
   rank: number;
   percentile: number;
 };
+
+// ============================================
+// LIVE ACTIVITY FEED
+// ============================================
+
+// Activity feed for live ticker - all system events
+export const activityFeed = pgTable("activity_feed", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventType: text("event_type").notNull(), // 'invoice_uploaded', 'payment_registered', 'risk_alert', 'company_added', 'overdue_warning'
+  companyId: varchar("company_id").references(() => companies.id),
+  invoiceId: varchar("invoice_id").references(() => invoices.id),
+  message: text("message").notNull(), // Human-readable message for ticker
+  severity: text("severity").default("info"), // 'info', 'warning', 'critical'
+  amount: decimal("amount", { precision: 12, scale: 2 }), // Optional amount for financial events
+  metadata: text("metadata"), // JSON for extra data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const activityFeedRelations = relations(activityFeed, ({ one }) => ({
+  company: one(companies, {
+    fields: [activityFeed.companyId],
+    references: [companies.id],
+  }),
+  invoice: one(invoices, {
+    fields: [activityFeed.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const insertActivityFeedSchema = createInsertSchema(activityFeed).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ActivityFeedItem = typeof activityFeed.$inferSelect;
+export type InsertActivityFeedItem = z.infer<typeof insertActivityFeedSchema>;
+
+// Activity feed with company info for display
+export type ActivityFeedWithCompany = ActivityFeedItem & {
+  company?: Company | null;
+};

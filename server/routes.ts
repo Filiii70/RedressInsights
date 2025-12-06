@@ -163,6 +163,16 @@ export async function registerRoutes(
         description: extractedData.description,
       });
 
+      // Log activity event for live ticker
+      await storage.createActivityEvent({
+        eventType: 'invoice_uploaded',
+        companyId: company.id,
+        invoiceId: invoice.id,
+        message: `Nieuwe factuur €${parseFloat(extractedData.amount.toString()).toLocaleString('nl-BE')} geregistreerd bij ${company.name}`,
+        severity: 'info',
+        amount: extractedData.amount.toString(),
+      });
+
       res.json({
         success: true,
         invoice,
@@ -195,6 +205,19 @@ export async function registerRoutes(
         status: "paid",
         paymentDate: pDate,
         daysLate,
+      });
+
+      // Log activity event for live ticker
+      const severity = daysLate > 30 ? 'warning' : 'info';
+      await storage.createActivityEvent({
+        eventType: 'payment_registered',
+        companyId: invoice.companyId,
+        invoiceId: invoice.id,
+        message: daysLate > 0 
+          ? `Betaling ontvangen van ${invoice.company.name} (${daysLate} dagen te laat)`
+          : `Betaling op tijd ontvangen van ${invoice.company.name}`,
+        severity,
+        amount: invoice.amount.toString(),
       });
 
       res.json(updated);
@@ -524,6 +547,46 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching overdue invoices:", error);
       res.status(500).json({ message: "Failed to fetch overdue invoices" });
+    }
+  });
+
+  // ============================================
+  // LIVE ACTIVITY FEED ENDPOINTS
+  // ============================================
+
+  // Get recent activity feed
+  app.get("/api/activity/feed", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const feed = await storage.getActivityFeed(limit);
+      res.json(feed);
+    } catch (error) {
+      console.error("Error fetching activity feed:", error);
+      res.status(500).json({ message: "Failed to fetch activity feed" });
+    }
+  });
+
+  // Get new activity count since timestamp (for FOMO badge)
+  app.get("/api/activity/new-count", async (req, res) => {
+    try {
+      const since = req.query.since ? new Date(req.query.since as string) : new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const count = await storage.getNewActivityCount(since);
+      res.json({ count, since });
+    } catch (error) {
+      console.error("Error fetching new activity count:", error);
+      res.status(500).json({ message: "Failed to fetch activity count" });
+    }
+  });
+
+  // Get activity since a timestamp (for polling)
+  app.get("/api/activity/since", async (req, res) => {
+    try {
+      const since = req.query.since ? new Date(req.query.since as string) : new Date(Date.now() - 60 * 60 * 1000);
+      const feed = await storage.getActivityFeedSince(since);
+      res.json(feed);
+    } catch (error) {
+      console.error("Error fetching activity since:", error);
+      res.status(500).json({ message: "Failed to fetch activity" });
     }
   });
 
