@@ -318,7 +318,14 @@ export class DatabaseStorage implements IStorage {
 
   // Dashboard
   async getDashboardStats(): Promise<DashboardStats> {
-    const allInvoices = await db.select().from(invoices);
+    // ONLY get invoices for KMO-Alert's own customers (isCustomer = true)
+    const customerCompanies = await db.select().from(companies).where(eq(companies.isCustomer, true));
+    const customerIds = customerCompanies.map(c => c.id);
+    
+    // Get only OUR invoices (to our customers)
+    const allInvoices = customerIds.length > 0 
+      ? await db.select().from(invoices).where(inArray(invoices.companyId, customerIds))
+      : [];
     
     const pendingInvoices = allInvoices.filter(i => i.status === "pending");
     const overdueInvoices = allInvoices.filter(i => i.status === "overdue");
@@ -334,7 +341,10 @@ export class DatabaseStorage implements IStorage {
       ? allInvoices.reduce((sum, i) => sum + (i.daysLate || 0), 0) / allInvoices.length
       : 0;
 
-    const behaviors = await db.select().from(paymentBehavior);
+    // Only count behaviors for OUR customers
+    const behaviors = customerIds.length > 0
+      ? await db.select().from(paymentBehavior).where(inArray(paymentBehavior.companyId, customerIds))
+      : [];
     const highRiskClients = behaviors.filter(b => (b.riskScore || 0) > 70).length;
 
     // Positive metrics
