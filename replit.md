@@ -4,9 +4,15 @@
 
 KMO-Alert is a B2B financial data platform for tracking and analyzing payment behavior of companies in the Benelux region. It's designed as a modern alternative to traditional credit reporting services, offering real-time, crowd-sourced payment data for SMEs (KMO's). The platform allows businesses to upload invoices, automatically extract data using AI, and analyze payment patterns to assess credit risk before engaging with customers.
 
+**Tagline**: "The Graydon for KMO's — but realtime, crowd-sourced and affordable."
+
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language (Dutch)
+- **CRITICAL**: ALL pages must have fixed-height layout with NO vertical scrolling
+- **CRITICAL**: NEVER modify dashboard UI without explicit request
+- Dashboard must remain publicly accessible without login
+- Design philosophy: Focus on "verslaving" (addiction) - engagement drives data contribution
 
 ## System Architecture
 
@@ -24,6 +30,12 @@ Preferred communication style: Simple, everyday language.
 - Recharts for financial data visualizations (charts, gauges, trends)
 - Dark mode support with theme toggle functionality
 
+**Layout Design**
+- Fixed-height layouts on ALL pages - no scrolling
+- Sidebar: Compact, non-scrolling with menu at top, footer at bottom (mt-auto)
+- Dashboard: Two-row grid layout (Kritieke facturen + Risicoverdeling / Risico bedrijven + Netwerk Updates)
+- All content must fit within viewport height
+
 **State Management & Data Fetching**
 - TanStack Query (React Query) for server state management, caching, and background refetching
 - Custom query client configuration with infinite stale time for predictable data behavior
@@ -32,7 +44,6 @@ Preferred communication style: Simple, everyday language.
 **Design Principles**
 - Professional fintech aesthetic with Inter font for UI and JetBrains Mono for financial data
 - Information-dense but scannable layouts optimized for financial decision-making
-- 12-column grid system with responsive breakpoints
 - Consistent spacing using Tailwind's 2, 4, 6, 8, 12, 16 unit system
 
 ### Backend Architecture
@@ -43,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 - Middleware chain: JSON parsing with raw body capture, URL encoding, request logging
 
 **API Structure**
-- RESTful endpoints organized by domain (invoices, companies, dashboard stats)
+- RESTful endpoints organized by domain (invoices, companies, dashboard stats, blacklist)
 - File upload handling via Multer with 10MB limit and memory storage
 - Centralized error handling with HTTP status codes
 
@@ -54,29 +65,50 @@ Preferred communication style: Simple, everyday language.
 - Connection pooling for efficient database access
 
 **Database Schema**
-- **Companies**: VAT number-indexed business entities with sector classification and geographic data
+- **Companies**: VAT number-indexed business entities with sector classification, geographic data, and `isCustomer` flag
 - **Invoices**: Payment records linked to companies with status tracking (pending, paid, overdue)
 - **PaymentBehavior**: Aggregated metrics per company (risk scores, trends, payment statistics)
 - **SectorBenchmarks**: Industry comparison data for contextual risk analysis
+- **ActivityFeed**: Event logging for platform activities with company relations
+- **Blacklist**: Company risk tracking with status (active/removed), reason, riskScoreAtTime, addedBy
 
 **Business Logic**
 - Risk scoring algorithm (0-100 scale) based on payment history and days late
 - Automatic payment behavior recalculation when invoices are updated
 - Action plan generation based on risk levels (low/medium/high/critical)
 - Dashboard statistics aggregation for real-time insights
+- Blacklist management for high-risk companies
 
 **Engagement & FOMO System**
 - **Activity Feed**: Real-time event logging for all platform activities (invoice uploads, payment registrations, risk alerts)
-- **Live Ticker**: Scrolling marquee component on dashboard showing recent activity stream
+- **Live Ticker**: Scrolling marquee component in header showing recent activity stream
 - **FOMO Badge**: Sidebar notification badge showing count of new activities since last visit (24-hour window)
-- **Daily Email Summaries**: Personalized morning digest with new invoices, payments, overdue alerts, and risky companies
+- **Clickable Network Updates**: Dashboard card with activity items that open detail dialogs
+- **Activity Dialog**: Shows company info, customer status badge, and quick blacklist action
 - Event types tracked: invoice_uploaded, payment_registered, risk_alert, risk_improvement, company_added
 - Severity levels: info, warning, critical - for visual prioritization
+
+### Pages & Navigation
+
+**Sidebar Menu (Compact, Non-scrolling)**
+- Menu: Dashboard, Facturen, Bedrijven, Upload
+- Analyse: Risico Analyse, Trends, Blacklist
+- Footer: Inloggen, Instellingen
+
+**Main Pages**
+- Dashboard: Stats row, Kritieke facturen (3), Risicoverdeling, Risico bedrijven (3), Netwerk Updates
+- Facturen: Invoice list with filtering
+- Bedrijven: Company directory
+- Upload: AI-powered invoice upload
+- Risico Analyse: Risk scoring analysis
+- Trends: Payment behavior trends
+- Blacklist: Manage blacklisted companies
+- Settings: User preferences
 
 ### External Dependencies
 
 **AI/ML Services**
-- OpenAI GPT-5 for invoice data extraction from images
+- OpenAI GPT-4 for invoice data extraction from images
 - Vision API integration for processing invoice scans and PDFs
 - Structured JSON extraction of company names, VAT numbers, amounts, dates, and payment status
 - Automatic VAT number normalization for Belgian/Dutch formats
@@ -96,11 +128,10 @@ Preferred communication style: Simple, everyday language.
 - ESBuild for fast server bundling with selective dependency bundling
 - Drizzle Kit for database migrations and schema management
 - TypeScript compiler with strict mode and path aliases (@, @shared, @assets)
-- Replit-specific plugins for development environment integration (cartographer, dev banner, runtime error overlay)
+- Replit-specific plugins for development environment integration
 
 **Deployment Strategy**
 - Separate client and server builds into dist/ directory
 - Client assets served as static files from dist/public
 - Server bundled as single CommonJS file (dist/index.cjs)
-- Selective dependency bundling to reduce cold start times (allowlist approach)
-- Production mode uses compiled artifacts, development uses Vite HMR
+- Target domain: www.kmo-alert.be
