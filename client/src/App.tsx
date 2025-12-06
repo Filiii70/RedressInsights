@@ -15,6 +15,7 @@ import CompanyDetail from "@/pages/company-detail";
 import RiskAnalysis from "@/pages/risk-analysis";
 import Trends from "@/pages/trends";
 import RegisterPayment from "@/pages/register-payment";
+import Settings from "@/pages/settings";
 
 function AppLayout() {
   const style = {
@@ -41,6 +42,7 @@ function AppLayout() {
                 <Route path="/upload" component={Upload} />
                 <Route path="/risk-analysis" component={RiskAnalysis} />
                 <Route path="/trends" component={Trends} />
+                <Route path="/settings" component={Settings} />
                 <Route component={NotFound} />
               </Switch>
             </div>

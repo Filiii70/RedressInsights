@@ -46,6 +46,9 @@ export interface IStorage {
 
   // Company Contacts (Notifications)
   getCompanyContact(companyId: string): Promise<CompanyContact | undefined>;
+  getCompanyContactById(id: string): Promise<CompanyContact | undefined>;
+  createCompanyContact(contact: InsertCompanyContact): Promise<CompanyContact>;
+  updateCompanyContact(id: string, updates: Partial<InsertCompanyContact>): Promise<CompanyContact | undefined>;
   upsertCompanyContact(contact: InsertCompanyContact): Promise<CompanyContact>;
 
   // Notifications
@@ -445,6 +448,24 @@ Wat kunnen wij afspreken?
   async getCompanyContact(companyId: string): Promise<CompanyContact | undefined> {
     const [contact] = await db.select().from(companyContacts).where(eq(companyContacts.companyId, companyId));
     return contact;
+  }
+
+  async getCompanyContactById(id: string): Promise<CompanyContact | undefined> {
+    const [contact] = await db.select().from(companyContacts).where(eq(companyContacts.id, id));
+    return contact;
+  }
+
+  async createCompanyContact(contact: InsertCompanyContact): Promise<CompanyContact> {
+    const [created] = await db.insert(companyContacts).values(contact).returning();
+    return created;
+  }
+
+  async updateCompanyContact(id: string, updates: Partial<InsertCompanyContact>): Promise<CompanyContact | undefined> {
+    const [updated] = await db.update(companyContacts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(companyContacts.id, id))
+      .returning();
+    return updated;
   }
 
   async upsertCompanyContact(contact: InsertCompanyContact): Promise<CompanyContact> {

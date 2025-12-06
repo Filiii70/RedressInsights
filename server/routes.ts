@@ -501,6 +501,70 @@ export async function registerRoutes(
   });
 
   // ============================================
+  // CONTACT SETTINGS ENDPOINTS
+  // ============================================
+
+  // Get contact settings for a company
+  app.get("/api/contacts/:companyId", async (req, res) => {
+    try {
+      const contact = await storage.getCompanyContact(req.params.companyId);
+      if (!contact) {
+        return res.status(404).json({ message: "Contact not found" });
+      }
+      res.json(contact);
+    } catch (error) {
+      console.error("Error fetching contact:", error);
+      res.status(500).json({ message: "Failed to fetch contact" });
+    }
+  });
+
+  // Create new contact settings
+  app.post("/api/contacts", async (req, res) => {
+    try {
+      const contact = await storage.createCompanyContact(req.body);
+      res.json(contact);
+    } catch (error) {
+      console.error("Error creating contact:", error);
+      res.status(500).json({ message: "Failed to create contact" });
+    }
+  });
+
+  // Update contact settings
+  app.patch("/api/contacts/:id", async (req, res) => {
+    try {
+      const contact = await storage.updateCompanyContact(req.params.id, req.body);
+      res.json(contact);
+    } catch (error) {
+      console.error("Error updating contact:", error);
+      res.status(500).json({ message: "Failed to update contact" });
+    }
+  });
+
+  // Test notification endpoint
+  app.post("/api/notifications/test", async (req, res) => {
+    try {
+      const { channel, email, phone, whatsapp } = req.body;
+      
+      if (channel === "email" && email) {
+        console.log(`[TEST] Would send test email to: ${email}`);
+        // In production with Resend configured, this would actually send
+        res.json({ success: true, message: `Test email would be sent to ${email}` });
+      } else if (channel === "sms" && phone) {
+        console.log(`[TEST] Would send test SMS to: ${phone}`);
+        res.json({ success: true, message: `Test SMS would be sent to ${phone}` });
+      } else if (channel === "whatsapp" && whatsapp) {
+        console.log(`[TEST] Would send test WhatsApp to: ${whatsapp}`);
+        res.json({ success: true, message: `Test WhatsApp would be sent to ${whatsapp}` });
+      } else {
+        res.status(400).json({ message: "Invalid channel or missing contact info" });
+      }
+    } catch (error) {
+      console.error("Error sending test notification:", error);
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  // ============================================
   // QUICK PAYMENT REGISTRATION (from QR scan)
   // ============================================
 

@@ -6,6 +6,7 @@ import {
   Upload,
   TrendingUp,
   Shield,
+  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -128,7 +129,21 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="text-xs text-muted-foreground">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={location === "/settings"}
+              className="data-[active=true]:bg-sidebar-accent"
+            >
+              <Link href="/settings" data-testid="link-nav-settings">
+                <Settings className="h-4 w-4" />
+                <span>Instellingen</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <div className="text-xs text-muted-foreground mt-4">
           <p>Versie 1.0.0</p>
           <p className="mt-1">Benelux KMO Register</p>
         </div>
