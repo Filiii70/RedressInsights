@@ -98,7 +98,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="flex-none">
         <SidebarGroup className="p-1.5">
           <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground h-6 px-1.5">
             Menu
@@ -154,7 +154,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-2">
+      <SidebarFooter className="border-t border-sidebar-border p-2 mt-auto">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton data-testid="button-nav-login" className="h-8">
