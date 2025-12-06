@@ -1,35 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
-import { Activity, FileUp, CreditCard, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Activity } from "lucide-react";
 import type { ActivityFeedWithCompany } from "@shared/schema";
 
-function getEventIcon(eventType: string) {
+function getEventEmoji(eventType: string) {
   switch (eventType) {
     case 'invoice_uploaded':
-      return FileUp;
+      return '📄';
     case 'payment_registered':
-      return CreditCard;
+      return '💰';
     case 'risk_alert':
-      return AlertTriangle;
+      return '⚠️';
     case 'risk_improvement':
-      return TrendingUp;
+      return '📈';
     case 'company_added':
-      return Activity;
+      return '🏢';
     default:
-      return Activity;
-  }
-}
-
-function getSeverityColor(severity: string) {
-  switch (severity) {
-    case 'warning':
-      return 'text-orange-500';
-    case 'critical':
-      return 'text-red-500';
-    case 'success':
-      return 'text-green-500';
-    default:
-      return 'text-muted-foreground';
+      return '📌';
   }
 }
 
@@ -41,63 +28,63 @@ function formatTimeAgo(date: Date | string) {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   
   if (diffMins < 1) return 'nu';
-  if (diffMins < 60) return `${diffMins}m`;
-  if (diffHours < 24) return `${diffHours}u`;
-  return `${Math.floor(diffHours / 24)}d`;
+  if (diffMins < 60) return `${diffMins}m geleden`;
+  if (diffHours < 24) return `${diffHours}u geleden`;
+  return `${Math.floor(diffHours / 24)}d geleden`;
 }
 
-export function LiveTicker() {
+export function LiveTickerHeader() {
   const { data: feed } = useQuery<ActivityFeedWithCompany[]>({
     queryKey: ["/api/activity/feed"],
     refetchInterval: 30000,
   });
 
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!feed || feed.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % feed.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [feed]);
+
   if (!feed || feed.length === 0) {
     return (
-      <div className="h-8 bg-muted/30 rounded flex items-center px-3 gap-2">
-        <Activity className="h-3 w-3 text-muted-foreground animate-pulse" />
-        <span className="text-xs text-muted-foreground">Wachten op activiteit...</span>
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Activity className="h-3 w-3 animate-pulse" />
+        <span className="text-xs">Wachten op activiteit...</span>
       </div>
     );
   }
 
+  const currentItem = feed[currentIndex];
+
   return (
-    <div className="h-8 bg-muted/30 rounded flex items-center overflow-hidden">
-      <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r border-muted">
-        <Activity className="h-3 w-3 text-primary" />
-        <span className="text-xs font-medium text-muted-foreground">Live</span>
+    <div className="flex-1 flex items-center gap-3 min-w-0 overflow-hidden">
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Live</span>
       </div>
-      <div className="flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={feed[0]?.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-2 px-3"
-          >
-            {(() => {
-              const Icon = getEventIcon(feed[0]?.eventType || 'activity');
-              return <Icon className={`h-3 w-3 flex-shrink-0 ${getSeverityColor(feed[0]?.severity || 'info')}`} />;
-            })()}
-            <span className="text-xs truncate">{feed[0]?.message}</span>
-            <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-auto">
-              {formatTimeAgo(feed[0]?.createdAt || new Date())}
-            </span>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-      <div className="flex items-center gap-1 px-3 flex-shrink-0 border-l border-muted">
-        {feed.slice(0, 3).map((item, i) => {
-          const Icon = getEventIcon(item.eventType);
-          return (
-            <div 
-              key={item.id}
-              className={`h-2 w-2 rounded-full ${i === 0 ? 'bg-primary animate-pulse' : 'bg-muted-foreground/30'}`}
-              title={item.message}
-            />
-          );
-        })}
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div 
+          className={`flex items-center gap-2 transition-all duration-300 ${
+            isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <span className="text-sm flex-shrink-0">{getEventEmoji(currentItem.eventType)}</span>
+          <span className="text-sm truncate">{currentItem.message}</span>
+          <span className="text-xs text-muted-foreground flex-shrink-0">
+            {formatTimeAgo(currentItem.createdAt || new Date())}
+          </span>
+        </div>
       </div>
     </div>
   );
