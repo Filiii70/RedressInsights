@@ -25,168 +25,109 @@ export default function RiskAnalysis() {
     queryKey: ["/api/companies"],
   });
 
-  // Calculate risk distribution
   const riskDistribution = {
     low: companies?.filter((c) => (c.paymentBehavior?.riskScore || 50) <= 30).length || 0,
-    medium: companies?.filter((c) => {
-      const score = c.paymentBehavior?.riskScore || 50;
-      return score > 30 && score <= 60;
-    }).length || 0,
-    high: companies?.filter((c) => {
-      const score = c.paymentBehavior?.riskScore || 50;
-      return score > 60 && score <= 80;
-    }).length || 0,
+    medium: companies?.filter((c) => { const score = c.paymentBehavior?.riskScore || 50; return score > 30 && score <= 60; }).length || 0,
+    high: companies?.filter((c) => { const score = c.paymentBehavior?.riskScore || 50; return score > 60 && score <= 80; }).length || 0,
     critical: companies?.filter((c) => (c.paymentBehavior?.riskScore || 50) > 80).length || 0,
   };
 
   const pieData = [
-    { name: "Laag (0-30)", value: riskDistribution.low, color: "#22c55e" },
-    { name: "Medium (31-60)", value: riskDistribution.medium, color: "#f59e0b" },
-    { name: "Hoog (61-80)", value: riskDistribution.high, color: "#f97316" },
-    { name: "Kritiek (81-100)", value: riskDistribution.critical, color: "#ef4444" },
+    { name: "Laag", value: riskDistribution.low, color: "#22c55e" },
+    { name: "Medium", value: riskDistribution.medium, color: "#f59e0b" },
+    { name: "Hoog", value: riskDistribution.high, color: "#f97316" },
+    { name: "Kritiek", value: riskDistribution.critical, color: "#ef4444" },
   ];
 
-  // Sector risk comparison (mock data - would come from API)
   const sectorData = [
     { sector: "Bouw", avgRisk: 68 },
     { sector: "Retail", avgRisk: 52 },
-    { sector: "IT Services", avgRisk: 35 },
+    { sector: "IT", avgRisk: 35 },
     { sector: "Transport", avgRisk: 61 },
     { sector: "Horeca", avgRisk: 74 },
-    { sector: "Industrie", avgRisk: 45 },
   ];
 
   const highRiskCompanies = companies
     ?.filter((c) => (c.paymentBehavior?.riskScore || 50) > 70)
     .sort((a, b) => (b.paymentBehavior?.riskScore || 0) - (a.paymentBehavior?.riskScore || 0))
-    .slice(0, 5);
+    .slice(0, 4);
 
   const worseningCompanies = companies
     ?.filter((c) => c.paymentBehavior?.trend === "worsening")
-    .slice(0, 5);
+    .slice(0, 4);
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">
-          Risico Analyse
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Gedetailleerd overzicht van risico's in je klantenportfolio
-        </p>
+    <div className="h-full flex flex-col gap-3">
+      <div className="flex-shrink-0">
+        <h1 className="text-lg font-bold" data-testid="text-page-title">Risico Analyse</h1>
+        <p className="text-xs text-muted-foreground">Risico-overzicht van je portfolio</p>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-4 gap-2 flex-shrink-0">
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-                <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-600" data-testid="stat-low-risk">
-                  {riskDistribution.low}
-                </div>
-                <p className="text-sm text-muted-foreground">Laag risico</p>
-              </div>
+          <CardContent className="p-3 flex items-center gap-2">
+            <Shield className="h-4 w-4 text-green-500 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Laag</p>
+              <p className="text-sm font-bold text-green-600" data-testid="stat-low-risk">{riskDistribution.low}</p>
             </div>
           </CardContent>
         </Card>
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-amber-600" data-testid="stat-medium-risk">
-                  {riskDistribution.medium}
-                </div>
-                <p className="text-sm text-muted-foreground">Medium risico</p>
-              </div>
+          <CardContent className="p-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Medium</p>
+              <p className="text-sm font-bold text-amber-600" data-testid="stat-medium-risk">{riskDistribution.medium}</p>
             </div>
           </CardContent>
         </Card>
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
-                <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-orange-600" data-testid="stat-high-risk">
-                  {riskDistribution.high}
-                </div>
-                <p className="text-sm text-muted-foreground">Hoog risico</p>
-              </div>
+          <CardContent className="p-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Hoog</p>
+              <p className="text-sm font-bold text-orange-600" data-testid="stat-high-risk">{riskDistribution.high}</p>
             </div>
           </CardContent>
         </Card>
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-red-600" data-testid="stat-critical-risk">
-                  {riskDistribution.critical}
-                </div>
-                <p className="text-sm text-muted-foreground">Kritiek risico</p>
-              </div>
+          <CardContent className="p-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Kritiek</p>
+              <p className="text-sm font-bold text-red-600" data-testid="stat-critical-risk">{riskDistribution.critical}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Risk Distribution Pie */}
-        <Card className="overflow-visible">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Risicoverdeling</CardTitle>
+      <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
+        <Card className="overflow-visible flex flex-col min-h-0">
+          <CardHeader className="p-3 pb-1 flex-shrink-0">
+            <CardTitle className="text-sm">Risicoverdeling</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 flex-1 min-h-0 flex flex-col">
             {isLoading ? (
-              <Skeleton className="h-64 w-full" />
+              <Skeleton className="flex-1" />
             ) : (
               <>
-                <div className="h-64">
+                <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={90}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
+                      <Pie data={pieData} cx="50%" cy="50%" innerRadius="35%" outerRadius="60%" paddingAngle={2} dataKey="value">
                         {pieData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip
-                        formatter={(value: number) => [value, "Bedrijven"]}
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                        }}
-                      />
+                      <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="flex flex-wrap justify-center gap-4 mt-4">
+                <div className="flex flex-wrap justify-center gap-3 flex-shrink-0 pt-1">
                   {pieData.map((item) => (
-                    <div key={item.name} className="flex items-center gap-2 text-sm">
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
+                    <div key={item.name} className="flex items-center gap-1 text-[10px]">
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
                       <span>{item.name}</span>
                       <span className="font-mono text-muted-foreground">{item.value}</span>
                     </div>
@@ -197,90 +138,52 @@ export default function RiskAnalysis() {
           </CardContent>
         </Card>
 
-        {/* Sector Comparison */}
-        <Card className="overflow-visible">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Gemiddeld risico per sector</CardTitle>
+        <Card className="overflow-visible flex flex-col min-h-0">
+          <CardHeader className="p-3 pb-1 flex-shrink-0">
+            <CardTitle className="text-sm">Risico per sector</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sectorData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    type="number"
-                    domain={[0, 100]}
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="sector"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    width={80}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [value, "Risicoscore"]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar
-                    dataKey="avgRisk"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          <CardContent className="p-3 pt-0 flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sectorData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                <YAxis type="category" dataKey="sector" stroke="hsl(var(--muted-foreground))" fontSize={10} width={50} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} />
+                <Bar dataKey="avgRisk" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Company Lists */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* High Risk Companies */}
-        <Card className="overflow-visible">
-          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Hoogste risico klanten
+        <Card className="overflow-visible flex flex-col min-h-0">
+          <CardHeader className="p-3 pb-1 flex-shrink-0 flex flex-row items-center justify-between gap-2">
+            <CardTitle className="text-sm flex items-center gap-1">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+              Hoogste risico
             </CardTitle>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="h-6 text-xs" asChild>
               <Link href="/companies?risk=high">
-                Bekijk alle
-                <ArrowRight className="ml-1 h-4 w-4" />
+                Alle <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 flex-1 overflow-auto min-h-0">
             {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full" />
-                ))}
-              </div>
+              <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
             ) : highRiskCompanies && highRiskCompanies.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {highRiskCompanies.map((company) => (
                   <Link
                     key={company.id}
                     href={`/companies/${company.id}`}
-                    className="flex items-center justify-between rounded-lg border p-3 hover-elevate"
+                    className="flex items-center justify-between rounded border p-2 hover-elevate"
                     data-testid={`link-high-risk-company-${company.id}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                        <Building2 className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{company.name}</p>
-                        <p className="text-sm text-muted-foreground font-mono">
-                          {company.vatNumber}
-                        </p>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{company.name}</p>
+                        <p className="text-[10px] text-muted-foreground font-mono">{company.vatNumber}</p>
                       </div>
                     </div>
                     <RiskScoreBadge score={company.paymentBehavior?.riskScore || 50} />
@@ -288,52 +191,44 @@ export default function RiskAnalysis() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Shield className="h-10 w-10 text-green-500 mb-3" />
-                <p className="text-muted-foreground">Geen hoog risico klanten</p>
+              <div className="flex flex-col items-center justify-center h-full">
+                <Shield className="h-6 w-6 text-green-500 mb-1" />
+                <p className="text-xs text-muted-foreground">Geen hoog risico</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Worsening Trend Companies */}
-        <Card className="overflow-visible">
-          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-orange-500 rotate-180" />
-              Verslechterende trends
+        <Card className="overflow-visible flex flex-col min-h-0">
+          <CardHeader className="p-3 pb-1 flex-shrink-0 flex flex-row items-center justify-between gap-2">
+            <CardTitle className="text-sm flex items-center gap-1">
+              <TrendingUp className="h-4 w-4 text-orange-500 rotate-180" />
+              Verslechterend
             </CardTitle>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="h-6 text-xs" asChild>
               <Link href="/companies">
-                Bekijk alle
-                <ArrowRight className="ml-1 h-4 w-4" />
+                Alle <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
             </Button>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 flex-1 overflow-auto min-h-0">
             {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full" />
-                ))}
-              </div>
+              <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
             ) : worseningCompanies && worseningCompanies.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {worseningCompanies.map((company) => (
                   <Link
                     key={company.id}
                     href={`/companies/${company.id}`}
-                    className="flex items-center justify-between rounded-lg border p-3 hover-elevate"
+                    className="flex items-center justify-between rounded border p-2 hover-elevate"
                     data-testid={`link-worsening-company-${company.id}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                        <Building2 className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{company.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"))} dagen te laat
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{company.name}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"))}d te laat
                         </p>
                       </div>
                     </div>
@@ -342,9 +237,9 @@ export default function RiskAnalysis() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <TrendingUp className="h-10 w-10 text-green-500 mb-3" />
-                <p className="text-muted-foreground">Geen verslechterende trends</p>
+              <div className="flex flex-col items-center justify-center h-full">
+                <TrendingUp className="h-6 w-6 text-green-500 mb-1" />
+                <p className="text-xs text-muted-foreground">Geen verslechterende trends</p>
               </div>
             )}
           </CardContent>

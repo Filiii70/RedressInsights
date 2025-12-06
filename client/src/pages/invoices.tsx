@@ -29,6 +29,8 @@ function formatCurrency(amount: number | string) {
   return new Intl.NumberFormat("nl-BE", {
     style: "currency",
     currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(num);
 }
 
@@ -36,7 +38,6 @@ function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString("nl-BE", {
     day: "2-digit",
     month: "2-digit",
-    year: "numeric",
   });
 }
 
@@ -69,76 +70,87 @@ export default function Invoices() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col gap-3">
+      <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">
-            Facturen
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Beheer en bekijk al je geüploade facturen
-          </p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">Facturen</h1>
+          <p className="text-xs text-muted-foreground">Beheer al je facturen</p>
         </div>
-        <Button asChild data-testid="button-upload-invoice">
+        <Button size="sm" asChild data-testid="button-upload-invoice">
           <Link href="/upload">
-            <Upload className="mr-2 h-4 w-4" />
-            Factuur uploaden
+            <Upload className="mr-1 h-3 w-3" />
+            Upload
           </Link>
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-4 gap-2 flex-shrink-0">
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold" data-testid="stat-total-invoices">{stats.total}</div>
-            <p className="text-sm text-muted-foreground">Totaal facturen</p>
+          <CardContent className="p-3 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Totaal</p>
+              <p className="text-sm font-bold" data-testid="stat-total-invoices">{stats.total}</p>
+            </div>
           </CardContent>
         </Card>
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-blue-600" data-testid="stat-pending-invoices">{stats.pending}</div>
-            <p className="text-sm text-muted-foreground">In afwachting</p>
+          <CardContent className="p-3 flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="h-2 w-2 rounded-full bg-blue-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Wachtend</p>
+              <p className="text-sm font-bold text-blue-600" data-testid="stat-pending-invoices">{stats.pending}</p>
+            </div>
           </CardContent>
         </Card>
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-red-600" data-testid="stat-overdue-invoices">{stats.overdue}</div>
-            <p className="text-sm text-muted-foreground">Te laat</p>
+          <CardContent className="p-3 flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="h-2 w-2 rounded-full bg-red-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Te laat</p>
+              <p className="text-sm font-bold text-red-600" data-testid="stat-overdue-invoices">{stats.overdue}</p>
+            </div>
           </CardContent>
         </Card>
         <Card className="overflow-visible">
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-green-600" data-testid="stat-paid-invoices">{stats.paid}</div>
-            <p className="text-sm text-muted-foreground">Betaald</p>
+          <CardContent className="p-3 flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="h-2 w-2 rounded-full bg-green-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Betaald</p>
+              <p className="text-sm font-bold text-green-600" data-testid="stat-paid-invoices">{stats.paid}</p>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters and Table */}
-      <Card className="overflow-visible">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle className="text-lg">Alle facturen</CardTitle>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <Card className="overflow-visible flex-1 flex flex-col min-h-0">
+        <CardHeader className="p-3 pb-2 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-sm">Alle facturen</CardTitle>
+            <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Zoek op bedrijf, factuurnummer..."
+                  placeholder="Zoek..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 w-full sm:w-64"
+                  className="pl-7 h-8 w-40 text-xs"
                   data-testid="input-search-invoices"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-40" data-testid="select-status-filter">
+                <SelectTrigger className="w-28 h-8 text-xs" data-testid="select-status-filter">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alle statussen</SelectItem>
-                  <SelectItem value="pending">In afwachting</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
+                  <SelectItem value="pending">Wachtend</SelectItem>
                   <SelectItem value="overdue">Te laat</SelectItem>
                   <SelectItem value="paid">Betaald</SelectItem>
                 </SelectContent>
@@ -146,86 +158,72 @@ export default function Invoices() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 pt-0 flex-1 overflow-auto min-h-0">
           {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+            <div className="space-y-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
               ))}
             </div>
           ) : filteredInvoices && filteredInvoices.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Bedrijf</TableHead>
-                    <TableHead>Factuurnummer</TableHead>
-                    <TableHead>Bedrag</TableHead>
-                    <TableHead>Factuurdatum</TableHead>
-                    <TableHead>Vervaldatum</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Dagen te laat</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs py-1">Bedrijf</TableHead>
+                  <TableHead className="text-xs py-1">Nr.</TableHead>
+                  <TableHead className="text-xs py-1">Bedrag</TableHead>
+                  <TableHead className="text-xs py-1">Verval</TableHead>
+                  <TableHead className="text-xs py-1">Status</TableHead>
+                  <TableHead className="text-xs py-1">+dagen</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredInvoices.map((invoice) => (
+                  <TableRow key={invoice.id} className="text-xs" data-testid={`row-invoice-${invoice.id}`}>
+                    <TableCell className="py-1.5">
+                      <Link
+                        href={`/companies/${invoice.companyId}`}
+                        className="flex items-center gap-1 hover:underline font-medium truncate max-w-[120px]"
+                      >
+                        <Building2 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        {invoice.company?.name || "Onbekend"}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="py-1.5 font-mono text-xs truncate max-w-[80px]">
+                      {invoice.invoiceNumber || "-"}
+                    </TableCell>
+                    <TableCell className="py-1.5 font-mono">
+                      {formatCurrency(invoice.amount)}
+                    </TableCell>
+                    <TableCell className="py-1.5">{formatDate(invoice.dueDate)}</TableCell>
+                    <TableCell className="py-1.5">
+                      <InvoiceStatusBadge
+                        status={invoice.status as "pending" | "paid" | "overdue"}
+                        daysLate={invoice.daysLate || 0}
+                      />
+                    </TableCell>
+                    <TableCell className="py-1.5">
+                      {invoice.status === "overdue" ? (
+                        <span className="font-mono text-red-600">+{invoice.daysLate || 0}</span>
+                      ) : invoice.status === "paid" && invoice.daysLate && invoice.daysLate > 0 ? (
+                        <span className="font-mono text-amber-600">+{invoice.daysLate}</span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInvoices.map((invoice) => (
-                    <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`}>
-                      <TableCell>
-                        <Link
-                          href={`/companies/${invoice.companyId}`}
-                          className="flex items-center gap-2 hover:underline font-medium"
-                        >
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          {invoice.company?.name || "Onbekend"}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {invoice.invoiceNumber || "-"}
-                      </TableCell>
-                      <TableCell className="font-mono font-medium">
-                        {formatCurrency(invoice.amount)}
-                      </TableCell>
-                      <TableCell>{formatDate(invoice.invoiceDate)}</TableCell>
-                      <TableCell>{formatDate(invoice.dueDate)}</TableCell>
-                      <TableCell>
-                        <InvoiceStatusBadge
-                          status={invoice.status as "pending" | "paid" | "overdue"}
-                          daysLate={invoice.daysLate || 0}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {invoice.status === "overdue" ? (
-                          <span className="font-mono text-red-600 dark:text-red-400">
-                            +{invoice.daysLate || 0}
-                          </span>
-                        ) : invoice.status === "paid" && invoice.daysLate && invoice.daysLate > 0 ? (
-                          <span className="font-mono text-amber-600 dark:text-amber-400">
-                            +{invoice.daysLate}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Geen facturen gevonden</h3>
-              <p className="text-muted-foreground mb-4">
-                {search || statusFilter !== "all"
-                  ? "Probeer andere zoekfilters"
-                  : "Upload je eerste factuur om te beginnen"}
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <FileText className="h-8 w-8 text-muted-foreground/50 mb-2" />
+              <p className="text-xs text-muted-foreground">
+                {search || statusFilter !== "all" ? "Geen resultaten" : "Nog geen facturen"}
               </p>
               {!search && statusFilter === "all" && (
-                <Button asChild data-testid="link-upload-first-invoice">
-                  <Link href="/upload">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Factuur uploaden
-                  </Link>
+                <Button size="sm" className="mt-2" asChild data-testid="link-upload-first-invoice">
+                  <Link href="/upload">Upload</Link>
                 </Button>
               )}
             </div>
