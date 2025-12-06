@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
 import { TrendIndicator } from "@/components/trend-indicator";
 import { Link } from "wouter";
+import { useState, useEffect } from "react";
 import {
   Euro,
   Clock,
@@ -15,9 +16,7 @@ import {
   Users,
   Receipt,
   Bell,
-  Mail,
 } from "lucide-react";
-import { SiWhatsapp } from "react-icons/si";
 import {
   Table,
   TableBody,
@@ -26,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { DashboardStats, InvoiceWithCompany, CompanyWithBehavior } from "@shared/schema";
+import type { DashboardStats, InvoiceWithCompany, CompanyWithBehavior, ActivityFeedWithCompany } from "@shared/schema";
 import {
   PieChart,
   Pie,
@@ -64,6 +63,39 @@ export default function Dashboard() {
   const { data: riskyCompanies, isLoading: companiesLoading } = useQuery<CompanyWithBehavior[]>({
     queryKey: ["/api/companies", "risky"],
   });
+
+  const { data: activityFeed } = useQuery<ActivityFeedWithCompany[]>({
+    queryKey: ["/api/activity/feed"],
+    refetchInterval: 30000,
+  });
+
+  const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
+  const [isActivityAnimating, setIsActivityAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!activityFeed || activityFeed.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsActivityAnimating(true);
+      setTimeout(() => {
+        setCurrentActivityIndex((prev) => (prev + 1) % activityFeed.length);
+        setIsActivityAnimating(false);
+      }, 300);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [activityFeed]);
+
+  const getActivityEmoji = (eventType: string) => {
+    switch (eventType) {
+      case 'invoice_uploaded': return '📄';
+      case 'payment_registered': return '💰';
+      case 'risk_alert': return '⚠️';
+      case 'risk_improvement': return '📈';
+      case 'company_added': return '🏢';
+      default: return '📌';
+    }
+  };
 
   const riskDistributionData = [
     { name: "Laag", value: 35, color: "#22c55e" },
@@ -273,34 +305,44 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Network Stats & Notifications */}
+        {/* Network Stats & Live Feed */}
         <Card>
           <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Netwerk & Alerts</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2">
+              Netwerk & Alerts
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-3">
+          <CardContent className="p-3 pt-0 space-y-2">
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <Users className="h-4 w-4 mx-auto text-primary mb-1" />
-                <p className="text-sm font-bold">50+</p>
+                <p className="text-sm font-bold">{riskyCompanies?.length || 0}+</p>
                 <p className="text-[10px] text-muted-foreground">Bedrijven</p>
               </div>
               <div>
                 <Receipt className="h-4 w-4 mx-auto text-green-600 mb-1" />
-                <p className="text-sm font-bold">230+</p>
+                <p className="text-sm font-bold">{(stats?.overdueInvoices || 0) + (stats?.pendingInvoices || 0)}+</p>
                 <p className="text-[10px] text-muted-foreground">Facturen</p>
               </div>
               <div>
                 <Bell className="h-4 w-4 mx-auto text-orange-500 mb-1" />
-                <p className="text-sm font-bold">Real-time</p>
+                <p className="text-sm font-bold">{stats?.highRiskClients || 0}</p>
                 <p className="text-[10px] text-muted-foreground">Alerts</p>
               </div>
             </div>
-            <div className="flex items-center justify-center gap-3 pt-1 border-t">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <SiWhatsapp className="h-4 w-4 text-green-500" />
-              <span className="text-[10px] text-muted-foreground">Notificaties via Email & WhatsApp</span>
-            </div>
+            {activityFeed && activityFeed.length > 0 && (
+              <div className="pt-2 border-t">
+                <div 
+                  className={`flex items-center gap-2 text-xs transition-all duration-300 ${
+                    isActivityAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
+                  }`}
+                >
+                  <span>{getActivityEmoji(activityFeed[currentActivityIndex]?.eventType)}</span>
+                  <span className="truncate flex-1">{activityFeed[currentActivityIndex]?.message}</span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

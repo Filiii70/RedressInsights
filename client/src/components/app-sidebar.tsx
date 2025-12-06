@@ -10,7 +10,9 @@ import {
   Settings,
   LogIn,
   Activity,
+  Mail,
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import {
   Sidebar,
   SidebarContent,
@@ -86,6 +88,11 @@ export function AppSidebar() {
             </span>
           </div>
         </Link>
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-sidebar-border">
+          <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+          <SiWhatsapp className="h-3.5 w-3.5 text-green-500" />
+          <span className="text-[10px] text-muted-foreground">Notificaties via Email & WhatsApp</span>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
