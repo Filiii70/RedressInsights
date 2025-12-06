@@ -742,5 +742,94 @@ export async function registerRoutes(
     }
   });
 
+  // ============================================
+  // BLACKLIST MANAGEMENT
+  // ============================================
+
+  // Get all blacklist entries
+  app.get("/api/blacklist", async (req, res) => {
+    try {
+      const entries = await storage.getBlacklistEntries();
+      res.json(entries);
+    } catch (error) {
+      console.error("Error fetching blacklist:", error);
+      res.status(500).json({ message: "Failed to fetch blacklist" });
+    }
+  });
+
+  // Check if company is blacklisted
+  app.get("/api/blacklist/check/:companyId", async (req, res) => {
+    try {
+      const isBlacklisted = await storage.isCompanyBlacklisted(req.params.companyId);
+      res.json({ isBlacklisted });
+    } catch (error) {
+      console.error("Error checking blacklist:", error);
+      res.status(500).json({ message: "Failed to check blacklist" });
+    }
+  });
+
+  // Add company to blacklist
+  app.post("/api/blacklist", async (req, res) => {
+    try {
+      const { companyId, reason, riskScoreAtTime, notes } = req.body;
+      
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID is required" });
+      }
+
+      // Check if already blacklisted
+      const isAlreadyBlacklisted = await storage.isCompanyBlacklisted(companyId);
+      if (isAlreadyBlacklisted) {
+        return res.status(400).json({ message: "Company is already on blacklist" });
+      }
+
+      const entry = await storage.addToBlacklist({
+        companyId,
+        reason,
+        riskScoreAtTime,
+        notes,
+        status: "active",
+      });
+
+      res.json(entry);
+    } catch (error) {
+      console.error("Error adding to blacklist:", error);
+      res.status(500).json({ message: "Failed to add to blacklist" });
+    }
+  });
+
+  // Update blacklist entry (e.g., resolve, add notes)
+  app.patch("/api/blacklist/:id", async (req, res) => {
+    try {
+      const updates = req.body;
+      
+      if (updates.status === "resolved") {
+        updates.resolvedAt = new Date();
+      }
+
+      const updated = await storage.updateBlacklistEntry(req.params.id, updates);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Blacklist entry not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating blacklist entry:", error);
+      res.status(500).json({ message: "Failed to update blacklist entry" });
+    }
+  });
+
+  // Remove from blacklist
+  app.delete("/api/blacklist/:id", async (req, res) => {
+    try {
+      await storage.removeFromBlacklist(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing from blacklist:", error);
+      res.status(500).json({ message: "Failed to remove from blacklist" });
+    }
+  });
+
   return httpServer;
 }

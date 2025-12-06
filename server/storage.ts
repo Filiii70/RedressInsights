@@ -1,7 +1,7 @@
 import { 
   companies, invoices, paymentBehavior, sectorBenchmarks,
   companyContacts, notifications, invoiceQuickLinks, engagementEvents, weeklySnapshots,
-  users, activityFeed,
+  users, activityFeed, blacklistEntries,
   type Company, type InsertCompany, 
   type Invoice, type InsertInvoice,
   type PaymentBehavior, type InsertPaymentBehavior,
@@ -14,7 +14,8 @@ import {
   type WeeklySnapshot, type InsertWeeklySnapshot,
   type WeeklyLeaderboard, type EngagementStats,
   type User, type UpsertUser,
-  type ActivityFeedItem, type InsertActivityFeedItem, type ActivityFeedWithCompany
+  type ActivityFeedItem, type InsertActivityFeedItem, type ActivityFeedWithCompany,
+  type BlacklistEntry, type InsertBlacklistEntry, type BlacklistEntryWithCompany
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
@@ -82,6 +83,14 @@ export interface IStorage {
   getActivityFeedSince(since: Date): Promise<ActivityFeedWithCompany[]>;
   createActivityEvent(event: InsertActivityFeedItem): Promise<ActivityFeedItem>;
   getNewActivityCount(since: Date): Promise<number>;
+
+  // Blacklist
+  getBlacklistEntries(): Promise<BlacklistEntryWithCompany[]>;
+  getBlacklistEntry(id: string): Promise<BlacklistEntryWithCompany | undefined>;
+  isCompanyBlacklisted(companyId: string): Promise<boolean>;
+  addToBlacklist(entry: InsertBlacklistEntry): Promise<BlacklistEntry>;
+  updateBlacklistEntry(id: string, updates: Partial<InsertBlacklistEntry>): Promise<BlacklistEntry | undefined>;
+  removeFromBlacklist(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -771,6 +780,64 @@ Wat kunnen wij afspreken?
       .from(activityFeed)
       .where(gte(activityFeed.createdAt, since));
     return result[0]?.count || 0;
+  }
+
+  // Blacklist operations
+  async getBlacklistEntries(): Promise<BlacklistEntryWithCompany[]> {
+    const entries = await db.select()
+      .from(blacklistEntries)
+      .orderBy(desc(blacklistEntries.createdAt));
+
+    const result: BlacklistEntryWithCompany[] = [];
+    for (const entry of entries) {
+      const [company] = await db.select().from(companies).where(eq(companies.id, entry.companyId));
+      if (company) {
+        const [behavior] = await db.select().from(paymentBehavior).where(eq(paymentBehavior.companyId, entry.companyId));
+        result.push({ ...entry, company, paymentBehavior: behavior || null });
+      }
+    }
+    return result;
+  }
+
+  async getBlacklistEntry(id: string): Promise<BlacklistEntryWithCompany | undefined> {
+    const [entry] = await db.select()
+      .from(blacklistEntries)
+      .where(eq(blacklistEntries.id, id));
+
+    if (!entry) return undefined;
+
+    const [company] = await db.select().from(companies).where(eq(companies.id, entry.companyId));
+    if (!company) return undefined;
+
+    const [behavior] = await db.select().from(paymentBehavior).where(eq(paymentBehavior.companyId, entry.companyId));
+    return { ...entry, company, paymentBehavior: behavior || null };
+  }
+
+  async isCompanyBlacklisted(companyId: string): Promise<boolean> {
+    const [entry] = await db.select()
+      .from(blacklistEntries)
+      .where(and(
+        eq(blacklistEntries.companyId, companyId),
+        eq(blacklistEntries.status, "active")
+      ));
+    return !!entry;
+  }
+
+  async addToBlacklist(entry: InsertBlacklistEntry): Promise<BlacklistEntry> {
+    const [created] = await db.insert(blacklistEntries).values(entry).returning();
+    return created;
+  }
+
+  async updateBlacklistEntry(id: string, updates: Partial<InsertBlacklistEntry>): Promise<BlacklistEntry | undefined> {
+    const [updated] = await db.update(blacklistEntries)
+      .set(updates)
+      .where(eq(blacklistEntries.id, id))
+      .returning();
+    return updated;
+  }
+
+  async removeFromBlacklist(id: string): Promise<void> {
+    await db.delete(blacklistEntries).where(eq(blacklistEntries.id, id));
   }
 }
 
