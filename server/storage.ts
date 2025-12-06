@@ -18,7 +18,7 @@ import {
   type BlacklistEntry, type InsertBlacklistEntry, type BlacklistEntryWithCompany
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, count, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Companies
@@ -81,6 +81,7 @@ export interface IStorage {
   // Activity Feed (Live Ticker)
   getActivityFeed(limit: number): Promise<ActivityFeedWithCompany[]>;
   getActivityFeedSince(since: Date): Promise<ActivityFeedWithCompany[]>;
+  getPublicNetworkFeed(limit: number): Promise<ActivityFeedWithCompany[]>; // Only public events
   createActivityEvent(event: InsertActivityFeedItem): Promise<ActivityFeedItem>;
   getNewActivityCount(since: Date): Promise<number>;
 
@@ -91,6 +92,7 @@ export interface IStorage {
   addToBlacklist(entry: InsertBlacklistEntry): Promise<BlacklistEntry>;
   updateBlacklistEntry(id: string, updates: Partial<InsertBlacklistEntry>): Promise<BlacklistEntry | undefined>;
   removeFromBlacklist(id: string): Promise<void>;
+  autoBlacklistHighRiskCompanies(): Promise<number>; // Returns count of newly blacklisted
 }
 
 export class DatabaseStorage implements IStorage {
@@ -856,6 +858,70 @@ Wat kunnen wij afspreken?
 
   async removeFromBlacklist(id: string): Promise<void> {
     await db.delete(blacklistEntries).where(eq(blacklistEntries.id, id));
+  }
+
+  // Get only public network events (member_joined, blacklist_added, member_milestone)
+  async getPublicNetworkFeed(limit: number): Promise<ActivityFeedWithCompany[]> {
+    const publicEventTypes = ['member_joined', 'blacklist_added', 'member_milestone', 'company_added'];
+    const items = await db.select()
+      .from(activityFeed)
+      .where(inArray(activityFeed.eventType, publicEventTypes))
+      .orderBy(desc(activityFeed.createdAt))
+      .limit(limit);
+
+    const result: ActivityFeedWithCompany[] = [];
+    for (const item of items) {
+      if (item.companyId) {
+        const [company] = await db.select().from(companies).where(eq(companies.id, item.companyId));
+        result.push({ ...item, company: company || null });
+      } else {
+        result.push({ ...item, company: null });
+      }
+    }
+    return result;
+  }
+
+  // Auto-blacklist high-risk companies (risk score >= 70)
+  async autoBlacklistHighRiskCompanies(): Promise<number> {
+    const HIGH_RISK_THRESHOLD = 70;
+    
+    // Get all companies with high risk scores
+    const highRiskBehaviors = await db.select()
+      .from(paymentBehavior)
+      .where(gte(paymentBehavior.riskScore, HIGH_RISK_THRESHOLD));
+
+    let blacklistedCount = 0;
+
+    for (const behavior of highRiskBehaviors) {
+      // Check if already blacklisted
+      const isAlreadyBlacklisted = await this.isCompanyBlacklisted(behavior.companyId);
+      if (isAlreadyBlacklisted) continue;
+
+      // Get company info
+      const [company] = await db.select().from(companies).where(eq(companies.id, behavior.companyId));
+      if (!company) continue;
+
+      // Add to blacklist
+      await this.addToBlacklist({
+        companyId: behavior.companyId,
+        reason: `Automatisch toegevoegd: risicoscore ${behavior.riskScore}/100 op basis van betalingsgedrag community`,
+        riskScoreAtTime: behavior.riskScore || 0,
+        status: "active",
+        addedBy: "system",
+      });
+
+      // Create public activity event
+      await this.createActivityEvent({
+        eventType: "blacklist_added",
+        companyId: behavior.companyId,
+        message: `${company.name} toegevoegd aan watchlist (score: ${behavior.riskScore})`,
+        severity: "warning",
+      });
+
+      blacklistedCount++;
+    }
+
+    return blacklistedCount;
   }
 }
 

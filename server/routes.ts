@@ -594,7 +594,7 @@ export async function registerRoutes(
   // LIVE ACTIVITY FEED ENDPOINTS
   // ============================================
 
-  // Get recent activity feed
+  // Get recent activity feed (all events - for internal use)
   app.get("/api/activity/feed", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
@@ -603,6 +603,29 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching activity feed:", error);
       res.status(500).json({ message: "Failed to fetch activity feed" });
+    }
+  });
+
+  // Get PUBLIC network feed only (new members, blacklist additions - no private data)
+  app.get("/api/activity/network", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const feed = await storage.getPublicNetworkFeed(limit);
+      res.json(feed);
+    } catch (error) {
+      console.error("Error fetching network feed:", error);
+      res.status(500).json({ message: "Failed to fetch network feed" });
+    }
+  });
+
+  // Auto-blacklist high-risk companies (called on startup or periodically)
+  app.post("/api/blacklist/auto-populate", async (req, res) => {
+    try {
+      const count = await storage.autoBlacklistHighRiskCompanies();
+      res.json({ success: true, blacklistedCount: count });
+    } catch (error) {
+      console.error("Error auto-populating blacklist:", error);
+      res.status(500).json({ message: "Failed to auto-populate blacklist" });
     }
   });
 

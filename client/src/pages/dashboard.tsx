@@ -80,7 +80,7 @@ export default function Dashboard() {
   });
 
   const { data: activityFeed } = useQuery<ActivityFeedWithCompany[]>({
-    queryKey: ["/api/activity/feed"],
+    queryKey: ["/api/activity/network"],
     refetchInterval: 30000,
   });
 

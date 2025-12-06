@@ -33,8 +33,9 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 **Layout Design**
 - Fixed-height layouts on ALL pages - no scrolling
 - Sidebar: Compact, non-scrolling with menu at top, footer at bottom (mt-auto)
-- Dashboard: Two-row grid layout (Kritieke facturen + Risicoverdeling / Risico bedrijven + Netwerk Updates)
+- Dashboard: Two-row grid layout (Actieve opvolging + Klantverdeling / Aandachtspunten + Community)
 - All content must fit within viewport height
+- Dashboard sections reframed positively: "Actieve opvolging" (actions), "Klantverdeling" (distribution), "Aandachtspunten" (attention), "Community" (network)
 
 **State Management & Data Fetching**
 - TanStack Query (React Query) for server state management, caching, and background refetching
@@ -80,13 +81,21 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 - Blacklist management for high-risk companies
 
 **Engagement & FOMO System**
-- **Activity Feed**: Real-time event logging for all platform activities (invoice uploads, payment registrations, risk alerts)
-- **Live Ticker**: Scrolling marquee component in header showing recent activity stream
+- **Public Network Feed**: Shows ONLY public community events (NO private invoice/payment data)
+  - member_joined: New members registering
+  - blacklist_added: Companies added to watchlist
+  - company_added: New companies tracked
+  - member_milestone: Member achievements
+- **Live Ticker**: Scrolling marquee component in header showing public activity stream
 - **FOMO Badge**: Sidebar notification badge showing count of new activities since last visit (24-hour window)
-- **Clickable Network Updates**: Dashboard card with activity items that open detail dialogs
-- **Activity Dialog**: Shows company info, customer status badge, and quick blacklist action
-- Event types tracked: invoice_uploaded, payment_registered, risk_alert, risk_improvement, company_added
+- **Community Card**: Dashboard section showing network stats and recent public activity
 - Severity levels: info, warning, critical - for visual prioritization
+
+**Auto-Blacklist System**
+- High-risk companies (risk score >= 70) automatically added to blacklist
+- Based on crowd-sourced payment behavior data from all registered members
+- Creates public activity event when company is blacklisted
+- Endpoint: POST /api/blacklist/auto-populate to trigger auto-blacklisting
 
 ### Pages & Navigation
 
@@ -96,13 +105,13 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 - Footer: Inloggen, Instellingen
 
 **Main Pages**
-- Dashboard: Stats row, Kritieke facturen (3), Risicoverdeling, Risico bedrijven (3), Netwerk Updates
+- Dashboard: Positive stats row (Op tijd, Betrouwbaar, Ontvangen, Verbeterd), Actieve opvolging (3), Klantverdeling, Aandachtspunten (3), Community
 - Facturen: Invoice list with filtering
 - Bedrijven: Company directory
 - Upload: AI-powered invoice upload
 - Risico Analyse: Risk scoring analysis
 - Trends: Payment behavior trends
-- Blacklist: Manage blacklisted companies
+- Blacklist: Manage blacklisted companies (auto-populated from high-risk companies)
 - Settings: User preferences
 
 ### External Dependencies

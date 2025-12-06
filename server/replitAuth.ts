@@ -52,6 +52,10 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
+  // Check if user already exists (to distinguish new vs returning users)
+  const existingUser = await storage.getUser(claims["sub"]);
+  const isNewUser = !existingUser;
+
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
@@ -59,6 +63,16 @@ async function upsertUser(claims: any) {
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
   });
+
+  // Create public activity event for new members
+  if (isNewUser) {
+    const displayName = claims["first_name"] || "Nieuw lid";
+    await storage.createActivityEvent({
+      eventType: "member_joined",
+      message: `${displayName} is lid geworden van KMO-Alert`,
+      severity: "info",
+    });
+  }
 }
 
 export async function setupAuth(app: Express) {
