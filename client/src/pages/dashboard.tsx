@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
-import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { TrendIndicator } from "@/components/trend-indicator";
+import { LiveTicker } from "@/components/live-ticker";
 import { Link } from "wouter";
 import {
   Euro,
@@ -304,6 +304,11 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Live Activity Ticker */}
+      <div className="flex-shrink-0">
+        <LiveTicker />
       </div>
     </div>
   );
