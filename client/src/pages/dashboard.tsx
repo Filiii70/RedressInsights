@@ -196,13 +196,16 @@ export default function Dashboard() {
 
       {/* Main Content - Two rows */}
       <div className="flex-1 grid grid-rows-2 gap-2 min-h-0">
-        {/* Top Row: Kritieke facturen + Risicoverdeling */}
+        {/* Top Row: Actieve opvolging + Klantverdeling */}
         <div className="grid grid-cols-3 gap-2 min-h-0">
-          {/* Kritieke facturen */}
+          {/* Actieve opvolging */}
           <Card className="col-span-2 flex flex-col min-h-0 overflow-hidden">
             <CardHeader className="p-2 pb-1 flex-shrink-0">
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-xs flex-shrink-0">Kritieke facturen</CardTitle>
+                <CardTitle className="text-xs flex-shrink-0 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Actieve opvolging
+                </CardTitle>
                 <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2 flex-shrink-0" asChild>
                   <Link href="/invoices">
                     Alle <ArrowRight className="ml-1 h-2.5 w-2.5" />
@@ -223,7 +226,7 @@ export default function Dashboard() {
                     <TableRow>
                       <TableHead className="text-[10px] py-0.5">Bedrijf</TableHead>
                       <TableHead className="text-[10px] py-0.5">Bedrag</TableHead>
-                      <TableHead className="text-[10px] py-0.5">Te laat</TableHead>
+                      <TableHead className="text-[10px] py-0.5">Actie</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -238,7 +241,9 @@ export default function Dashboard() {
                           {formatCurrency(invoice.amount)}
                         </TableCell>
                         <TableCell className="py-1">
-                          <span className="text-red-600 font-medium text-[10px]">{invoice.daysLate || 0}d</span>
+                          <Badge variant="outline" className="text-[9px] px-1 py-0">
+                            {(invoice.daysLate || 0) > 30 ? "Bel" : "Herinner"}
+                          </Badge>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -246,17 +251,17 @@ export default function Dashboard() {
                 </Table>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <FileText className="h-6 w-6 text-muted-foreground/50 mb-1" />
-                  <p className="text-[10px] text-muted-foreground">Nog geen facturen</p>
+                  <CheckCircle className="h-6 w-6 text-green-500/50 mb-1" />
+                  <p className="text-[10px] text-muted-foreground">Alles op schema!</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Risicoverdeling */}
+          {/* Klantverdeling */}
           <Card className="flex flex-col min-h-0 overflow-hidden">
             <CardHeader className="p-2 pb-0 flex-shrink-0">
-              <CardTitle className="text-xs">Risicoverdeling</CardTitle>
+              <CardTitle className="text-xs">Klantverdeling</CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0 flex-1 flex flex-col min-h-0">
               <div className="flex-1 min-h-0">
@@ -291,12 +296,15 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Bottom Row: Risico bedrijven + Netwerk Updates */}
+        {/* Bottom Row: Aandachtspunten + Netwerk Updates */}
         <div className="grid grid-cols-3 gap-2 min-h-0">
-        {/* Risky Companies */}
+        {/* Aandachtspunten */}
         <Card className="col-span-2">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <CardTitle className="text-sm">Risico bedrijven</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-1">
+              <Eye className="h-3.5 w-3.5" />
+              Aandachtspunten
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0">
             {companiesLoading ? (
@@ -324,7 +332,10 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground text-center py-4">Geen data</p>
+              <div className="flex flex-col items-center justify-center py-4">
+                <CheckCircle className="h-6 w-6 text-green-500/50 mb-1" />
+                <p className="text-xs text-muted-foreground">Geen aandachtspunten</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -333,7 +344,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="p-3 pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              Netwerk Updates
+              Community
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
             </CardTitle>
           </CardHeader>
@@ -341,18 +352,18 @@ export default function Dashboard() {
             <div className="grid grid-cols-3 gap-2 text-center mb-2">
               <div>
                 <Users className="h-4 w-4 mx-auto text-primary mb-1" />
-                <p className="text-sm font-bold">{riskyCompanies?.length || 0}+</p>
-                <p className="text-[10px] text-muted-foreground">Bedrijven</p>
+                <p className="text-sm font-bold">{stats?.reliableClients || 0}+</p>
+                <p className="text-[10px] text-muted-foreground">Partners</p>
               </div>
               <div>
                 <Receipt className="h-4 w-4 mx-auto text-green-600 mb-1" />
-                <p className="text-sm font-bold">{(stats?.overdueInvoices || 0) + (stats?.pendingInvoices || 0)}+</p>
-                <p className="text-[10px] text-muted-foreground">Facturen</p>
+                <p className="text-sm font-bold">{stats?.onTimePayments || 0}+</p>
+                <p className="text-[10px] text-muted-foreground">Op tijd</p>
               </div>
               <div>
-                <Bell className="h-4 w-4 mx-auto text-orange-500 mb-1" />
-                <p className="text-sm font-bold">{stats?.highRiskClients || 0}</p>
-                <p className="text-[10px] text-muted-foreground">Alerts</p>
+                <TrendingUp className="h-4 w-4 mx-auto text-green-500 mb-1" />
+                <p className="text-sm font-bold">{stats?.improvedClients || 0}</p>
+                <p className="text-[10px] text-muted-foreground">Verbeterd</p>
               </div>
             </div>
             {activityFeed && activityFeed.length > 0 && (
