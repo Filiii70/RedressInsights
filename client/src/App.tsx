@@ -25,15 +25,15 @@ function AppLayout() {
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex min-h-screen w-full">
+      <div className="flex h-screen w-full overflow-hidden">
         <AppSidebar />
-        <div className="flex flex-col flex-1 min-w-0">
-          <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+        <div className="flex flex-col flex-1 min-w-0 h-full">
+          <header className="flex-shrink-0 flex h-14 items-center justify-between gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto p-6">
-            <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-7xl h-full">
               <Switch>
                 <Route path="/" component={Dashboard} />
                 <Route path="/invoices" component={Invoices} />

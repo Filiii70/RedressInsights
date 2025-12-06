@@ -9,7 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Mail, MessageSquare, Smartphone, Bell, Clock, AlertTriangle, Save, Send } from "lucide-react";
+import { Mail, Smartphone, Bell, Clock, AlertTriangle, Save, Send } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import type { CompanyContact } from "@shared/schema";
 import { useState, useEffect } from "react";
 
@@ -235,7 +236,7 @@ export default function Settings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <MessageSquare className="h-5 w-5 text-green-600" />
+                <SiWhatsapp className="h-5 w-5 text-green-500" />
                 <div>
                   <Label className="font-medium">WhatsApp</Label>
                   <p className="text-sm text-muted-foreground">Snelle updates</p>

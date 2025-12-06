@@ -43,6 +43,17 @@ KMO-Alert is een crowd-sourced KMO betalingsgedrag register dat bedrijven helpt 
 - Automatische actieplan aanbevelingen
 - Historische trend visualisatie
 
+### Engagement & Gamification
+- **Weekly Leaderboard** - Top 5 bijdragers aan het netwerk
+- **QR-code Betalingen** - Registreer betalingen in <30 seconden via QR scan
+- **Peer Benchmarks** - Vergelijk je prestaties met andere gebruikers
+- **Engagement Tracking** - Automatische logging van platformactiviteit
+
+### Notificaties
+- **Email** - Wekelijkse overzichten en betalingsherinneringen (via Resend)
+- **WhatsApp** - Snelle updates bij nieuwe risico's (via Twilio)
+- **SMS** - Kritieke alerts voor 30+ dagen achterstallige facturen (via Twilio)
+
 ## 🛡️ AVG/GDPR Compliant
 
 KMO-Alert is ontworpen om AVG-compliant te zijn:
