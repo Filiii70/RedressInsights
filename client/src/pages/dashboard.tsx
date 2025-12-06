@@ -296,10 +296,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Bottom Row: Aandachtspunten + Live Ticker */}
-        <div className="grid grid-cols-3 gap-2 min-h-0">
-        {/* Aandachtspunten */}
-        <Card className="col-span-2">
+        {/* Bottom Row: Aandachtspunten (full width) */}
+        <Card className="min-h-0">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <CardTitle className="text-sm flex items-center gap-1">
               <Eye className="h-3.5 w-3.5" />
@@ -308,14 +306,14 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="p-3 pt-0">
             {companiesLoading ? (
-              <div className="grid grid-cols-3 gap-2">
-                {Array.from({ length: 3 }).map((_, i) => (
+              <div className="grid grid-cols-4 gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
                   <Skeleton key={i} className="h-12" />
                 ))}
               </div>
             ) : riskyCompanies && riskyCompanies.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
-                {riskyCompanies.slice(0, 3).map((company) => (
+              <div className="grid grid-cols-4 gap-2">
+                {riskyCompanies.slice(0, 4).map((company) => (
                   <Link
                     key={company.id}
                     href={`/companies/${company.id}`}
@@ -339,40 +337,35 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+      </div>
 
-        {/* Live Ticker Banner */}
-        <Card className="flex flex-col overflow-hidden bg-gradient-to-b from-primary/5 to-transparent">
-          <CardHeader className="p-2 pb-1 flex-shrink-0">
-            <CardTitle className="text-xs flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              Live
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-2 pt-0 flex-1 overflow-hidden relative">
-            {activityFeed && activityFeed.length > 0 ? (
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="animate-scroll-vertical space-y-2 py-1">
-                  {[...activityFeed, ...activityFeed].map((activity, idx) => (
-                    <div
-                      key={`${activity.id}-${idx}`}
-                      onClick={() => setSelectedActivity(activity)}
-                      className="flex items-start gap-2 text-[10px] p-1.5 rounded cursor-pointer hover:bg-accent/50 transition-colors"
-                      data-testid={`live-item-${activity.id}`}
-                    >
-                      <span className="flex-shrink-0">{getActivityEmoji(activity.eventType)}</span>
-                      <span className="line-clamp-2 leading-tight">{activity.message}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p className="text-[10px]">Wachten op activiteit...</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Live Ticker Banner - Horizontal at bottom */}
+      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-t flex items-center overflow-hidden">
+        <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
+          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-[10px] font-medium text-muted-foreground">LIVE</span>
         </div>
+        {activityFeed && activityFeed.length > 0 ? (
+          <div className="flex-1 overflow-hidden">
+            <div className="animate-scroll-horizontal flex gap-8 whitespace-nowrap">
+              {[...activityFeed, ...activityFeed].map((activity, idx) => (
+                <span
+                  key={`${activity.id}-${idx}`}
+                  onClick={() => setSelectedActivity(activity)}
+                  className="inline-flex items-center gap-2 text-xs cursor-pointer hover:text-primary transition-colors"
+                  data-testid={`live-item-${activity.id}`}
+                >
+                  <span>{getActivityEmoji(activity.eventType)}</span>
+                  <span>{activity.message}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-[10px] text-muted-foreground">Wachten op netwerk activiteit...</p>
+          </div>
+        )}
       </div>
 
       {/* Activity Detail Dialog */}

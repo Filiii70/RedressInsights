@@ -288,20 +288,20 @@
   }
 }
 
-/* Live ticker vertical scroll animation */
-@keyframes scroll-vertical {
+/* Live ticker horizontal scroll animation */
+@keyframes scroll-horizontal {
   0% {
-    transform: translateY(0);
+    transform: translateX(0);
   }
   100% {
-    transform: translateY(-50%);
+    transform: translateX(-50%);
   }
 }
 
-.animate-scroll-vertical {
-  animation: scroll-vertical 20s linear infinite;
+.animate-scroll-horizontal {
+  animation: scroll-horizontal 30s linear infinite;
 }
 
-.animate-scroll-vertical:hover {
+.animate-scroll-horizontal:hover {
   animation-play-state: paused;
 }
