@@ -145,13 +145,15 @@ export default function Dashboard() {
       <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
         {/* Left: Invoices Table */}
         <Card className="col-span-2 overflow-visible flex flex-col">
-          <CardHeader className="p-3 pb-2 flex-shrink-0 flex flex-row items-center justify-between gap-2">
-            <CardTitle className="text-sm">Recente facturen</CardTitle>
-            <Button variant="ghost" size="sm" className="h-6 text-xs" asChild>
-              <Link href="/invoices">
-                Alle <ArrowRight className="ml-1 h-3 w-3" />
-              </Link>
-            </Button>
+          <CardHeader className="p-3 pb-2 flex-shrink-0">
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle className="text-sm flex-shrink-0">Recente facturen</CardTitle>
+              <Button variant="ghost" size="sm" className="h-6 text-xs flex-shrink-0" asChild>
+                <Link href="/invoices">
+                  Alle <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-3 pt-0 flex-1 overflow-auto">
             {invoicesLoading ? (
@@ -243,13 +245,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-3 gap-3 flex-shrink-0">
         {/* Risky Companies */}
         <Card className="col-span-2 overflow-visible">
-          <CardHeader className="p-3 pb-2 flex flex-row items-center justify-between gap-2">
-            <CardTitle className="text-sm">Hoogste risico</CardTitle>
-            <Button variant="ghost" size="sm" className="h-6 text-xs" asChild>
-              <Link href="/companies">
-                Alle <ArrowRight className="ml-1 h-3 w-3" />
-              </Link>
-            </Button>
+          <CardHeader className="p-3 pb-2 flex-shrink-0">
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle className="text-sm flex-shrink-0">Hoogste risico</CardTitle>
+              <Button variant="ghost" size="sm" className="h-6 text-xs flex-shrink-0" asChild>
+                <Link href="/companies">
+                  Alle <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-3 pt-0">
             {companiesLoading ? (
