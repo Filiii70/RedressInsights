@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Medal, Flame, Zap } from "lucide-react";
+import { Zap, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import type { LeaderboardEntry } from "@shared/schema";
 
 const fakeLeaderboard: LeaderboardEntry[] = [
@@ -41,19 +43,22 @@ function getStreakEmoji(streak: number) {
 }
 
 export default function Leaderboard() {
+  const [showAll, setShowAll] = useState(false);
+
   const { data: apiLeaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/gamification/leaderboard"],
   });
 
   const leaderboard = (apiLeaderboard && apiLeaderboard.length > 0) ? apiLeaderboard : fakeLeaderboard;
+  const displayedEntries = showAll ? leaderboard : leaderboard.slice(0, 5);
 
   if (isLoading) {
     return (
       <div className="h-full flex flex-col gap-2 p-2">
         <Skeleton className="h-12 w-full" />
-        <div className="flex-1 grid grid-cols-2 gap-2">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <Skeleton key={i} className="h-16" />
+        <div className="flex-1 flex flex-col gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-14" />
           ))}
         </div>
       </div>
@@ -72,47 +77,47 @@ export default function Leaderboard() {
         <p className="text-center text-muted-foreground text-[10px]">Top bijdragers aan het KMO-Alert netwerk 🚀</p>
       </div>
 
-      {/* Leaderboard Grid - 2 columns */}
-      <div className="flex-1 grid grid-cols-2 gap-1.5 min-h-0">
-        {leaderboard.slice(0, 8).map((entry) => {
+      {/* Top 5 stacked vertically */}
+      <div className="flex-1 flex flex-col gap-1.5 min-h-0">
+        {displayedEntries.map((entry) => {
           const decoration = getRankDecoration(entry.rank);
           return (
             <Card
               key={entry.userId}
-              className={`hover-elevate ${decoration.bg}`}
+              className={`hover-elevate flex-shrink-0 ${decoration.bg}`}
               data-testid={`card-leaderboard-${entry.rank}`}
             >
               <CardContent className="p-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm w-6 text-center flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg w-8 text-center flex-shrink-0">
                     {decoration.emoji}
                   </span>
                   
-                  <Avatar className="h-6 w-6 flex-shrink-0">
+                  <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={entry.profileImageUrl || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
                       {getInitials(entry.userName)}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold truncate flex items-center gap-1" data-testid={`text-leaderboard-name-${entry.rank}`}>
+                    <p className="text-sm font-semibold truncate flex items-center gap-1" data-testid={`text-leaderboard-name-${entry.rank}`}>
                       {entry.userName}
-                      {entry.rank === 1 && <span className="text-[10px]">👑</span>}
+                      {entry.rank === 1 && <span className="text-sm">👑</span>}
                     </p>
-                    <p className="text-[9px] text-muted-foreground">
-                      📄 {entry.invoicesUploaded} · 💳 {entry.paymentsRegistered}
+                    <p className="text-[10px] text-muted-foreground">
+                      📄 {entry.invoicesUploaded} facturen · 💳 {entry.paymentsRegistered} betalingen
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {entry.currentStreak > 0 && (
-                      <span className="text-[10px] text-orange-500">
-                        {entry.currentStreak}{getStreakEmoji(entry.currentStreak)}
+                      <span className="text-xs text-orange-500 font-medium">
+                        {entry.currentStreak}d {getStreakEmoji(entry.currentStreak)}
                       </span>
                     )}
-                    <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4">
-                      <Zap className="h-2.5 w-2.5 mr-0.5" />
+                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                      <Zap className="h-3 w-3 mr-1" />
                       {entry.totalActivity}
                     </Badge>
                   </div>
@@ -122,6 +127,29 @@ export default function Leaderboard() {
           );
         })}
       </div>
+
+      {/* Show more/less button */}
+      {leaderboard.length > 5 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-shrink-0 w-full"
+          onClick={() => setShowAll(!showAll)}
+          data-testid="button-toggle-leaderboard"
+        >
+          {showAll ? (
+            <>
+              <ChevronUp className="h-4 w-4 mr-1" />
+              Minder tonen
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4 mr-1" />
+              Meer tonen ({leaderboard.length - 5} meer)
+            </>
+          )}
+        </Button>
+      )}
 
       {/* Bottom info bar */}
       <div className="flex-shrink-0 bg-primary/5 rounded-lg px-3 py-1.5 border border-primary/20">
