@@ -490,6 +490,46 @@ export async function registerRoutes(
   });
 
   // ============================================
+  // DAILY SUMMARY EMAIL ENDPOINTS
+  // ============================================
+
+  // Preview daily summary (for testing)
+  app.get("/api/email/daily-summary/preview", async (req, res) => {
+    try {
+      const stats = await notificationService.generateDailySummaryStats();
+      const email = notificationService.generateDailySummaryEmail(stats);
+      res.json({ stats, email });
+    } catch (error) {
+      console.error("Error generating daily summary preview:", error);
+      res.status(500).json({ message: "Failed to generate preview" });
+    }
+  });
+
+  // Trigger daily summary send (would be called by cron job)
+  app.post("/api/email/daily-summary/send", async (req, res) => {
+    try {
+      const stats = await notificationService.generateDailySummaryStats();
+      const email = notificationService.generateDailySummaryEmail(stats);
+      
+      // Log the summary generation
+      console.log(`[Daily Summary] Generated for ${new Date().toLocaleDateString("nl-BE")}`);
+      console.log(`[Daily Summary] Stats:`, stats);
+      
+      // In production, this would send to all subscribed users
+      // For now, just return the generated content
+      res.json({ 
+        success: true, 
+        message: "Daily summary generated",
+        stats,
+        emailSubject: email.subject,
+      });
+    } catch (error) {
+      console.error("Error sending daily summary:", error);
+      res.status(500).json({ message: "Failed to send daily summary" });
+    }
+  });
+
+  // ============================================
   // GAMIFICATION / ENGAGEMENT ENDPOINTS
   // ============================================
 

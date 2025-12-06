@@ -244,6 +244,130 @@ export class NotificationService {
 
     return sentCount;
   }
+
+  generateDailySummaryEmail(stats: {
+    newInvoices: number;
+    paymentsReceived: number;
+    overdueAlerts: number;
+    riskChanges: number;
+    topRiskyCompanies: Array<{ name: string; riskScore: number }>;
+    recentActivity: Array<{ message: string; time: string }>;
+  }): { subject: string; html: string } {
+    const today = new Date().toLocaleDateString("nl-BE", { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long' 
+    });
+    
+    const activityHtml = stats.recentActivity.slice(0, 5).map(a => 
+      `<li style="padding: 4px 0; border-bottom: 1px solid #eee;">${a.message} <span style="color: #888; font-size: 12px;">(${a.time})</span></li>`
+    ).join('');
+
+    const riskyCompaniesHtml = stats.topRiskyCompanies.slice(0, 3).map(c => 
+      `<li style="padding: 4px 0;"><strong>${c.name}</strong> - Risico score: ${c.riskScore}</li>`
+    ).join('');
+
+    return {
+      subject: `KMO-Alert Dagelijks Overzicht - ${today}`,
+      html: `
+        <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; background: #fff;">
+          <div style="background: #f97316; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">Goedemorgen!</h1>
+            <p style="margin: 8px 0 0 0; opacity: 0.9;">Je dagelijks overzicht voor ${today}</p>
+          </div>
+          
+          <div style="padding: 24px;">
+            <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+              <div style="flex: 1; background: #f0fdf4; padding: 16px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; font-size: 28px; font-weight: bold; color: #22c55e;">${stats.newInvoices}</p>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">Nieuwe facturen</p>
+              </div>
+              <div style="flex: 1; background: #eff6ff; padding: 16px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; font-size: 28px; font-weight: bold; color: #3b82f6;">${stats.paymentsReceived}</p>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">Betalingen</p>
+              </div>
+              <div style="flex: 1; background: #fef2f2; padding: 16px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; font-size: 28px; font-weight: bold; color: #ef4444;">${stats.overdueAlerts}</p>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">Te laat</p>
+              </div>
+            </div>
+
+            ${stats.topRiskyCompanies.length > 0 ? `
+            <div style="background: #fef3cd; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+              <h3 style="margin: 0 0 12px 0; color: #856404;">Bedrijven om in de gaten te houden</h3>
+              <ul style="margin: 0; padding-left: 20px;">${riskyCompaniesHtml}</ul>
+            </div>
+            ` : ''}
+
+            <div style="margin-bottom: 24px;">
+              <h3 style="margin: 0 0 12px 0; color: #333;">Recente activiteit</h3>
+              <ul style="margin: 0; padding: 0; list-style: none;">${activityHtml || '<li style="color: #888;">Geen recente activiteit</li>'}</ul>
+            </div>
+
+            <div style="text-align: center; padding-top: 16px; border-top: 1px solid #eee;">
+              <a href="https://kmo-alert.be" style="display: inline-block; background: #f97316; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: 500;">
+                Open Dashboard
+              </a>
+            </div>
+          </div>
+          
+          <div style="background: #f9fafb; padding: 16px; text-align: center; border-radius: 0 0 8px 8px;">
+            <p style="margin: 0; font-size: 12px; color: #666;">
+              Je ontvangt deze email omdat je dagelijkse updates hebt ingeschakeld.
+              <br/>
+              <a href="https://kmo-alert.be/settings" style="color: #f97316;">Voorkeuren aanpassen</a>
+            </p>
+          </div>
+        </div>
+      `,
+    };
+  }
+
+  async generateDailySummaryStats(): Promise<{
+    newInvoices: number;
+    paymentsReceived: number;
+    overdueAlerts: number;
+    riskChanges: number;
+    topRiskyCompanies: Array<{ name: string; riskScore: number }>;
+    recentActivity: Array<{ message: string; time: string }>;
+  }> {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const activityFeed = await storage.getActivityFeedSince(yesterday);
+    const riskyCompanies = await storage.getRiskyCompanies(70);
+    const stats = await storage.getDashboardStats();
+
+    const newInvoices = activityFeed.filter(a => a.eventType === 'invoice_uploaded').length;
+    const paymentsReceived = activityFeed.filter(a => a.eventType === 'payment_registered').length;
+
+    return {
+      newInvoices,
+      paymentsReceived,
+      overdueAlerts: stats.overdueInvoices,
+      riskChanges: activityFeed.filter(a => a.eventType.includes('risk')).length,
+      topRiskyCompanies: riskyCompanies.slice(0, 3).map(c => ({
+        name: c.name,
+        riskScore: c.paymentBehavior?.riskScore || 50,
+      })),
+      recentActivity: activityFeed.slice(0, 5).map(a => ({
+        message: a.message,
+        time: this.formatTimeAgo(a.createdAt || new Date()),
+      })),
+    };
+  }
+
+  private formatTimeAgo(date: Date | string): string {
+    const now = new Date();
+    const past = new Date(date);
+    const diffMs = now.getTime() - past.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    if (diffMins < 60) return `${diffMins}m geleden`;
+    if (diffHours < 24) return `${diffHours}u geleden`;
+    return `${Math.floor(diffHours / 24)}d geleden`;
+  }
 }
 
 export const notificationService = new NotificationService();
