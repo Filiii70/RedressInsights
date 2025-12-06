@@ -589,7 +589,7 @@ Wat kunnen wij afspreken?
     for (const event of events) {
       const stats = companyStats.get(event.companyId) || { invoicesUploaded: 0, paymentsRegistered: 0 };
       if (event.eventType === 'invoice_uploaded') stats.invoicesUploaded++;
-      if (event.eventType === 'payment_registered') stats.paymentsRegistered++;
+      if (event.eventType === 'payment_registered' || event.eventType === 'qr_scanned') stats.paymentsRegistered++;
       companyStats.set(event.companyId, stats);
     }
 
