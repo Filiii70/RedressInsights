@@ -15,7 +15,8 @@ import {
   type WeeklyLeaderboard, type EngagementStats,
   type User, type UpsertUser,
   type ActivityFeedItem, type InsertActivityFeedItem, type ActivityFeedWithCompany,
-  type BlacklistEntry, type InsertBlacklistEntry, type BlacklistEntryWithCompany
+  type BlacklistEntry, type InsertBlacklistEntry, type BlacklistEntryWithCompany,
+  type UserStreakInfo, type LeaderboardEntry, type PortfolioRiskScore
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, count, inArray } from "drizzle-orm";
@@ -93,6 +94,17 @@ export interface IStorage {
   updateBlacklistEntry(id: string, updates: Partial<InsertBlacklistEntry>): Promise<BlacklistEntry | undefined>;
   removeFromBlacklist(id: string): Promise<void>;
   autoBlacklistHighRiskCompanies(): Promise<number>; // Returns count of newly blacklisted
+
+  // Streak System (Gamification)
+  getUserStreak(userId: string): Promise<UserStreakInfo>;
+  updateUserStreak(userId: string): Promise<UserStreakInfo>;
+  incrementUserActivity(userId: string, type: 'invoice' | 'payment'): Promise<void>;
+
+  // Leaderboard
+  getUserLeaderboard(period: 'week' | 'month' | 'all'): Promise<LeaderboardEntry[]>;
+
+  // Portfolio Risk Score
+  getPortfolioRiskScore(): Promise<PortfolioRiskScore>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -932,6 +944,242 @@ Wat kunnen wij afspreken?
     }
 
     return blacklistedCount;
+  }
+
+  // ============================================
+  // STREAK SYSTEM (Gamification)
+  // ============================================
+
+  async getUserStreak(userId: string): Promise<UserStreakInfo> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivityDate: null,
+        streakActive: false,
+      };
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+
+    let streakActive = false;
+    if (user.lastActivityDate) {
+      const lastActivity = new Date(user.lastActivityDate);
+      const lastActivityDay = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+      streakActive = lastActivityDay >= yesterday;
+    }
+
+    return {
+      currentStreak: user.currentStreak || 0,
+      longestStreak: user.longestStreak || 0,
+      lastActivityDate: user.lastActivityDate,
+      streakActive,
+    };
+  }
+
+  async updateUserStreak(userId: string): Promise<UserStreakInfo> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivityDate: null,
+        streakActive: false,
+      };
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+
+    let currentStreak = user.currentStreak || 0;
+    let longestStreak = user.longestStreak || 0;
+
+    if (user.lastActivityDate) {
+      const lastActivity = new Date(user.lastActivityDate);
+      const lastActivityDay = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+
+      if (lastActivityDay.getTime() === today.getTime()) {
+        // Already logged activity today - no change
+      } else if (lastActivityDay.getTime() === yesterday.getTime()) {
+        // Consecutive day - increment streak
+        currentStreak += 1;
+      } else {
+        // Streak broken - reset to 1
+        currentStreak = 1;
+      }
+    } else {
+      // First activity ever
+      currentStreak = 1;
+    }
+
+    // Update longest streak if needed
+    if (currentStreak > longestStreak) {
+      longestStreak = currentStreak;
+    }
+
+    // Update user
+    await db.update(users)
+      .set({
+        currentStreak,
+        longestStreak,
+        lastActivityDate: now,
+        updatedAt: now,
+      })
+      .where(eq(users.id, userId));
+
+    return {
+      currentStreak,
+      longestStreak,
+      lastActivityDate: now,
+      streakActive: true,
+    };
+  }
+
+  async incrementUserActivity(userId: string, type: 'invoice' | 'payment'): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const updates: Partial<User> = { updatedAt: new Date() };
+    if (type === 'invoice') {
+      updates.totalInvoicesUploaded = (user.totalInvoicesUploaded || 0) + 1;
+    } else {
+      updates.totalPaymentsRegistered = (user.totalPaymentsRegistered || 0) + 1;
+    }
+
+    await db.update(users)
+      .set(updates)
+      .where(eq(users.id, userId));
+
+    // Also update the streak
+    await this.updateUserStreak(userId);
+  }
+
+  // ============================================
+  // LEADERBOARD
+  // ============================================
+
+  async getUserLeaderboard(period: 'week' | 'month' | 'all'): Promise<LeaderboardEntry[]> {
+    // Get all users
+    const allUsers = await db.select().from(users).orderBy(desc(users.totalInvoicesUploaded));
+
+    const entries: LeaderboardEntry[] = allUsers
+      .filter(u => (u.totalInvoicesUploaded || 0) > 0 || (u.totalPaymentsRegistered || 0) > 0)
+      .map((u, index) => ({
+        userId: u.id,
+        userName: u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : u.email || 'Anoniem',
+        profileImageUrl: u.profileImageUrl,
+        invoicesUploaded: u.totalInvoicesUploaded || 0,
+        paymentsRegistered: u.totalPaymentsRegistered || 0,
+        totalActivity: (u.totalInvoicesUploaded || 0) + (u.totalPaymentsRegistered || 0),
+        currentStreak: u.currentStreak || 0,
+        rank: index + 1,
+      }))
+      .sort((a, b) => b.totalActivity - a.totalActivity)
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
+
+    return entries.slice(0, 20);
+  }
+
+  // ============================================
+  // PORTFOLIO RISK SCORE
+  // ============================================
+
+  async getPortfolioRiskScore(): Promise<PortfolioRiskScore> {
+    // Get all outstanding invoices for our customers
+    const customerCompanies = await db.select().from(companies).where(eq(companies.isCustomer, true));
+    const customerIds = customerCompanies.map(c => c.id);
+    
+    if (customerIds.length === 0) {
+      return {
+        score: 0,
+        trend: 'stable',
+        changeThisWeek: 0,
+        totalOutstanding: 0,
+        highRiskAmount: 0,
+        mediumRiskAmount: 0,
+        lowRiskAmount: 0,
+      };
+    }
+
+    // Get all outstanding invoices
+    const outstandingInvoices = await db.select()
+      .from(invoices)
+      .where(and(
+        inArray(invoices.companyId, customerIds),
+        inArray(invoices.status, ['pending', 'overdue'])
+      ));
+
+    if (outstandingInvoices.length === 0) {
+      return {
+        score: 0,
+        trend: 'stable',
+        changeThisWeek: 0,
+        totalOutstanding: 0,
+        highRiskAmount: 0,
+        mediumRiskAmount: 0,
+        lowRiskAmount: 0,
+      };
+    }
+
+    // Get payment behaviors for risk calculation
+    const behaviors = await db.select()
+      .from(paymentBehavior)
+      .where(inArray(paymentBehavior.companyId, customerIds));
+
+    const behaviorMap = new Map(behaviors.map(b => [b.companyId, b]));
+
+    let totalOutstanding = 0;
+    let highRiskAmount = 0;
+    let mediumRiskAmount = 0;
+    let lowRiskAmount = 0;
+    let weightedRiskSum = 0;
+
+    for (const invoice of outstandingInvoices) {
+      const amount = parseFloat(invoice.amount.toString());
+      totalOutstanding += amount;
+
+      const behavior = behaviorMap.get(invoice.companyId);
+      const riskScore = behavior?.riskScore || 50;
+
+      if (riskScore >= 70) {
+        highRiskAmount += amount;
+      } else if (riskScore >= 40) {
+        mediumRiskAmount += amount;
+      } else {
+        lowRiskAmount += amount;
+      }
+
+      // Weight by amount
+      weightedRiskSum += riskScore * amount;
+    }
+
+    // Calculate portfolio score on 0-10 scale
+    const avgRiskScore = totalOutstanding > 0 ? weightedRiskSum / totalOutstanding : 0;
+    const portfolioScore = Math.round(avgRiskScore / 10 * 10) / 10; // Scale to 0-10
+
+    // Determine trend based on overdue ratio
+    const overdueAmount = outstandingInvoices
+      .filter(i => i.status === 'overdue')
+      .reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+    const overdueRatio = totalOutstanding > 0 ? overdueAmount / totalOutstanding : 0;
+
+    let trend: 'up' | 'down' | 'stable' = 'stable';
+    if (overdueRatio > 0.3) trend = 'up';
+    else if (overdueRatio < 0.1) trend = 'down';
+
+    return {
+      score: portfolioScore,
+      trend,
+      changeThisWeek: 0, // Would need historical data to calculate
+      totalOutstanding,
+      highRiskAmount,
+      mediumRiskAmount,
+      lowRiskAmount,
+    };
   }
 }
 

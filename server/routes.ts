@@ -854,5 +854,75 @@ export async function registerRoutes(
     }
   });
 
+  // ============================================
+  // GAMIFICATION ROUTES
+  // ============================================
+
+  // Get current user's streak info
+  app.get("/api/gamification/streak", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const streakInfo = await storage.getUserStreak(userId);
+      res.json(streakInfo);
+    } catch (error) {
+      console.error("Error fetching streak:", error);
+      res.status(500).json({ message: "Failed to fetch streak info" });
+    }
+  });
+
+  // Update streak (called when user performs an action)
+  app.post("/api/gamification/streak/update", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const streakInfo = await storage.updateUserStreak(userId);
+      res.json(streakInfo);
+    } catch (error) {
+      console.error("Error updating streak:", error);
+      res.status(500).json({ message: "Failed to update streak" });
+    }
+  });
+
+  // Record activity (invoice upload or payment registration)
+  app.post("/api/gamification/activity", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { type } = req.body; // 'invoice' or 'payment'
+      
+      if (!type || !['invoice', 'payment'].includes(type)) {
+        return res.status(400).json({ message: "Invalid activity type" });
+      }
+
+      await storage.incrementUserActivity(userId, type);
+      const streakInfo = await storage.getUserStreak(userId);
+      res.json(streakInfo);
+    } catch (error) {
+      console.error("Error recording activity:", error);
+      res.status(500).json({ message: "Failed to record activity" });
+    }
+  });
+
+  // Get leaderboard
+  app.get("/api/gamification/leaderboard", async (req, res) => {
+    try {
+      const period = (req.query.period as 'week' | 'month' | 'all') || 'all';
+      const leaderboard = await storage.getUserLeaderboard(period);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // Get portfolio risk score
+  app.get("/api/gamification/portfolio-risk", async (req, res) => {
+    try {
+      const portfolioRisk = await storage.getPortfolioRiskScore();
+      res.json(portfolioRisk);
+    } catch (error) {
+      console.error("Error fetching portfolio risk:", error);
+      res.status(500).json({ message: "Failed to fetch portfolio risk" });
+    }
+  });
+
   return httpServer;
 }

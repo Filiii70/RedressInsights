@@ -158,12 +158,49 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  // Streak tracking
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastActivityDate: timestamp("last_activity_date"),
+  totalInvoicesUploaded: integer("total_invoices_uploaded").default(0),
+  totalPaymentsRegistered: integer("total_payments_registered").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// User streak and engagement stats for gamification
+export type UserStreakInfo = {
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: Date | null;
+  streakActive: boolean; // true if user has activity today or yesterday
+};
+
+// Leaderboard entry
+export type LeaderboardEntry = {
+  userId: string;
+  userName: string;
+  profileImageUrl: string | null;
+  invoicesUploaded: number;
+  paymentsRegistered: number;
+  totalActivity: number;
+  currentStreak: number;
+  rank: number;
+};
+
+// Portfolio Risk Score
+export type PortfolioRiskScore = {
+  score: number; // 0-10 scale
+  trend: 'up' | 'down' | 'stable';
+  changeThisWeek: number;
+  totalOutstanding: number;
+  highRiskAmount: number;
+  mediumRiskAmount: number;
+  lowRiskAmount: number;
+};
 
 // ============================================
 // NOTIFICATION & ENGAGEMENT SYSTEM
