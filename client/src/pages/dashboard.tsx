@@ -145,9 +145,9 @@ export default function Dashboard() {
           {/* Portfolio Risk Score Widget */}
           {portfolioRisk && (
             <div 
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md border bg-card"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md border bg-card cursor-help"
               data-testid="widget-portfolio-risk"
-              title={`Totaal uitstaand: €${Math.round(portfolioRisk.totalOutstanding).toLocaleString()}`}
+              title={`Portfolio Risico (0-10): Gewogen gemiddelde van risicoscores van al je klanten. Hoe lager, hoe beter! Uitstaand: €${Math.round(portfolioRisk.totalOutstanding).toLocaleString()}`}
             >
               <Gauge className="h-4 w-4 text-primary" />
               <div className="flex flex-col">
@@ -224,7 +224,7 @@ export default function Dashboard() {
                 <FileText className="h-4 w-4 text-primary flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground truncate">Open facturen</p>
-                  <p className="text-sm font-bold">{stats?.pendingInvoices || 0}</p>
+                  <p className="text-sm font-bold">{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -399,7 +399,7 @@ export default function Dashboard() {
             </span>
             <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-pending">
               <FileText className="h-3 w-3 text-primary" />
-              <span>Open: <strong>{stats?.pendingInvoices || 0} facturen</strong></span>
+              <span>Open: <strong>{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)} facturen</strong></span>
             </span>
             <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-ontime">
               <TrendingUp className="h-3 w-3 text-green-500" />
@@ -424,7 +424,7 @@ export default function Dashboard() {
             </span>
             <span className="inline-flex items-center gap-2 text-xs">
               <FileText className="h-3 w-3 text-primary" />
-              <span>Open: <strong>{stats?.pendingInvoices || 0} facturen</strong></span>
+              <span>Open: <strong>{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)} facturen</strong></span>
             </span>
           </div>
         </div>
