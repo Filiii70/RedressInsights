@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/hooks/useAuth";
+import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Invoices from "@/pages/invoices";
@@ -16,6 +18,18 @@ import RiskAnalysis from "@/pages/risk-analysis";
 import Trends from "@/pages/trends";
 import RegisterPayment from "@/pages/register-payment";
 import Settings from "@/pages/settings";
+import Landing from "@/pages/landing";
+
+function LoadingScreen() {
+  return (
+    <div className="h-screen w-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <Skeleton className="h-12 w-12 rounded-full" />
+        <Skeleton className="h-4 w-32" />
+      </div>
+    </div>
+  );
+}
 
 function AppLayout() {
   const style = {
@@ -53,19 +67,32 @@ function AppLayout() {
   );
 }
 
-function App() {
+function AuthenticatedApp() {
+  const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
   
   const isPublicRoute = location.startsWith("/register-payment");
 
+  if (isPublicRoute) {
+    return <RegisterPayment />;
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!isAuthenticated) {
+    return <Landing />;
+  }
+
+  return <AppLayout />;
+}
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {isPublicRoute ? (
-          <RegisterPayment />
-        ) : (
-          <AppLayout />
-        )}
+        <AuthenticatedApp />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

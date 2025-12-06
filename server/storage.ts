@@ -1,6 +1,7 @@
 import { 
   companies, invoices, paymentBehavior, sectorBenchmarks,
   companyContacts, notifications, invoiceQuickLinks, engagementEvents, weeklySnapshots,
+  users,
   type Company, type InsertCompany, 
   type Invoice, type InsertInvoice,
   type PaymentBehavior, type InsertPaymentBehavior,
@@ -11,7 +12,8 @@ import {
   type InvoiceQuickLink, type InsertQuickLink,
   type EngagementEvent, type InsertEngagementEvent,
   type WeeklySnapshot, type InsertWeeklySnapshot,
-  type WeeklyLeaderboard, type EngagementStats
+  type WeeklyLeaderboard, type EngagementStats,
+  type User, type UpsertUser
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
@@ -68,6 +70,10 @@ export interface IStorage {
   getWeeklyLeaderboard(): Promise<WeeklyLeaderboard[]>;
   getEngagementStats(companyId: string): Promise<EngagementStats>;
   getOverdueInvoicesForAlerts(daysOverdue: number): Promise<InvoiceWithCompany[]>;
+
+  // User operations (Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -669,6 +675,27 @@ Wat kunnen wij afspreken?
       }
     }
     return result;
+  }
+
+  // User operations (Replit Auth)
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 }
 
