@@ -222,7 +222,7 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {criticalInvoices.slice(0, 6).map((invoice) => (
+                  {criticalInvoices.slice(0, 3).map((invoice) => (
                     <TableRow key={invoice.id} className="text-xs" data-testid={`row-invoice-${invoice.id}`}>
                       <TableCell className="py-1.5 font-medium truncate max-w-[120px]">
                         <Link href={`/companies/${invoice.companyId}`} className="hover:underline">
