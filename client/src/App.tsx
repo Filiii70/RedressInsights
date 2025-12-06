@@ -19,6 +19,7 @@ import Blacklist from "@/pages/blacklist";
 import RegisterPayment from "@/pages/register-payment";
 import Settings from "@/pages/settings";
 import Leaderboard from "@/pages/leaderboard";
+import About from "@/pages/about";
 
 function AppLayout() {
   const style = {
@@ -49,6 +50,7 @@ function AppLayout() {
                 <Route path="/blacklist" component={Blacklist} />
                 <Route path="/leaderboard" component={Leaderboard} />
                 <Route path="/settings" component={Settings} />
+                <Route path="/about" component={About} />
                 <Route component={NotFound} />
               </Switch>
             </div>

@@ -14,6 +14,7 @@ import {
   Ban,
   Trophy,
   Flame,
+  Info,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import type { UserStreakInfo } from "@shared/schema";
@@ -183,6 +184,18 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border p-2 mt-auto">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={location === "/about"}
+              className="data-[active=true]:bg-sidebar-accent h-8"
+            >
+              <Link href="/about" data-testid="link-nav-about">
+                <Info className="h-3.5 w-3.5" />
+                <span className="text-sm">Over KMO-Alert</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton data-testid="button-nav-login" className="h-8">
               <LogIn className="h-3.5 w-3.5" />
