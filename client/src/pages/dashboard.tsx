@@ -296,7 +296,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Bottom Row: Aandachtspunten + Netwerk Updates */}
+        {/* Bottom Row: Aandachtspunten + Live Ticker */}
         <div className="grid grid-cols-3 gap-2 min-h-0">
         {/* Aandachtspunten */}
         <Card className="col-span-2">
@@ -340,47 +340,34 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Network Stats & Live Feed */}
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              Community
+        {/* Live Ticker Banner */}
+        <Card className="flex flex-col overflow-hidden bg-gradient-to-b from-primary/5 to-transparent">
+          <CardHeader className="p-2 pb-1 flex-shrink-0">
+            <CardTitle className="text-xs flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              Live
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-2">
-            <div className="grid grid-cols-3 gap-2 text-center mb-2">
-              <div>
-                <Users className="h-4 w-4 mx-auto text-primary mb-1" />
-                <p className="text-sm font-bold">{stats?.reliableClients || 0}+</p>
-                <p className="text-[10px] text-muted-foreground">Partners</p>
+          <CardContent className="p-2 pt-0 flex-1 overflow-hidden relative">
+            {activityFeed && activityFeed.length > 0 ? (
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="animate-scroll-vertical space-y-2 py-1">
+                  {[...activityFeed, ...activityFeed].map((activity, idx) => (
+                    <div
+                      key={`${activity.id}-${idx}`}
+                      onClick={() => setSelectedActivity(activity)}
+                      className="flex items-start gap-2 text-[10px] p-1.5 rounded cursor-pointer hover:bg-accent/50 transition-colors"
+                      data-testid={`live-item-${activity.id}`}
+                    >
+                      <span className="flex-shrink-0">{getActivityEmoji(activity.eventType)}</span>
+                      <span className="line-clamp-2 leading-tight">{activity.message}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div>
-                <Receipt className="h-4 w-4 mx-auto text-green-600 mb-1" />
-                <p className="text-sm font-bold">{stats?.onTimePayments || 0}+</p>
-                <p className="text-[10px] text-muted-foreground">Op tijd</p>
-              </div>
-              <div>
-                <TrendingUp className="h-4 w-4 mx-auto text-green-500 mb-1" />
-                <p className="text-sm font-bold">{stats?.improvedClients || 0}</p>
-                <p className="text-[10px] text-muted-foreground">Verbeterd</p>
-              </div>
-            </div>
-            {activityFeed && activityFeed.length > 0 && (
-              <div className="pt-2 border-t space-y-1">
-                <p className="text-[10px] text-muted-foreground">Recente activiteit (klik voor details):</p>
-                {activityFeed.slice(0, 3).map((activity) => (
-                  <div
-                    key={activity.id}
-                    onClick={() => setSelectedActivity(activity)}
-                    className="flex items-center gap-2 text-xs p-1.5 rounded cursor-pointer hover-elevate border"
-                    data-testid={`activity-item-${activity.id}`}
-                  >
-                    <span>{getActivityEmoji(activity.eventType)}</span>
-                    <span className="truncate flex-1">{activity.message}</span>
-                    <Eye className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                  </div>
-                ))}
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <p className="text-[10px]">Wachten op activiteit...</p>
               </div>
             )}
           </CardContent>
