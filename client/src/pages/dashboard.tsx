@@ -22,6 +22,9 @@ import {
   CheckCircle,
   TrendingUp,
   Sparkles,
+  TrendingDown,
+  Minus,
+  Gauge,
 } from "lucide-react";
 import {
   Dialog,
@@ -40,7 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { DashboardStats, InvoiceWithCompany, CompanyWithBehavior, ActivityFeedWithCompany } from "@shared/schema";
+import type { DashboardStats, InvoiceWithCompany, CompanyWithBehavior, ActivityFeedWithCompany, PortfolioRiskScore } from "@shared/schema";
 import {
   PieChart,
   Pie,
@@ -82,6 +85,10 @@ export default function Dashboard() {
   const { data: activityFeed } = useQuery<ActivityFeedWithCompany[]>({
     queryKey: ["/api/activity/network"],
     refetchInterval: 30000,
+  });
+
+  const { data: portfolioRisk } = useQuery<PortfolioRiskScore>({
+    queryKey: ["/api/gamification/portfolio-risk"],
   });
 
   // Calculate 24h activity summary from feed
@@ -134,12 +141,43 @@ export default function Dashboard() {
           <h1 className="text-lg font-bold" data-testid="text-page-title">Dashboard</h1>
           <p className="text-[10px] text-muted-foreground">Betalingsgedrag register</p>
         </div>
-        <Button size="sm" asChild data-testid="button-upload-invoice">
-          <Link href="/upload">
-            <FileText className="mr-1 h-3 w-3" />
-            Upload
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Portfolio Risk Score Widget */}
+          {portfolioRisk && (
+            <div 
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md border bg-card"
+              data-testid="widget-portfolio-risk"
+              title={`Totaal uitstaand: €${Math.round(portfolioRisk.totalOutstanding).toLocaleString()}`}
+            >
+              <Gauge className="h-4 w-4 text-primary" />
+              <div className="flex flex-col">
+                <span className="text-[9px] text-muted-foreground">Portfolio Risico</span>
+                <div className="flex items-center gap-1">
+                  <span 
+                    className={`text-sm font-bold ${
+                      portfolioRisk.score >= 7 ? 'text-red-500' :
+                      portfolioRisk.score >= 4 ? 'text-orange-500' :
+                      'text-green-500'
+                    }`}
+                    data-testid="text-portfolio-score"
+                  >
+                    {portfolioRisk.score.toFixed(1)}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground">/10</span>
+                  {portfolioRisk.trend === 'up' && <TrendingUp className="h-3 w-3 text-red-500" />}
+                  {portfolioRisk.trend === 'down' && <TrendingDown className="h-3 w-3 text-green-500" />}
+                  {portfolioRisk.trend === 'stable' && <Minus className="h-3 w-3 text-muted-foreground" />}
+                </div>
+              </div>
+            </div>
+          )}
+          <Button size="sm" asChild data-testid="button-upload-invoice">
+            <Link href="/upload">
+              <FileText className="mr-1 h-3 w-3" />
+              Upload
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Compact Stats Row */}
