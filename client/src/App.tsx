@@ -15,6 +15,7 @@ import Upload from "@/pages/upload";
 import CompanyDetail from "@/pages/company-detail";
 import RiskAnalysis from "@/pages/risk-analysis";
 import Trends from "@/pages/trends";
+import Blacklist from "@/pages/blacklist";
 import RegisterPayment from "@/pages/register-payment";
 import Settings from "@/pages/settings";
 
@@ -44,6 +45,7 @@ function AppLayout() {
                 <Route path="/upload" component={Upload} />
                 <Route path="/risk-analysis" component={RiskAnalysis} />
                 <Route path="/trends" component={Trends} />
+                <Route path="/blacklist" component={Blacklist} />
                 <Route path="/settings" component={Settings} />
                 <Route component={NotFound} />
               </Switch>

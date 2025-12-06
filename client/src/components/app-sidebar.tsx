@@ -11,6 +11,7 @@ import {
   LogIn,
   Activity,
   Mail,
+  Ban,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import {
@@ -59,6 +60,11 @@ const analyticsItems = [
     title: "Trends",
     url: "/trends",
     icon: TrendingUp,
+  },
+  {
+    title: "Blacklist",
+    url: "/blacklist",
+    icon: Ban,
   },
 ];
 
