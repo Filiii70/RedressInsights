@@ -33,9 +33,10 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 **Layout Design**
 - Fixed-height layouts on ALL pages - no scrolling
 - Sidebar: Compact, non-scrolling with menu at top, footer at bottom (mt-auto)
-- Dashboard: Two-row grid layout (Actieve opvolging + Klantverdeling / Aandachtspunten + Community)
+- Dashboard: Two-row grid layout (Actieve opvolging + Klantverdeling / Aandachtspunten)
 - All content must fit within viewport height
-- Dashboard sections reframed positively: "Actieve opvolging" (actions), "Klantverdeling" (distribution), "Aandachtspunten" (attention), "Community" (network)
+- Dashboard sections reframed positively: "Actieve opvolging" (actions), "Klantverdeling" (distribution), "Aandachtspunten" (attention)
+- **Bottom Banner**: Scrolling ticker showing KMO-Alert's OWN business data (Ontvangen, Te innen, Achterstallig, Open facturen, Op tijd betaald, Betrouwbare klanten)
 
 **State Management & Data Fetching**
 - TanStack Query (React Query) for server state management, caching, and background refetching
@@ -80,16 +81,16 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 - Dashboard statistics aggregation for real-time insights
 - Blacklist management for high-risk companies
 
-**Engagement & FOMO System**
-- **Public Network Feed**: Shows ONLY public community events (NO private invoice/payment data)
-  - member_joined: New members registering
-  - blacklist_added: Companies added to watchlist
-  - company_added: New companies tracked
-  - member_milestone: Member achievements
-- **Live Ticker**: Scrolling marquee component in header showing public activity stream
-- **FOMO Badge**: Sidebar notification badge showing count of new activities since last visit (24-hour window)
-- **Community Card**: Dashboard section showing network stats and recent public activity
-- Severity levels: info, warning, critical - for visual prioritization
+**Dashboard Data Separation**
+- **Top Stats Row**: Shows KMO-Alert's OWN private business metrics only
+  - Ontvangen (green): Payments received from YOUR customers
+  - Te innen (orange): Outstanding amounts from YOUR customers
+  - Achterstallig (red): Overdue invoices from YOUR customers
+  - Open facturen: Pending invoices to YOUR customers
+- **Bottom Banner**: Scrolling ticker with YOUR company's financial KPIs
+  - Uses `isCustomer = true` filter to show only YOUR client data
+  - NO network/community data mixed in
+- **Data Source**: `/api/dashboard/stats` filters on companies where `isCustomer = true`
 
 **Auto-Blacklist System**
 - High-risk companies (risk score >= 70) automatically added to blacklist
@@ -105,7 +106,7 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 - Footer: Inloggen, Instellingen
 
 **Main Pages**
-- Dashboard: Positive stats row (Op tijd, Betrouwbaar, Ontvangen, Verbeterd), Actieve opvolging (3), Klantverdeling, Aandachtspunten (3), Community
+- Dashboard: Stats row (Ontvangen, Te innen, Achterstallig, Open facturen), Actieve opvolging, Klantverdeling, Aandachtspunten, Bottom banner with scrolling KMO-Alert KPIs
 - Facturen: Invoice list with filtering
 - Bedrijven: Company directory
 - Upload: AI-powered invoice upload
