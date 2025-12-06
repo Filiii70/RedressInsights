@@ -224,7 +224,7 @@ export default function Dashboard() {
                 <FileText className="h-4 w-4 text-primary flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground truncate">Open facturen</p>
-                  <p className="text-sm font-bold">{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)}</p>
+                  <p className="text-sm font-bold">{stats?.pendingInvoices || 0}</p>
                 </div>
               </CardContent>
             </Card>
@@ -377,54 +377,56 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* KMO-Alert Bedrijfsgegevens Banner - Horizontal at bottom */}
-      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
+      {/* KMO-Alert Actie Banner - Horizontal at bottom */}
+      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
         <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
-          <Building2 className="h-3 w-3 text-primary" />
-          <span className="text-[10px] font-medium text-primary">KMO-ALERT</span>
+          <Bell className="h-3 w-3 text-orange-500" />
+          <span className="text-[10px] font-medium text-orange-600">TO-DO</span>
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="animate-scroll-horizontal flex gap-12 whitespace-nowrap">
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-paid">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              <span>Ontvangen: <strong className="text-green-600">{formatCurrency(stats?.totalPaid || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-outstanding">
+            {(stats?.overdueInvoices || 0) > 0 && (
+              <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-call">
+                <AlertTriangle className="h-3 w-3 text-red-500" />
+                <span><strong className="text-red-600">{stats?.overdueInvoices} klanten bellen</strong> - achterstallige facturen</span>
+              </span>
+            )}
+            {(stats?.pendingInvoices || 0) > 0 && (
+              <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-followup">
+                <Clock className="h-3 w-3 text-orange-500" />
+                <span><strong className="text-orange-600">{stats?.pendingInvoices} opvolgen</strong> - binnen betaaltermijn</span>
+              </span>
+            )}
+            {(stats?.highRiskClients || 0) > 0 && (
+              <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-highrisk">
+                <Ban className="h-3 w-3 text-red-500" />
+                <span><strong className="text-red-600">{stats?.highRiskClients} hoog-risico</strong> - voorwaarden herzien</span>
+              </span>
+            )}
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-toinnen">
               <Euro className="h-3 w-3 text-orange-500" />
               <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
             </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-overdue">
-              <Clock className="h-3 w-3 text-red-500" />
-              <span>Achterstallig: <strong className="text-red-600">{stats?.overdueInvoices || 0} facturen</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-pending">
-              <FileText className="h-3 w-3 text-primary" />
-              <span>Open: <strong>{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)} facturen</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-ontime">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span>Op tijd betaald: <strong className="text-green-600">{stats?.onTimePayments || 0}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-reliable">
-              <Users className="h-3 w-3 text-green-500" />
-              <span>Betrouwbare klanten: <strong className="text-green-600">{stats?.reliableClients || 0}</strong></span>
+            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-check">
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span><strong className="text-green-600">{stats?.reliableClients || 0} betrouwbaar</strong> - geen actie nodig</span>
             </span>
             {/* Duplicate for seamless loop */}
-            <span className="inline-flex items-center gap-2 text-xs">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              <span>Ontvangen: <strong className="text-green-600">{formatCurrency(stats?.totalPaid || 0)}</strong></span>
-            </span>
+            {(stats?.overdueInvoices || 0) > 0 && (
+              <span className="inline-flex items-center gap-2 text-xs">
+                <AlertTriangle className="h-3 w-3 text-red-500" />
+                <span><strong className="text-red-600">{stats?.overdueInvoices} klanten bellen</strong> - achterstallige facturen</span>
+              </span>
+            )}
+            {(stats?.pendingInvoices || 0) > 0 && (
+              <span className="inline-flex items-center gap-2 text-xs">
+                <Clock className="h-3 w-3 text-orange-500" />
+                <span><strong className="text-orange-600">{stats?.pendingInvoices} opvolgen</strong> - binnen betaaltermijn</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-2 text-xs">
               <Euro className="h-3 w-3 text-orange-500" />
               <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs">
-              <Clock className="h-3 w-3 text-red-500" />
-              <span>Achterstallig: <strong className="text-red-600">{stats?.overdueInvoices || 0} facturen</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs">
-              <FileText className="h-3 w-3 text-primary" />
-              <span>Open: <strong>{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)} facturen</strong></span>
             </span>
           </div>
         </div>
