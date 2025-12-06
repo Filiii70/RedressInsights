@@ -205,7 +205,7 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-3 pt-0 flex-1 min-h-0 overflow-y-auto">
+          <CardContent className="p-3 pt-0 flex-1 min-h-0 overflow-hidden">
             {invoicesLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 4 }).map((_, i) => (
