@@ -7,6 +7,7 @@ import {
   TrendingUp,
   Shield,
   Settings,
+  LogIn,
 } from "lucide-react";
 import {
   Sidebar,
@@ -130,6 +131,14 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a href="/api/login" data-testid="link-nav-login">
+                <LogIn className="h-4 w-4" />
+                <span>Inloggen</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
