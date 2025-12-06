@@ -124,12 +124,12 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="h-full flex flex-col gap-3">
+    <div className="h-full flex flex-col gap-2">
       {/* Compact Header */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-xl font-bold" data-testid="text-page-title">Dashboard</h1>
-          <p className="text-xs text-muted-foreground">Betalingsgedrag register</p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">Dashboard</h1>
+          <p className="text-[10px] text-muted-foreground">Betalingsgedrag register</p>
         </div>
         <Button size="sm" asChild data-testid="button-upload-invoice">
           <Link href="/upload">
@@ -191,103 +191,105 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Main Content - Two columns */}
-      <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
-        {/* Left: Invoices Table */}
-        <Card className="col-span-2 flex flex-col min-h-0 overflow-hidden">
-          <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-sm flex-shrink-0">Kritieke facturen</CardTitle>
-              <Button variant="ghost" size="sm" className="h-6 text-xs flex-shrink-0" asChild>
-                <Link href="/invoices">
-                  Alle <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 flex-1 min-h-0 overflow-hidden">
-            {invoicesLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-full" />
+      {/* Main Content - Two rows */}
+      <div className="flex-1 grid grid-rows-2 gap-2 min-h-0">
+        {/* Top Row: Kritieke facturen + Risicoverdeling */}
+        <div className="grid grid-cols-3 gap-2 min-h-0">
+          {/* Kritieke facturen */}
+          <Card className="col-span-2 flex flex-col min-h-0 overflow-hidden">
+            <CardHeader className="p-2 pb-1 flex-shrink-0">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-xs flex-shrink-0">Kritieke facturen</CardTitle>
+                <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2 flex-shrink-0" asChild>
+                  <Link href="/invoices">
+                    Alle <ArrowRight className="ml-1 h-2.5 w-2.5" />
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 pt-0 flex-1 min-h-0 overflow-hidden">
+              {invoicesLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-6 w-full" />
+                  ))}
+                </div>
+              ) : criticalInvoices && criticalInvoices.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] py-0.5">Bedrijf</TableHead>
+                      <TableHead className="text-[10px] py-0.5">Bedrag</TableHead>
+                      <TableHead className="text-[10px] py-0.5">Te laat</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {criticalInvoices.slice(0, 3).map((invoice) => (
+                      <TableRow key={invoice.id} className="text-xs" data-testid={`row-invoice-${invoice.id}`}>
+                        <TableCell className="py-1 font-medium truncate max-w-[100px]">
+                          <Link href={`/companies/${invoice.companyId}`} className="hover:underline">
+                            {invoice.company?.name || "Onbekend"}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="py-1 font-mono text-[10px]">
+                          {formatCurrency(invoice.amount)}
+                        </TableCell>
+                        <TableCell className="py-1">
+                          <span className="text-red-600 font-medium text-[10px]">{invoice.daysLate || 0}d</span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <FileText className="h-6 w-6 text-muted-foreground/50 mb-1" />
+                  <p className="text-[10px] text-muted-foreground">Nog geen facturen</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Risicoverdeling */}
+          <Card className="flex flex-col min-h-0 overflow-hidden">
+            <CardHeader className="p-2 pb-0 flex-shrink-0">
+              <CardTitle className="text-xs">Risicoverdeling</CardTitle>
+            </CardHeader>
+            <CardContent className="p-2 pt-0 flex-1 flex flex-col min-h-0">
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={riskDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="35%"
+                      outerRadius="65%"
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {riskDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => [`${value}%`, ""]} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap justify-center gap-1 flex-shrink-0">
+                {riskDistributionData.map((item) => (
+                  <div key={item.name} className="flex items-center gap-0.5 text-[9px]">
+                    <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span>{item.name}</span>
+                  </div>
                 ))}
               </div>
-            ) : criticalInvoices && criticalInvoices.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs py-1">Bedrijf</TableHead>
-                    <TableHead className="text-xs py-1">Bedrag</TableHead>
-                    <TableHead className="text-xs py-1">Te laat</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {criticalInvoices.slice(0, 3).map((invoice) => (
-                    <TableRow key={invoice.id} className="text-xs" data-testid={`row-invoice-${invoice.id}`}>
-                      <TableCell className="py-1.5 font-medium truncate max-w-[120px]">
-                        <Link href={`/companies/${invoice.companyId}`} className="hover:underline">
-                          {invoice.company?.name || "Onbekend"}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="py-1.5 font-mono text-xs">
-                        {formatCurrency(invoice.amount)}
-                      </TableCell>
-                      <TableCell className="py-1.5">
-                        <span className="text-red-600 font-medium">{invoice.daysLate || 0}d</span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <FileText className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                <p className="text-xs text-muted-foreground">Nog geen facturen</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Right: Risk Chart */}
-        <Card className="flex flex-col min-h-0 overflow-hidden">
-          <CardHeader className="p-3 pb-1 flex-shrink-0">
-            <CardTitle className="text-sm">Risicoverdeling</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 flex-1 flex flex-col min-h-0">
-            <div className="flex-1 min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={riskDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="40%"
-                    outerRadius="70%"
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {riskDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => [`${value}%`, ""]} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 flex-shrink-0">
-              {riskDistributionData.map((item) => (
-                <div key={item.name} className="flex items-center gap-1 text-xs">
-                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span>{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom Row - Compact */}
-      <div className="grid grid-cols-3 gap-3 flex-shrink-0">
+        {/* Bottom Row: Risico bedrijven + Netwerk Updates */}
+        <div className="grid grid-cols-3 gap-2 min-h-0">
         {/* Risky Companies */}
         <Card className="col-span-2">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
@@ -369,6 +371,7 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Activity Detail Dialog */}
