@@ -1,11 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
 import { TrendIndicator } from "@/components/trend-indicator";
 import { Link } from "wouter";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Euro,
   Clock,
@@ -16,7 +17,18 @@ import {
   Users,
   Receipt,
   Bell,
+  Ban,
+  Eye,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
   Table,
   TableBody,
@@ -75,6 +87,34 @@ export default function Dashboard() {
     payments: activityFeed.filter(a => a.eventType === 'payment_registered').length,
     alerts: activityFeed.filter(a => a.eventType === 'risk_alert').length,
   } : { invoices: 0, payments: 0, alerts: 0 };
+
+  const { toast } = useToast();
+  const [selectedActivity, setSelectedActivity] = useState<ActivityFeedWithCompany | null>(null);
+
+  const blacklistMutation = useMutation({
+    mutationFn: async (data: { companyId: string; reason: string; riskScoreAtTime?: number }) => {
+      return apiRequest("POST", "/api/blacklist", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blacklist"] });
+      toast({ title: "Toegevoegd", description: "Bedrijf is toegevoegd aan de blacklist" });
+      setSelectedActivity(null);
+    },
+    onError: () => {
+      toast({ title: "Fout", description: "Kon niet toevoegen aan blacklist", variant: "destructive" });
+    },
+  });
+
+  const getActivityEmoji = (eventType: string) => {
+    switch (eventType) {
+      case 'invoice_uploaded': return '📄';
+      case 'payment_registered': return '💰';
+      case 'risk_alert': return '⚠️';
+      case 'risk_improvement': return '📈';
+      case 'company_added': return '🏢';
+      default: return '📌';
+    }
+  };
 
   const riskDistributionData = [
     { name: "Laag", value: 35, color: "#22c55e" },
@@ -288,12 +328,12 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="p-3 pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              Netwerk & Alerts
+              Netwerk Updates
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 space-y-2">
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="grid grid-cols-3 gap-2 text-center mb-2">
               <div>
                 <Users className="h-4 w-4 mx-auto text-primary mb-1" />
                 <p className="text-sm font-bold">{riskyCompanies?.length || 0}+</p>
@@ -311,19 +351,104 @@ export default function Dashboard() {
               </div>
             </div>
             {activityFeed && activityFeed.length > 0 && (
-              <div className="pt-2 border-t">
-                <p className="text-[10px] text-muted-foreground mb-1">Laatste 24 uur:</p>
-                <div className="flex items-center justify-between text-xs">
-                  <span>📄 {activitySummary.invoices} facturen</span>
-                  <span>💰 {activitySummary.payments} betalingen</span>
-                  <span>⚠️ {activitySummary.alerts} alerts</span>
-                </div>
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-[10px] text-muted-foreground">Recente activiteit (klik voor details):</p>
+                {activityFeed.slice(0, 3).map((activity) => (
+                  <div
+                    key={activity.id}
+                    onClick={() => setSelectedActivity(activity)}
+                    className="flex items-center gap-2 text-xs p-1.5 rounded cursor-pointer hover-elevate border"
+                    data-testid={`activity-item-${activity.id}`}
+                  >
+                    <span>{getActivityEmoji(activity.eventType)}</span>
+                    <span className="truncate flex-1">{activity.message}</span>
+                    <Eye className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
+      {/* Activity Detail Dialog */}
+      <Dialog open={!!selectedActivity} onOpenChange={(open) => !open && setSelectedActivity(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedActivity && getActivityEmoji(selectedActivity.eventType)}
+              Netwerk Update
+            </DialogTitle>
+            <DialogDescription>Details van deze activiteit</DialogDescription>
+          </DialogHeader>
+          {selectedActivity && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Bericht</p>
+                <p className="text-sm font-medium">{selectedActivity.message}</p>
+              </div>
+              
+              {selectedActivity.company && (
+                <>
+                  <div className="p-3 rounded border bg-muted/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Building2 className="h-4 w-4" />
+                      <span className="font-medium">{selectedActivity.company.name}</span>
+                      {selectedActivity.company.isCustomer && (
+                        <Badge variant="outline" className="text-[10px] border-blue-500 text-blue-500">Klant</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{selectedActivity.company.vatNumber}</p>
+                    {selectedActivity.company.sector && (
+                      <p className="text-xs text-muted-foreground">Sector: {selectedActivity.company.sector}</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Link href={`/companies/${selectedActivity.company.id}`}>
+                      <Button size="sm" variant="outline" data-testid="button-view-company">
+                        <Building2 className="h-3 w-3 mr-1" />
+                        Bekijk Bedrijf
+                      </Button>
+                    </Link>
+                    
+                    {(selectedActivity.eventType === 'risk_alert' || selectedActivity.severity === 'critical') && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => blacklistMutation.mutate({
+                          companyId: selectedActivity.company!.id,
+                          reason: selectedActivity.message,
+                          riskScoreAtTime: 80,
+                        })}
+                        disabled={blacklistMutation.isPending}
+                        data-testid="button-add-blacklist"
+                      >
+                        <Ban className="h-3 w-3 mr-1" />
+                        Blacklist
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t">
+                <span>Type: {selectedActivity.eventType}</span>
+                {selectedActivity.severity && (
+                  <Badge 
+                    variant={selectedActivity.severity === 'critical' ? 'destructive' : 
+                             selectedActivity.severity === 'warning' ? 'secondary' : 'outline'}
+                    className="text-[10px]"
+                  >
+                    {selectedActivity.severity}
+                  </Badge>
+                )}
+                <span>{formatDate(selectedActivity.createdAt || new Date())}</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
