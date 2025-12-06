@@ -6,6 +6,7 @@ import { StatCard } from "@/components/stat-card";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { TrendIndicator } from "@/components/trend-indicator";
+import { LeaderboardWidget } from "@/components/leaderboard-widget";
 import { Link } from "wouter";
 import {
   Euro,
@@ -204,7 +205,7 @@ export default function Dashboard() {
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
                 <p className="text-muted-foreground">Nog geen facturen</p>
-                <Button asChild variant="link" className="mt-2" data-testid="link-upload-first-invoice">
+                <Button asChild variant="ghost" className="mt-2" data-testid="link-upload-first-invoice">
                   <Link href="/upload">Upload je eerste factuur</Link>
                 </Button>
               </div>
@@ -375,6 +376,37 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Gamification Section */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <LeaderboardWidget />
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Netwerk Groei</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="p-4 rounded-lg bg-primary/5">
+                  <p className="text-3xl font-bold text-primary">50+</p>
+                  <p className="text-sm text-muted-foreground">Bedrijven</p>
+                </div>
+                <div className="p-4 rounded-lg bg-green-500/5">
+                  <p className="text-3xl font-bold text-green-600">230+</p>
+                  <p className="text-sm text-muted-foreground">Facturen</p>
+                </div>
+                <div className="p-4 rounded-lg bg-blue-500/5">
+                  <p className="text-3xl font-bold text-blue-600">€2.1M</p>
+                  <p className="text-sm text-muted-foreground">Totaal Volume</p>
+                </div>
+              </div>
+              <p className="text-xs text-center text-muted-foreground mt-4">
+                Hoe meer bedrijven meedoen, hoe betrouwbaarder de data. Nodig collega's uit!
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

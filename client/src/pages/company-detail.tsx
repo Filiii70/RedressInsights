@@ -9,6 +9,8 @@ import { TrendIndicator } from "@/components/trend-indicator";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { ActionPlanPanel } from "@/components/action-plan-panel";
 import { StatCard } from "@/components/stat-card";
+import { QRCodeCard } from "@/components/qr-code-card";
+import { EngagementStats } from "@/components/engagement-stats";
 import { Link } from "wouter";
 import {
   Table,
@@ -377,6 +379,23 @@ export default function CompanyDetail() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Engagement Stats */}
+          <div className="mt-6">
+            <EngagementStats companyId={companyId || ""} />
+          </div>
+
+          {/* QR Code for first pending/overdue invoice */}
+          {invoices && invoices.length > 0 && (
+            <div className="mt-6">
+              {invoices.filter(inv => inv.status !== "paid")[0] && (
+                <QRCodeCard 
+                  invoiceId={invoices.filter(inv => inv.status !== "paid")[0].id}
+                  invoiceNumber={invoices.filter(inv => inv.status !== "paid")[0].invoiceNumber || undefined}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
