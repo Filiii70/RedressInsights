@@ -135,6 +135,11 @@ export type DashboardStats = {
   highRiskClients: number;
   pendingInvoices: number;
   overdueInvoices: number;
+  // Positive metrics
+  onTimePayments: number;
+  reliableClients: number;
+  paidThisMonth: number;
+  improvedClients: number;
 };
 
 export type ActionPlan = {

@@ -335,6 +335,20 @@ export class DatabaseStorage implements IStorage {
     const behaviors = await db.select().from(paymentBehavior);
     const highRiskClients = behaviors.filter(b => (b.riskScore || 0) > 70).length;
 
+    // Positive metrics
+    const onTimePayments = paidInvoices.filter(i => (i.daysLate || 0) <= 0).length;
+    const reliableClients = behaviors.filter(b => (b.riskScore || 0) <= 30).length;
+    
+    // Paid this month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const paidThisMonth = paidInvoices
+      .filter(i => i.paymentDate && new Date(i.paymentDate) >= startOfMonth)
+      .reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+    
+    // Clients whose risk improved (trend = improving)
+    const improvedClients = behaviors.filter(b => b.trend === 'improving').length;
+
     return {
       totalOutstanding,
       totalPaid,
@@ -342,6 +356,10 @@ export class DatabaseStorage implements IStorage {
       highRiskClients,
       pendingInvoices: pendingInvoices.length,
       overdueInvoices: overdueInvoices.length,
+      onTimePayments,
+      reliableClients,
+      paidThisMonth,
+      improvedClients,
     };
   }
 
