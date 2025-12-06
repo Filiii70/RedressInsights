@@ -15,8 +15,10 @@ import {
   Building2,
   Users,
   Receipt,
-  TrendingUp,
+  Bell,
+  Mail,
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import {
   Table,
   TableBody,
@@ -280,12 +282,12 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Network Stats */}
+        {/* Network Stats & Notifications */}
         <Card className="overflow-visible">
           <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Netwerk</CardTitle>
+            <CardTitle className="text-sm">Netwerk & Alerts</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0">
+          <CardContent className="p-3 pt-0 space-y-3">
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <Users className="h-4 w-4 mx-auto text-primary mb-1" />
@@ -298,10 +300,15 @@ export default function Dashboard() {
                 <p className="text-[10px] text-muted-foreground">Facturen</p>
               </div>
               <div>
-                <TrendingUp className="h-4 w-4 mx-auto text-blue-600 mb-1" />
-                <p className="text-sm font-bold">€2.1M</p>
-                <p className="text-[10px] text-muted-foreground">Volume</p>
+                <Bell className="h-4 w-4 mx-auto text-orange-500 mb-1" />
+                <p className="text-sm font-bold">Real-time</p>
+                <p className="text-[10px] text-muted-foreground">Alerts</p>
               </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-1 border-t">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <SiWhatsapp className="h-4 w-4 text-green-500" />
+              <span className="text-[10px] text-muted-foreground">Notificaties via Email & WhatsApp</span>
             </div>
           </CardContent>
         </Card>
