@@ -108,14 +108,14 @@ export default function Dashboard() {
     },
   });
 
-  const getActivityEmoji = (eventType: string) => {
+  const getActivityIcon = (eventType: string) => {
     switch (eventType) {
-      case 'invoice_uploaded': return '📄';
-      case 'payment_registered': return '💰';
-      case 'risk_alert': return '⚠️';
-      case 'risk_improvement': return '📈';
-      case 'company_added': return '🏢';
-      default: return '📌';
+      case 'member_joined': return <Users className="h-3 w-3 text-green-500" />;
+      case 'company_added': return <Building2 className="h-3 w-3 text-blue-500" />;
+      case 'member_milestone': return <TrendingUp className="h-3 w-3 text-green-600" />;
+      case 'blacklist_added': return <AlertTriangle className="h-3 w-3 text-orange-500" />;
+      case 'risk_improvement': return <TrendingUp className="h-3 w-3 text-green-500" />;
+      default: return <Bell className="h-3 w-3 text-muted-foreground" />;
     }
   };
 
@@ -355,7 +355,7 @@ export default function Dashboard() {
                   className="inline-flex items-center gap-2 text-xs cursor-pointer hover:text-primary transition-colors"
                   data-testid={`live-item-${activity.id}`}
                 >
-                  <span>{getActivityEmoji(activity.eventType)}</span>
+                  {getActivityIcon(activity.eventType)}
                   <span>{activity.message}</span>
                 </span>
               ))}
@@ -373,7 +373,7 @@ export default function Dashboard() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {selectedActivity && getActivityEmoji(selectedActivity.eventType)}
+              {selectedActivity && getActivityIcon(selectedActivity.eventType)}
               Netwerk Update
             </DialogTitle>
             <DialogDescription>Details van deze activiteit</DialogDescription>
