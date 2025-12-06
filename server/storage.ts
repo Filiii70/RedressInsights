@@ -1,13 +1,20 @@
 import { 
   companies, invoices, paymentBehavior, sectorBenchmarks,
+  companyContacts, notifications, invoiceQuickLinks, engagementEvents, weeklySnapshots,
   type Company, type InsertCompany, 
   type Invoice, type InsertInvoice,
   type PaymentBehavior, type InsertPaymentBehavior,
   type CompanyWithBehavior, type InvoiceWithCompany, type DashboardStats,
-  type ActionPlan
+  type ActionPlan,
+  type CompanyContact, type InsertCompanyContact,
+  type Notification, type InsertNotification,
+  type InvoiceQuickLink, type InsertQuickLink,
+  type EngagementEvent, type InsertEngagementEvent,
+  type WeeklySnapshot, type InsertWeeklySnapshot,
+  type WeeklyLeaderboard, type EngagementStats
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   // Companies
@@ -36,6 +43,28 @@ export interface IStorage {
 
   // Action Plan
   getActionPlan(companyId: string): Promise<ActionPlan>;
+
+  // Company Contacts (Notifications)
+  getCompanyContact(companyId: string): Promise<CompanyContact | undefined>;
+  upsertCompanyContact(contact: InsertCompanyContact): Promise<CompanyContact>;
+
+  // Notifications
+  getNotifications(companyId?: string): Promise<Notification[]>;
+  getPendingNotifications(): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  updateNotificationStatus(id: string, status: string, errorMessage?: string): Promise<Notification | undefined>;
+
+  // Invoice Quick Links (QR Codes)
+  getQuickLink(token: string): Promise<InvoiceQuickLink | undefined>;
+  getQuickLinkByInvoice(invoiceId: string): Promise<InvoiceQuickLink | undefined>;
+  createQuickLink(quickLink: InsertQuickLink): Promise<InvoiceQuickLink>;
+  incrementQuickLinkClicks(token: string): Promise<void>;
+
+  // Engagement Events (Gamification)
+  createEngagementEvent(event: InsertEngagementEvent): Promise<EngagementEvent>;
+  getWeeklyLeaderboard(): Promise<WeeklyLeaderboard[]>;
+  getEngagementStats(companyId: string): Promise<EngagementStats>;
+  getOverdueInvoicesForAlerts(daysOverdue: number): Promise<InvoiceWithCompany[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -410,6 +439,215 @@ Wat kunnen wij afspreken?
       phoneScript,
       escalationAdvice,
     };
+  }
+
+  // Company Contacts (Notifications)
+  async getCompanyContact(companyId: string): Promise<CompanyContact | undefined> {
+    const [contact] = await db.select().from(companyContacts).where(eq(companyContacts.companyId, companyId));
+    return contact;
+  }
+
+  async upsertCompanyContact(contact: InsertCompanyContact): Promise<CompanyContact> {
+    const existing = await this.getCompanyContact(contact.companyId);
+    
+    if (existing) {
+      const [updated] = await db.update(companyContacts)
+        .set({ ...contact, updatedAt: new Date() })
+        .where(eq(companyContacts.companyId, contact.companyId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(companyContacts).values(contact).returning();
+      return created;
+    }
+  }
+
+  // Notifications
+  async getNotifications(companyId?: string): Promise<Notification[]> {
+    if (companyId) {
+      return db.select().from(notifications)
+        .where(eq(notifications.companyId, companyId))
+        .orderBy(desc(notifications.createdAt));
+    }
+    return db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(100);
+  }
+
+  async getPendingNotifications(): Promise<Notification[]> {
+    return db.select().from(notifications)
+      .where(eq(notifications.status, "pending"))
+      .orderBy(notifications.scheduledFor);
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [created] = await db.insert(notifications).values(notification).returning();
+    return created;
+  }
+
+  async updateNotificationStatus(id: string, status: string, errorMessage?: string): Promise<Notification | undefined> {
+    const updateData: Partial<Notification> = { status };
+    if (status === "sent") {
+      updateData.sentAt = new Date();
+    }
+    if (errorMessage) {
+      updateData.errorMessage = errorMessage;
+    }
+    const [updated] = await db.update(notifications)
+      .set(updateData)
+      .where(eq(notifications.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Invoice Quick Links (QR Codes)
+  async getQuickLink(token: string): Promise<InvoiceQuickLink | undefined> {
+    const [link] = await db.select().from(invoiceQuickLinks).where(eq(invoiceQuickLinks.token, token));
+    return link;
+  }
+
+  async getQuickLinkByInvoice(invoiceId: string): Promise<InvoiceQuickLink | undefined> {
+    const [link] = await db.select().from(invoiceQuickLinks).where(eq(invoiceQuickLinks.invoiceId, invoiceId));
+    return link;
+  }
+
+  async createQuickLink(quickLink: InsertQuickLink): Promise<InvoiceQuickLink> {
+    const [created] = await db.insert(invoiceQuickLinks).values(quickLink).returning();
+    return created;
+  }
+
+  async incrementQuickLinkClicks(token: string): Promise<void> {
+    await db.update(invoiceQuickLinks)
+      .set({ 
+        clicks: sql`${invoiceQuickLinks.clicks} + 1`,
+        lastClickedAt: new Date()
+      })
+      .where(eq(invoiceQuickLinks.token, token));
+  }
+
+  // Engagement Events (Gamification)
+  async createEngagementEvent(event: InsertEngagementEvent): Promise<EngagementEvent> {
+    const [created] = await db.insert(engagementEvents).values(event).returning();
+    return created;
+  }
+
+  async getWeeklyLeaderboard(): Promise<WeeklyLeaderboard[]> {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    
+    const events = await db.select()
+      .from(engagementEvents)
+      .where(gte(engagementEvents.createdAt, weekStart));
+
+    // Aggregate by company
+    const companyStats = new Map<string, { invoicesUploaded: number; paymentsRegistered: number }>();
+    
+    for (const event of events) {
+      const stats = companyStats.get(event.companyId) || { invoicesUploaded: 0, paymentsRegistered: 0 };
+      if (event.eventType === 'invoice_uploaded') stats.invoicesUploaded++;
+      if (event.eventType === 'payment_registered') stats.paymentsRegistered++;
+      companyStats.set(event.companyId, stats);
+    }
+
+    // Get company names and create leaderboard
+    const leaderboard: WeeklyLeaderboard[] = [];
+    const entries = Array.from(companyStats.entries());
+    for (const [companyId, stats] of entries) {
+      const company = await this.getCompany(companyId);
+      if (company) {
+        leaderboard.push({
+          companyId,
+          companyName: company.name,
+          invoicesUploaded: stats.invoicesUploaded,
+          paymentsRegistered: stats.paymentsRegistered,
+          totalActivity: stats.invoicesUploaded + stats.paymentsRegistered,
+          rank: 0,
+        });
+      }
+    }
+
+    // Sort and assign ranks
+    leaderboard.sort((a, b) => b.totalActivity - a.totalActivity);
+    leaderboard.forEach((item, index) => {
+      item.rank = index + 1;
+    });
+
+    return leaderboard.slice(0, 10);
+  }
+
+  async getEngagementStats(companyId: string): Promise<EngagementStats> {
+    const now = new Date();
+    const thisWeekStart = new Date(now);
+    thisWeekStart.setDate(now.getDate() - 7);
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+
+    // This week's events
+    const thisWeekEvents = await db.select()
+      .from(engagementEvents)
+      .where(and(
+        eq(engagementEvents.companyId, companyId),
+        gte(engagementEvents.createdAt, thisWeekStart)
+      ));
+
+    // Last week's events
+    const lastWeekEvents = await db.select()
+      .from(engagementEvents)
+      .where(and(
+        eq(engagementEvents.companyId, companyId),
+        gte(engagementEvents.createdAt, lastWeekStart),
+        lte(engagementEvents.createdAt, thisWeekStart)
+      ));
+
+    // Network average (all companies this week)
+    const allThisWeekEvents = await db.select()
+      .from(engagementEvents)
+      .where(gte(engagementEvents.createdAt, thisWeekStart));
+
+    const countByType = (events: EngagementEvent[], type: string) => 
+      events.filter(e => e.eventType === type).length;
+
+    const uniqueCompanies = new Set(allThisWeekEvents.map(e => e.companyId)).size || 1;
+
+    // Get rank from leaderboard
+    const leaderboard = await this.getWeeklyLeaderboard();
+    const myRank = leaderboard.find(l => l.companyId === companyId)?.rank || 0;
+    const totalCompanies = leaderboard.length || 1;
+    const percentile = myRank > 0 ? Math.round((1 - (myRank / totalCompanies)) * 100) : 0;
+
+    return {
+      thisWeek: {
+        invoicesUploaded: countByType(thisWeekEvents, 'invoice_uploaded'),
+        paymentsRegistered: countByType(thisWeekEvents, 'payment_registered'),
+        qrScans: countByType(thisWeekEvents, 'qr_scanned'),
+      },
+      lastWeek: {
+        invoicesUploaded: countByType(lastWeekEvents, 'invoice_uploaded'),
+        paymentsRegistered: countByType(lastWeekEvents, 'payment_registered'),
+        qrScans: countByType(lastWeekEvents, 'qr_scanned'),
+      },
+      networkAverage: {
+        invoicesUploaded: Math.round(countByType(allThisWeekEvents, 'invoice_uploaded') / uniqueCompanies),
+        paymentsRegistered: Math.round(countByType(allThisWeekEvents, 'payment_registered') / uniqueCompanies),
+      },
+      rank: myRank,
+      percentile,
+    };
+  }
+
+  async getOverdueInvoicesForAlerts(daysOverdue: number): Promise<InvoiceWithCompany[]> {
+    const allInvoices = await db.select().from(invoices)
+      .where(and(
+        eq(invoices.status, "overdue"),
+        gte(invoices.daysLate, daysOverdue)
+      ));
+
+    const result: InvoiceWithCompany[] = [];
+    for (const invoice of allInvoices) {
+      const [company] = await db.select().from(companies).where(eq(companies.id, invoice.companyId));
+      if (company) {
+        result.push({ ...invoice, company });
+      }
+    }
+    return result;
   }
 }
 

@@ -2,7 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { extractInvoiceData, extractInvoiceDataFromPdf } from "./openai";
+import { qrCodeService } from "./qrcode";
+import { notificationService } from "./notifications";
 import multer from "multer";
+import { insertCompanyContactSchema } from "@shared/schema";
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -274,6 +277,274 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating company:", error);
       res.status(500).json({ message: "Failed to update company" });
+    }
+  });
+
+  // ============================================
+  // QR CODE / QUICK LINK ENDPOINTS
+  // ============================================
+
+  // Generate QR code for an invoice
+  app.post("/api/invoices/:id/qr", async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const quickLink = await qrCodeService.generateQuickLink(req.params.id);
+      const qrDataUrl = await qrCodeService.generateQRCodeDataUrl(quickLink.token);
+      const url = qrCodeService.getQuickLinkUrl(quickLink.token);
+
+      res.json({
+        token: quickLink.token,
+        qrCodeDataUrl: qrDataUrl,
+        url,
+        clicks: quickLink.clicks,
+      });
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      res.status(500).json({ message: "Failed to generate QR code" });
+    }
+  });
+
+  // Get existing QR code for invoice
+  app.get("/api/invoices/:id/qr", async (req, res) => {
+    try {
+      const quickLink = await storage.getQuickLinkByInvoice(req.params.id);
+      if (!quickLink) {
+        return res.status(404).json({ message: "No QR code found for this invoice" });
+      }
+
+      const qrDataUrl = await qrCodeService.generateQRCodeDataUrl(quickLink.token);
+      const url = qrCodeService.getQuickLinkUrl(quickLink.token);
+
+      res.json({
+        token: quickLink.token,
+        qrCodeDataUrl: qrDataUrl,
+        url,
+        clicks: quickLink.clicks,
+        createdAt: quickLink.createdAt,
+      });
+    } catch (error) {
+      console.error("Error fetching QR code:", error);
+      res.status(500).json({ message: "Failed to fetch QR code" });
+    }
+  });
+
+  // Public QR code redirect endpoint - "Betaald? Registreer in 30 sec"
+  app.get("/qr/:token", async (req, res) => {
+    try {
+      const invoiceId = await qrCodeService.handleQuickLinkClick(req.params.token);
+      
+      if (!invoiceId) {
+        return res.redirect("/?error=invalid_qr");
+      }
+
+      // Redirect to payment registration page
+      res.redirect(`/register-payment/${invoiceId}`);
+    } catch (error) {
+      console.error("Error handling QR code click:", error);
+      res.redirect("/?error=qr_error");
+    }
+  });
+
+  // ============================================
+  // NOTIFICATION / CONTACT ENDPOINTS
+  // ============================================
+
+  // Get company contact info
+  app.get("/api/companies/:id/contact", async (req, res) => {
+    try {
+      const contact = await storage.getCompanyContact(req.params.id);
+      res.json(contact || null);
+    } catch (error) {
+      console.error("Error fetching contact:", error);
+      res.status(500).json({ message: "Failed to fetch contact" });
+    }
+  });
+
+  // Create or update company contact info
+  app.put("/api/companies/:id/contact", async (req, res) => {
+    try {
+      const contactData = {
+        ...req.body,
+        companyId: req.params.id,
+      };
+
+      const parsed = insertCompanyContactSchema.safeParse(contactData);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid contact data", errors: parsed.error.errors });
+      }
+
+      const contact = await storage.upsertCompanyContact(parsed.data);
+      res.json(contact);
+    } catch (error) {
+      console.error("Error updating contact:", error);
+      res.status(500).json({ message: "Failed to update contact" });
+    }
+  });
+
+  // Get notification history
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const companyId = req.query.companyId as string | undefined;
+      const notifications = await storage.getNotifications(companyId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Test send notification (for development)
+  app.post("/api/notifications/test", async (req, res) => {
+    try {
+      const { companyId, type, channel } = req.body;
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      let subject = "";
+      let content = "";
+
+      if (type === "onboarding") {
+        const email = notificationService.generateOnboardingEmail(company.name);
+        subject = email.subject;
+        content = email.html;
+      } else if (type === "weekly_digest") {
+        const stats = await storage.getDashboardStats();
+        const email = notificationService.generateWeeklyDigestEmail(company.name, stats);
+        subject = email.subject;
+        content = email.html;
+      } else if (type === "critical_alert") {
+        content = notificationService.generateCriticalAlertSMS(company, 30, 5000);
+        subject = "Kritieke factuur alert";
+      }
+
+      const success = await notificationService.sendNotification(
+        companyId,
+        type,
+        channel,
+        subject,
+        content
+      );
+
+      res.json({ success, message: success ? "Notification sent/logged" : "Failed to send" });
+    } catch (error) {
+      console.error("Error sending test notification:", error);
+      res.status(500).json({ message: "Failed to send notification" });
+    }
+  });
+
+  // ============================================
+  // GAMIFICATION / ENGAGEMENT ENDPOINTS
+  // ============================================
+
+  // Get weekly leaderboard
+  app.get("/api/engagement/leaderboard", async (req, res) => {
+    try {
+      const leaderboard = await storage.getWeeklyLeaderboard();
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // Get engagement stats for a company
+  app.get("/api/companies/:id/engagement", async (req, res) => {
+    try {
+      const stats = await storage.getEngagementStats(req.params.id);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching engagement stats:", error);
+      res.status(500).json({ message: "Failed to fetch engagement stats" });
+    }
+  });
+
+  // Log engagement event
+  app.post("/api/engagement/event", async (req, res) => {
+    try {
+      const { companyId, eventType, invoiceId, metadata } = req.body;
+      
+      if (!companyId || !eventType) {
+        return res.status(400).json({ message: "companyId and eventType are required" });
+      }
+
+      const event = await storage.createEngagementEvent({
+        companyId,
+        eventType,
+        invoiceId: invoiceId || null,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+      });
+
+      res.json(event);
+    } catch (error) {
+      console.error("Error logging engagement event:", error);
+      res.status(500).json({ message: "Failed to log event" });
+    }
+  });
+
+  // Get overdue invoices for critical alerts
+  app.get("/api/invoices/overdue/:days", async (req, res) => {
+    try {
+      const days = parseInt(req.params.days) || 30;
+      const invoices = await storage.getOverdueInvoicesForAlerts(days);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching overdue invoices:", error);
+      res.status(500).json({ message: "Failed to fetch overdue invoices" });
+    }
+  });
+
+  // ============================================
+  // QUICK PAYMENT REGISTRATION (from QR scan)
+  // ============================================
+
+  // Register payment from QR code scan
+  app.post("/api/invoices/:id/quick-pay", async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id);
+      
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      if (invoice.status === "paid") {
+        return res.status(400).json({ message: "Invoice is already paid" });
+      }
+
+      const paymentDate = req.body.paymentDate ? new Date(req.body.paymentDate) : new Date();
+      const dueDate = new Date(invoice.dueDate);
+      const daysLate = paymentDate > dueDate 
+        ? Math.ceil((paymentDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+
+      const updated = await storage.updateInvoice(req.params.id, {
+        status: "paid",
+        paymentDate,
+        daysLate,
+      });
+
+      // Log engagement event
+      await storage.createEngagementEvent({
+        companyId: invoice.companyId,
+        eventType: "payment_registered",
+        invoiceId: req.params.id,
+        metadata: JSON.stringify({ source: "qr_code" }),
+      });
+
+      res.json({
+        success: true,
+        invoice: updated,
+        message: "Betaling succesvol geregistreerd!"
+      });
+    } catch (error) {
+      console.error("Error registering quick payment:", error);
+      res.status(500).json({ message: "Failed to register payment" });
     }
   });
 

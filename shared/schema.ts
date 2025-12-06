@@ -148,3 +148,193 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// ============================================
+// NOTIFICATION & ENGAGEMENT SYSTEM
+// ============================================
+
+// Company contacts - business contact info for notifications (GDPR: no personal data)
+export const companyContacts = pgTable("company_contacts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  email: text("email"),
+  phone: text("phone"), // For SMS
+  whatsapp: text("whatsapp"), // WhatsApp number
+  emailEnabled: boolean("email_enabled").default(true),
+  smsEnabled: boolean("sms_enabled").default(false),
+  whatsappEnabled: boolean("whatsapp_enabled").default(false),
+  weeklyDigest: boolean("weekly_digest").default(true),
+  paymentReminders: boolean("payment_reminders").default(true),
+  criticalAlerts: boolean("critical_alerts").default(true), // 30+ days overdue
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Notification queue - tracks all sent notifications
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  invoiceId: varchar("invoice_id").references(() => invoices.id),
+  type: text("type").notNull(), // 'onboarding', 'weekly_digest', 'payment_reminder', 'critical_alert'
+  channel: text("channel").notNull(), // 'email', 'sms', 'whatsapp'
+  status: text("status").notNull().default("pending"), // 'pending', 'sent', 'failed', 'delivered'
+  subject: text("subject"),
+  content: text("content"),
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Invoice quick-links for QR codes - "Betaald? Registreer in 30 sec"
+export const invoiceQuickLinks = pgTable("invoice_quick_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  invoiceId: varchar("invoice_id").notNull().references(() => invoices.id).unique(),
+  token: text("token").notNull().unique(), // Short unique token for QR
+  qrCodeUrl: text("qr_code_url"), // Stored QR code image URL
+  clicks: integer("clicks").default(0),
+  lastClickedAt: timestamp("last_clicked_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Engagement events - track user actions for gamification
+export const engagementEvents = pgTable("engagement_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  eventType: text("event_type").notNull(), // 'invoice_uploaded', 'payment_registered', 'qr_scanned', 'reminder_sent'
+  invoiceId: varchar("invoice_id").references(() => invoices.id),
+  metadata: text("metadata"), // JSON string for extra data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Weekly engagement snapshots for gamification benchmarks
+export const weeklySnapshots = pgTable("weekly_snapshots", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  weekStart: timestamp("week_start").notNull(),
+  invoicesUploaded: integer("invoices_uploaded").default(0),
+  paymentsRegistered: integer("payments_registered").default(0),
+  qrScans: integer("qr_scans").default(0),
+  remindersSent: integer("reminders_sent").default(0),
+  rank: integer("rank"), // Position in weekly leaderboard
+  percentile: integer("percentile"), // Top X%
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations for new tables
+export const companyContactsRelations = relations(companyContacts, ({ one }) => ({
+  company: one(companies, {
+    fields: [companyContacts.companyId],
+    references: [companies.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  company: one(companies, {
+    fields: [notifications.companyId],
+    references: [companies.id],
+  }),
+  invoice: one(invoices, {
+    fields: [notifications.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const invoiceQuickLinksRelations = relations(invoiceQuickLinks, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceQuickLinks.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const engagementEventsRelations = relations(engagementEvents, ({ one }) => ({
+  company: one(companies, {
+    fields: [engagementEvents.companyId],
+    references: [companies.id],
+  }),
+  invoice: one(invoices, {
+    fields: [engagementEvents.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const weeklySnapshotsRelations = relations(weeklySnapshots, ({ one }) => ({
+  company: one(companies, {
+    fields: [weeklySnapshots.companyId],
+    references: [companies.id],
+  }),
+}));
+
+// Insert schemas for new tables
+export const insertCompanyContactSchema = createInsertSchema(companyContacts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertQuickLinkSchema = createInsertSchema(invoiceQuickLinks).omit({
+  id: true,
+  createdAt: true,
+  clicks: true,
+  lastClickedAt: true,
+});
+
+export const insertEngagementEventSchema = createInsertSchema(engagementEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWeeklySnapshotSchema = createInsertSchema(weeklySnapshots).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for new tables
+export type CompanyContact = typeof companyContacts.$inferSelect;
+export type InsertCompanyContact = z.infer<typeof insertCompanyContactSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+export type InvoiceQuickLink = typeof invoiceQuickLinks.$inferSelect;
+export type InsertQuickLink = z.infer<typeof insertQuickLinkSchema>;
+
+export type EngagementEvent = typeof engagementEvents.$inferSelect;
+export type InsertEngagementEvent = z.infer<typeof insertEngagementEventSchema>;
+
+export type WeeklySnapshot = typeof weeklySnapshots.$inferSelect;
+export type InsertWeeklySnapshot = z.infer<typeof insertWeeklySnapshotSchema>;
+
+// Extended types for engagement/gamification
+export type WeeklyLeaderboard = {
+  companyId: string;
+  companyName: string;
+  invoicesUploaded: number;
+  paymentsRegistered: number;
+  totalActivity: number;
+  rank: number;
+};
+
+export type EngagementStats = {
+  thisWeek: {
+    invoicesUploaded: number;
+    paymentsRegistered: number;
+    qrScans: number;
+  };
+  lastWeek: {
+    invoicesUploaded: number;
+    paymentsRegistered: number;
+    qrScans: number;
+  };
+  networkAverage: {
+    invoicesUploaded: number;
+    paymentsRegistered: number;
+  };
+  rank: number;
+  percentile: number;
+};
