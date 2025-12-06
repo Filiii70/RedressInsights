@@ -147,7 +147,7 @@ export default function Dashboard() {
         <Card className="col-span-2 flex flex-col min-h-0 overflow-hidden">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-sm flex-shrink-0">Recente facturen</CardTitle>
+              <CardTitle className="text-sm flex-shrink-0">Kritieke facturen</CardTitle>
               <Button variant="ghost" size="sm" className="h-6 text-xs flex-shrink-0" asChild>
                 <Link href="/invoices">
                   Alle <ArrowRight className="ml-1 h-3 w-3" />
