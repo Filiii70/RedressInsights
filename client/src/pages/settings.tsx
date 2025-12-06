@@ -260,17 +260,12 @@ export default function Settings() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-6 md:grid-cols-3">
-              <div className="rounded-lg border p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-blue-500" />
-                    <div>
-                      <p className="font-medium">Wekelijks Overzicht</p>
-                      <p className="text-sm text-muted-foreground">
-                        Elke maandag een samenvatting
-                      </p>
-                    </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-lg border p-4 flex flex-col h-full">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <p className="font-medium text-sm">Wekelijks Overzicht</p>
                   </div>
                   <Switch
                     checked={formData.weeklyDigest}
@@ -278,21 +273,19 @@ export default function Settings() {
                     data-testid="switch-weekly-digest"
                   />
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Badge variant="secondary">Email</Badge>
+                <p className="text-xs text-muted-foreground mb-3 flex-1">
+                  Elke maandag een samenvatting
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">Email</Badge>
                 </div>
               </div>
 
-              <div className="rounded-lg border p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Bell className="h-5 w-5 text-orange-500" />
-                    <div>
-                      <p className="font-medium">Betalingsherinneringen</p>
-                      <p className="text-sm text-muted-foreground">
-                        Als facturen vervallen
-                      </p>
-                    </div>
+              <div className="rounded-lg border p-4 flex flex-col h-full">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                    <p className="font-medium text-sm">Betalingsherinneringen</p>
                   </div>
                   <Switch
                     checked={formData.paymentReminders}
@@ -300,22 +293,20 @@ export default function Settings() {
                     data-testid="switch-payment-reminders"
                   />
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Badge variant="secondary">Email</Badge>
-                  <Badge variant="secondary">WhatsApp</Badge>
+                <p className="text-xs text-muted-foreground mb-3 flex-1">
+                  Als facturen vervallen
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">Email</Badge>
+                  <Badge variant="secondary" className="text-xs">WhatsApp</Badge>
                 </div>
               </div>
 
-              <div className="rounded-lg border p-4 border-red-200 dark:border-red-900/50">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
-                    <div>
-                      <p className="font-medium">Kritieke Alerts</p>
-                      <p className="text-sm text-muted-foreground">
-                        30+ dagen over tijd
-                      </p>
-                    </div>
+              <div className="rounded-lg border border-red-200 dark:border-red-900/50 p-4 flex flex-col h-full">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <p className="font-medium text-sm">Kritieke Alerts</p>
                   </div>
                   <Switch
                     checked={formData.criticalAlerts}
@@ -323,9 +314,12 @@ export default function Settings() {
                     data-testid="switch-critical-alerts"
                   />
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Badge variant="destructive">SMS</Badge>
-                  <Badge variant="secondary">WhatsApp</Badge>
+                <p className="text-xs text-muted-foreground mb-3 flex-1">
+                  30+ dagen over tijd
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="destructive" className="text-xs">SMS</Badge>
+                  <Badge variant="secondary" className="text-xs">WhatsApp</Badge>
                 </div>
               </div>
             </div>
