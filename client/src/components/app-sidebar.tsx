@@ -80,31 +80,28 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Shield className="h-5 w-5" />
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-2">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <Shield className="h-4 w-4" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold tracking-tight" data-testid="text-brand-name">
+            <span className="text-base font-bold tracking-tight" data-testid="text-brand-name">
               KMO-Alert
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Betalingsgedrag Register
             </span>
           </div>
         </Link>
-        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-sidebar-border">
-          <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-          <SiWhatsapp className="h-3.5 w-3.5 text-green-500" />
-          <span className="text-[10px] text-muted-foreground">Notificaties via Email & WhatsApp</span>
+        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-sidebar-border">
+          <Mail className="h-3 w-3 text-muted-foreground" />
+          <SiWhatsapp className="h-3 w-3 text-green-500" />
+          <span className="text-[9px] text-muted-foreground">Email & WhatsApp alerts</span>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Hoofdmenu
+        <SidebarGroup className="p-1.5">
+          <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground h-6 px-1.5">
+            Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -113,14 +110,14 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.url}
-                    className="data-[active=true]:bg-sidebar-accent"
+                    className="data-[active=true]:bg-sidebar-accent h-8"
                   >
                     <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase()}`}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-3.5 w-3.5" />
+                      <span className="text-sm">{item.title}</span>
                       {item.title === "Dashboard" && newActivityCount > 0 && (
-                        <span className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium">
-                          <Activity className="h-2.5 w-2.5" />
+                        <span className="ml-auto flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-medium">
+                          <Activity className="h-2 w-2" />
                           {newActivityCount > 99 ? '99+' : newActivityCount}
                         </span>
                       )}
@@ -132,8 +129,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <SidebarGroup className="p-1.5">
+          <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground h-6 px-1.5">
             Analyse
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -143,11 +140,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.url}
-                    className="data-[active=true]:bg-sidebar-accent"
+                    className="data-[active=true]:bg-sidebar-accent h-8"
                   >
                     <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(' ', '-')}`}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-3.5 w-3.5" />
+                      <span className="text-sm">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -157,31 +154,28 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
+      <SidebarFooter className="border-t border-sidebar-border p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton data-testid="button-nav-login">
-              <LogIn className="h-4 w-4" />
-              <span>Inloggen</span>
+            <SidebarMenuButton data-testid="button-nav-login" className="h-8">
+              <LogIn className="h-3.5 w-3.5" />
+              <span className="text-sm">Inloggen</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={location === "/settings"}
-              className="data-[active=true]:bg-sidebar-accent"
+              className="data-[active=true]:bg-sidebar-accent h-8"
             >
               <Link href="/settings" data-testid="link-nav-settings">
-                <Settings className="h-4 w-4" />
-                <span>Instellingen</span>
+                <Settings className="h-3.5 w-3.5" />
+                <span className="text-sm">Instellingen</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="text-xs text-muted-foreground mt-4">
-          <p>Versie 1.0.0</p>
-          <p className="mt-1">Benelux KMO Register</p>
-        </div>
+        <p className="text-[9px] text-muted-foreground text-center mt-2">v1.0 - Benelux</p>
       </SidebarFooter>
     </Sidebar>
   );
