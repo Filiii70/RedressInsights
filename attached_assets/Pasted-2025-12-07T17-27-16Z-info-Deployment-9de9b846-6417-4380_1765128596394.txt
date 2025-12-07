@@ -1,0 +1,94 @@
+2025-12-07T17:27:16Z info: Deployment: 9de9b846-6417-4380-85dd-f4b9a0c21b8c
+2025-12-07T17:27:16Z info: Connecting to builder
+2025-12-07T17:27:16Z info: Builder connected
+2025-12-07T17:27:16Z info: Installing packages
+--> npm install
+
+
+up to date, audited 614 packages in 3s
+
+
+79 packages are looking for funding
+  run `npm fund` for details
+
+2025-12-07T17:27:20Z info: Starting Build
+
+> rest-express@1.0.0 build
+> node script/build.mjs
+
+
+building client...
+
+vite v5.4.20 building for production...
+
+transforming...
+
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+
+✓ 3378 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+../dist/public/index.html                   1.25 kB │ gzip:   0.62 kB
+
+building server...
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    vite.config.ts:24:24:
+      24 │       "@": path.resolve(import.meta.dirname, "client", "src"),
+         ╵                         ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    vite.config.ts:25:30:
+      25 │       "@shared": path.resolve(import.meta.dirname, "shared"),
+         ╵                               ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    vite.config.ts:26:30:
+      26 │ ...  "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    vite.config.ts:29:21:
+      29 │   root: path.resolve(import.meta.dirname, "client"),
+         ╵                      ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    vite.config.ts:31:25:
+      31 │     outDir: path.resolve(import.meta.dirname, "dist/public"),
+         ╵                          ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+
+5 warnings
+
+
+  dist/index.cjs  1.5mb ⚠️
+
+⚡ Done in 580ms
+
+2025-12-07T17:27:35Z info: Pushing pid1 binary layer...
+2025-12-07T17:27:36Z info: Pushing Repl layer...
+2025-12-07T17:27:37Z info: Retrieved cached nix layer
+2025-12-07T17:27:37Z info: Created hosting layer
+2025-12-07T17:27:37Z info: Created pid1 binary layer
+2025-12-07T17:28:10Z info: Created Repl layer
+2025-12-07T17:28:13Z info: Pushed image manifest
+2025-12-07T17:28:15Z info: Pushed soci index manifest
