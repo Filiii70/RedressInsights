@@ -152,7 +152,12 @@ export default function About() {
         <div className="text-center text-xs text-muted-foreground border-t pt-3 print:text-[10px]">
           <p><strong>www.kmo-alert.be</strong></p>
           <p>Crowd-sourced payment data for Benelux SMEs</p>
-          <a href="mailto:hello@kmo-alert.be" className="text-primary hover:underline">hello@kmo-alert.be</a>
+          <button 
+            onClick={() => window.open('mailto:hello@kmo-alert.be', '_blank', 'noopener')}
+            className="text-primary hover:underline cursor-pointer bg-transparent border-none"
+          >
+            hello@kmo-alert.be
+          </button>
         </div>
 
       </div>
