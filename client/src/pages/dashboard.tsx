@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -67,6 +68,91 @@ function formatDate(date: string | Date) {
     day: "2-digit",
     month: "2-digit",
   });
+}
+
+function getActionForDaysLate(daysLate: number): { action: string; icon: string } {
+  if (daysLate <= 7) {
+    return { action: "Stuur herinnering", icon: "📧" };
+  } else if (daysLate <= 14) {
+    return { action: "Bel + bevestig per mail", icon: "📞" };
+  } else if (daysLate <= 30) {
+    return { action: "Plan betalingsregeling", icon: "📋" };
+  } else if (daysLate <= 60) {
+    return { action: "Schakel incasso in", icon: "⚠️" };
+  } else {
+    return { action: "Start juridische procedure", icon: "⚖️" };
+  }
+}
+
+function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!invoices || invoices.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % invoices.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [invoices]);
+
+  if (!invoices || invoices.length === 0) {
+    return (
+      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
+        <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
+          <CheckCircle className="h-3 w-3 text-green-500" />
+          <span className="text-[10px] font-medium text-green-600">ACTIES</span>
+        </div>
+        <div className="flex-1 px-3">
+          <span className="text-xs text-green-600">Geen openstaande acties - alle facturen op schema</span>
+        </div>
+      </div>
+    );
+  }
+
+  const currentInvoice = invoices[currentIndex];
+  const daysLate = currentInvoice.daysLate || 0;
+  const { action, icon } = getActionForDaysLate(daysLate);
+
+  return (
+    <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
+      <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
+        <Bell className="h-3 w-3 text-orange-500 animate-pulse" />
+        <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
+        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-orange-500 text-orange-600">
+          {invoices.length}
+        </Badge>
+      </div>
+      <div className="flex-1 min-w-0 overflow-hidden px-3">
+        <div 
+          className={`flex items-center gap-2 transition-all duration-300 ${
+            isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <span className="text-sm flex-shrink-0">{icon}</span>
+          <Link 
+            href={`/companies/${currentInvoice.companyId}`}
+            className="text-xs hover:underline cursor-pointer truncate"
+            data-testid={`ticker-action-${currentInvoice.id}`}
+            title={`${currentInvoice.company?.name}\nBTW: ${currentInvoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(currentInvoice.amount)}\nVervaldatum: ${formatDate(currentInvoice.dueDate)}\n${daysLate} dagen te laat\n\nActie: ${action}\nKlik om bedrijf te bekijken`}
+          >
+            <strong className="text-orange-600">{action}</strong>
+            {' '}bij <strong>{currentInvoice.company?.name}</strong>
+            {' '}- {formatCurrency(currentInvoice.amount)}, {daysLate}d te laat
+          </Link>
+          <span className="text-[10px] text-muted-foreground flex-shrink-0">
+            ({currentIndex + 1}/{invoices.length})
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Dashboard() {
