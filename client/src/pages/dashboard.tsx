@@ -84,6 +84,150 @@ function getActionForDaysLate(daysLate: number): { action: string; icon: string;
   }
 }
 
+// Prominente ACTIES Card - vervangt Aandachtspunten
+function ActiesCard({ invoices, isLoading }: { invoices: InvoiceWithCompany[]; isLoading: boolean }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Group invoices by action category
+  const actionGroups = useMemo(() => {
+    if (!invoices || invoices.length === 0) return null;
+    
+    const groups = {
+      herinnering: invoices.filter(inv => (inv.daysLate || 0) <= 7),
+      bellen: invoices.filter(inv => (inv.daysLate || 0) > 7 && (inv.daysLate || 0) <= 14),
+      regeling: invoices.filter(inv => (inv.daysLate || 0) > 14 && (inv.daysLate || 0) <= 30),
+      incasso: invoices.filter(inv => (inv.daysLate || 0) > 30 && (inv.daysLate || 0) <= 60),
+      juridisch: invoices.filter(inv => (inv.daysLate || 0) > 60),
+    };
+    
+    return groups;
+  }, [invoices]);
+
+  // Interleaved invoices for ticker
+  const sortedInvoices = useMemo(() => {
+    if (!actionGroups) return [];
+    const result: InvoiceWithCompany[] = [];
+    const maxLen = Math.max(
+      actionGroups.herinnering.length,
+      actionGroups.bellen.length,
+      actionGroups.regeling.length,
+      actionGroups.incasso.length,
+      actionGroups.juridisch.length
+    );
+    for (let i = 0; i < maxLen; i++) {
+      if (actionGroups.herinnering[i]) result.push(actionGroups.herinnering[i]);
+      if (actionGroups.bellen[i]) result.push(actionGroups.bellen[i]);
+      if (actionGroups.regeling[i]) result.push(actionGroups.regeling[i]);
+      if (actionGroups.incasso[i]) result.push(actionGroups.incasso[i]);
+      if (actionGroups.juridisch[i]) result.push(actionGroups.juridisch[i]);
+    }
+    return result;
+  }, [actionGroups]);
+
+  useEffect(() => {
+    if (sortedInvoices.length === 0) return;
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % sortedInvoices.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [sortedInvoices]);
+
+  const currentInvoice = sortedInvoices[currentIndex];
+  const currentAction = currentInvoice ? getActionForDaysLate(currentInvoice.daysLate || 0) : null;
+
+  const actionTypes = [
+    { key: 'herinnering', label: 'Herinnering', icon: '📧', color: 'bg-blue-500', bgLight: 'bg-blue-50', text: 'text-blue-700', days: '1-7d' },
+    { key: 'bellen', label: 'Bellen', icon: '📞', color: 'bg-yellow-500', bgLight: 'bg-yellow-50', text: 'text-yellow-700', days: '8-14d' },
+    { key: 'regeling', label: 'Regeling', icon: '📋', color: 'bg-orange-500', bgLight: 'bg-orange-50', text: 'text-orange-700', days: '15-30d' },
+    { key: 'incasso', label: 'Incasso', icon: '⚠️', color: 'bg-red-500', bgLight: 'bg-red-50', text: 'text-red-700', days: '31-60d' },
+    { key: 'juridisch', label: 'Juridisch', icon: '⚖️', color: 'bg-red-800', bgLight: 'bg-red-100', text: 'text-red-800', days: '60+d' },
+  ];
+
+  return (
+    <Card className="min-h-0 border-orange-200 bg-gradient-to-r from-orange-50/50 to-background">
+      <CardHeader className="p-3 pb-2 flex-shrink-0">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Bell className="h-4 w-4 text-orange-500" />
+          <span>Acties</span>
+          <Badge variant="outline" className="text-[10px] border-orange-500 text-orange-600">
+            {invoices.length} openstaand
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 pt-0">
+        {isLoading ? (
+          <div className="grid grid-cols-5 gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16" />
+            ))}
+          </div>
+        ) : actionGroups ? (
+          <div className="space-y-3">
+            {/* Action category cards */}
+            <div className="grid grid-cols-5 gap-2">
+              {actionTypes.map((type) => {
+                const count = actionGroups[type.key as keyof typeof actionGroups]?.length || 0;
+                const items = actionGroups[type.key as keyof typeof actionGroups] || [];
+                return (
+                  <div 
+                    key={type.key} 
+                    className={`rounded-lg p-2 ${type.bgLight} border ${count > 0 ? 'border-current opacity-100' : 'opacity-40 border-transparent'}`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-lg">{type.icon}</span>
+                      <span className={`text-lg font-bold ${type.text}`}>{count}</span>
+                    </div>
+                    <p className={`text-[10px] font-medium ${type.text}`}>{type.label}</p>
+                    <p className="text-[9px] text-muted-foreground">{type.days}</p>
+                    {count > 0 && items[0] && (
+                      <Link 
+                        href={`/companies/${items[0].companyId}`}
+                        className="text-[9px] text-muted-foreground truncate block hover:underline mt-1"
+                      >
+                        {items[0].company?.name}
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Current action ticker */}
+            {currentInvoice && currentAction && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-100/50 border border-orange-200">
+                <span className="text-xl animate-pulse">{currentAction.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className={`transition-all duration-300 ${isAnimating ? 'opacity-0 -translate-y-1' : 'opacity-100 translate-y-0'}`}>
+                    <Link 
+                      href={`/companies/${currentInvoice.companyId}`}
+                      className="hover:underline"
+                    >
+                      <span className={`text-xs font-bold ${currentAction.color}`}>{currentAction.action}</span>
+                      <span className="text-xs"> - {currentInvoice.company?.name}</span>
+                      <span className="text-xs text-muted-foreground"> - {formatCurrency(currentInvoice.amount)}, {currentInvoice.daysLate}d te laat</span>
+                    </Link>
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground">({currentIndex + 1}/{sortedInvoices.length})</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4">
+            <CheckCircle className="h-6 w-6 text-green-500/50 mb-1" />
+            <p className="text-xs text-muted-foreground">Geen openstaande acties - alle facturen op schema</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -488,51 +632,9 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Bottom Row: Aandachtspunten (full width) */}
-        <Card className="min-h-0">
-          <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <CardTitle className="text-sm flex items-center gap-1">
-              <Eye className="h-3.5 w-3.5" />
-              Aandachtspunten
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {companiesLoading ? (
-              <div className="grid grid-cols-4 gap-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12" />
-                ))}
-              </div>
-            ) : riskyCompanies && riskyCompanies.length > 0 ? (
-              <div className="grid grid-cols-4 gap-2">
-                {riskyCompanies.slice(0, 4).map((company) => (
-                  <Link
-                    key={company.id}
-                    href={`/companies/${company.id}`}
-                    className="flex items-center gap-2 rounded border p-2 hover-elevate"
-                  >
-                    <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium truncate">{company.name}</p>
-                      <div className="flex items-center gap-1">
-                        <RiskScoreBadge score={company.paymentBehavior?.riskScore || 50} />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-4">
-                <CheckCircle className="h-6 w-6 text-green-500/50 mb-1" />
-                <p className="text-xs text-muted-foreground">Geen aandachtspunten</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Bottom Row: ACTIES - Prominente actie-overzicht */}
+        <ActiesCard invoices={criticalInvoices || []} isLoading={invoicesLoading} />
       </div>
-
-      {/* Action Ticker - Tiered actions based on days late */}
-      <ActionTickerBanner invoices={criticalInvoices || []} />
 
       {/* Activity Detail Dialog */}
       <Dialog open={!!selectedActivity} onOpenChange={(open) => !open && setSelectedActivity(null)}>
