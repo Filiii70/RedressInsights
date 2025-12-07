@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { Link } from "wouter";
-import { FileCheck, Clock, Sparkles, Construction, AlertTriangle, Upload } from "lucide-react";
+import { FileCheck, Clock, Sparkles, Construction, AlertTriangle, Upload, Calendar, Hash, Building2, Euro, FileText } from "lucide-react";
 import type { InvoiceWithCompany } from "@shared/schema";
 
 function formatCurrency(amount: number | string) {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat("nl-BE", {
+  return new Intl.NumberFormat("en-BE", {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 0,
@@ -87,18 +87,52 @@ export default function UploadPage() {
 
           <Card className="overflow-visible">
             <CardHeader className="p-3 pb-2">
-              <CardTitle className="text-sm">Extracted data</CardTitle>
+              <CardTitle className="text-sm">AI Extracted Fields</CardTitle>
             </CardHeader>
             <CardContent className="p-3 pt-0">
-              <div className="grid grid-cols-4 gap-2 text-xs">
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Invoice date</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Due date</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />VAT number</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Company name</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Invoice amount</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Invoice number</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Payment date</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Status</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                  <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium">Invoice Date</p>
+                    <p className="text-[10px] text-muted-foreground">Issue date</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                  <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium">Due Date</p>
+                    <p className="text-[10px] text-muted-foreground">Payment deadline</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                  <Hash className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium">VAT Number</p>
+                    <p className="text-[10px] text-muted-foreground">BE/NL/LU format</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                  <Building2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium">Company Name</p>
+                    <p className="text-[10px] text-muted-foreground">Customer info</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                  <Euro className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium">Invoice Amount</p>
+                    <p className="text-[10px] text-muted-foreground">Total due</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                  <FileText className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium">Invoice Number</p>
+                    <p className="text-[10px] text-muted-foreground">Reference</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

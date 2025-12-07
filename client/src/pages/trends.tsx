@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { TrendingUp } from "lucide-react";
 import {
   LineChart,
@@ -23,7 +23,7 @@ import {
 } from "recharts";
 
 function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("nl-BE", {
+  return new Intl.NumberFormat("en-BE", {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 0,
@@ -34,7 +34,13 @@ function formatCurrency(amount: number) {
 export default function Trends() {
   const [timeRange, setTimeRange] = useState("6m");
 
-  const paymentTrendData = [
+  const allPaymentTrendData = [
+    { month: "Dec 23", avgDaysLate: 8, totalOverdue: 5200 },
+    { month: "Jan", avgDaysLate: 10, totalOverdue: 6800 },
+    { month: "Feb", avgDaysLate: 9, totalOverdue: 6100 },
+    { month: "Mar", avgDaysLate: 11, totalOverdue: 7500 },
+    { month: "Apr", avgDaysLate: 10, totalOverdue: 7000 },
+    { month: "May", avgDaysLate: 13, totalOverdue: 9200 },
     { month: "Jun", avgDaysLate: 12, totalOverdue: 8500 },
     { month: "Jul", avgDaysLate: 15, totalOverdue: 12000 },
     { month: "Aug", avgDaysLate: 11, totalOverdue: 9200 },
@@ -43,7 +49,13 @@ export default function Trends() {
     { month: "Nov", avgDaysLate: 19, totalOverdue: 18500 },
   ];
 
-  const invoiceVolumeData = [
+  const allInvoiceVolumeData = [
+    { month: "Dec 23", invoices: 18, amount: 32000 },
+    { month: "Jan", invoices: 22, amount: 41000 },
+    { month: "Feb", invoices: 20, amount: 38000 },
+    { month: "Mar", invoices: 26, amount: 48000 },
+    { month: "Apr", invoices: 23, amount: 43000 },
+    { month: "May", invoices: 29, amount: 54000 },
     { month: "Jun", invoices: 24, amount: 45000 },
     { month: "Jul", invoices: 31, amount: 58000 },
     { month: "Aug", invoices: 28, amount: 52000 },
@@ -52,7 +64,13 @@ export default function Trends() {
     { month: "Nov", invoices: 38, amount: 72000 },
   ];
 
-  const riskTrendData = [
+  const allRiskTrendData = [
+    { month: "Dec 23", low: 50, medium: 30, high: 15, critical: 5 },
+    { month: "Jan", low: 48, medium: 32, high: 14, critical: 6 },
+    { month: "Feb", low: 47, medium: 33, high: 15, critical: 5 },
+    { month: "Mar", low: 46, medium: 34, high: 14, critical: 6 },
+    { month: "Apr", low: 45, medium: 35, high: 14, critical: 6 },
+    { month: "May", low: 44, medium: 36, high: 15, critical: 5 },
     { month: "Jun", low: 45, medium: 35, high: 15, critical: 5 },
     { month: "Jul", low: 42, medium: 38, high: 14, critical: 6 },
     { month: "Aug", low: 48, medium: 32, high: 15, critical: 5 },
@@ -60,6 +78,23 @@ export default function Trends() {
     { month: "Oct", low: 35, medium: 40, high: 18, critical: 7 },
     { month: "Nov", low: 38, medium: 37, high: 17, critical: 8 },
   ];
+
+  const getDataSlice = (data: typeof allPaymentTrendData) => {
+    switch (timeRange) {
+      case "3m":
+        return data.slice(-3);
+      case "6m":
+        return data.slice(-6);
+      case "1y":
+        return data;
+      default:
+        return data.slice(-6);
+    }
+  };
+
+  const paymentTrendData = useMemo(() => getDataSlice(allPaymentTrendData), [timeRange]);
+  const invoiceVolumeData = useMemo(() => getDataSlice(allInvoiceVolumeData), [timeRange]);
+  const riskTrendData = useMemo(() => getDataSlice(allRiskTrendData), [timeRange]);
 
   const cashflowData = [
     { month: "Dec", expected: 52000, atRisk: 12000 },
@@ -101,7 +136,7 @@ export default function Trends() {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} />
                   <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `${v}d`} />
-                  <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `€${v / 1000}k`} />
+                  <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `${v / 1000}k`} />
                   <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} />
                   <Line yAxisId="left" type="monotone" dataKey="avgDaysLate" name="Days" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 2 }} />
                   <Line yAxisId="right" type="monotone" dataKey="totalOverdue" name="Overdue" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 2 }} />
@@ -126,7 +161,7 @@ export default function Trends() {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} />
                   <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `€${v / 1000}k`} />
+                  <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `${v / 1000}k`} />
                   <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} />
                   <Area yAxisId="right" type="monotone" dataKey="amount" name="Amount" fill="hsl(var(--primary) / 0.2)" stroke="hsl(var(--primary))" strokeWidth={2} />
                   <Line yAxisId="left" type="monotone" dataKey="invoices" name="Invoices" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 2 }} />
@@ -152,16 +187,16 @@ export default function Trends() {
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} />
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `${v}%`} />
                   <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} />
-                  <Area type="monotone" dataKey="low" stackId="1" fill="#22c55e" stroke="#22c55e" />
-                  <Area type="monotone" dataKey="medium" stackId="1" fill="#f59e0b" stroke="#f59e0b" />
-                  <Area type="monotone" dataKey="high" stackId="1" fill="#f97316" stroke="#f97316" />
-                  <Area type="monotone" dataKey="critical" stackId="1" fill="#ef4444" stroke="#ef4444" />
+                  <Area type="monotone" dataKey="critical" name="Critical" stackId="1" fill="#ef4444" stroke="#ef4444" />
+                  <Area type="monotone" dataKey="high" name="High" stackId="1" fill="#f97316" stroke="#f97316" />
+                  <Area type="monotone" dataKey="medium" name="Medium" stackId="1" fill="#eab308" stroke="#eab308" />
+                  <Area type="monotone" dataKey="low" name="Low" stackId="1" fill="#22c55e" stroke="#22c55e" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
             <div className="flex justify-center gap-3 flex-shrink-0 pt-1">
               <div className="flex items-center gap-1 text-[10px]"><div className="h-2 w-2 rounded-full bg-green-500" />Low</div>
-              <div className="flex items-center gap-1 text-[10px]"><div className="h-2 w-2 rounded-full bg-amber-500" />Medium</div>
+              <div className="flex items-center gap-1 text-[10px]"><div className="h-2 w-2 rounded-full bg-yellow-500" />Medium</div>
               <div className="flex items-center gap-1 text-[10px]"><div className="h-2 w-2 rounded-full bg-orange-500" />High</div>
               <div className="flex items-center gap-1 text-[10px]"><div className="h-2 w-2 rounded-full bg-red-500" />Critical</div>
             </div>
@@ -170,7 +205,7 @@ export default function Trends() {
 
         <Card className="overflow-visible flex flex-col min-h-0">
           <CardHeader className="p-3 pb-1 flex-shrink-0">
-            <CardTitle className="text-sm">Cashflow Forecast</CardTitle>
+            <CardTitle className="text-sm">Cash Flow Forecast</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 flex-1 min-h-0 flex flex-col">
             <div className="flex-1 min-h-0">
@@ -178,10 +213,10 @@ export default function Trends() {
                 <BarChart data={cashflowData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `€${v / 1000}k`} />
-                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} formatter={(value: number) => [formatCurrency(value), ""]} />
-                  <Bar dataKey="expected" name="Expected" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="atRisk" name="At Risk" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `${v / 1000}k`} />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} formatter={(value: number) => formatCurrency(value)} />
+                  <Bar dataKey="expected" name="Expected" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="atRisk" name="At Risk" fill="hsl(var(--destructive))" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
