@@ -70,17 +70,17 @@ function formatDate(date: string | Date) {
   });
 }
 
-function getActionForDaysLate(daysLate: number): { action: string; icon: string } {
+function getActionForDaysLate(daysLate: number): { action: string; icon: string; color: string } {
   if (daysLate <= 7) {
-    return { action: "Stuur herinnering", icon: "📧" };
+    return { action: "Herinnering", icon: "📧", color: "text-blue-600" };
   } else if (daysLate <= 14) {
-    return { action: "Bel + bevestig per mail", icon: "📞" };
+    return { action: "Bellen", icon: "📞", color: "text-yellow-600" };
   } else if (daysLate <= 30) {
-    return { action: "Plan betalingsregeling", icon: "📋" };
+    return { action: "Betalingsregeling", icon: "📋", color: "text-orange-600" };
   } else if (daysLate <= 60) {
-    return { action: "Schakel incasso in", icon: "⚠️" };
+    return { action: "Incasso", icon: "⚠️", color: "text-red-600" };
   } else {
-    return { action: "Start juridische procedure", icon: "⚖️" };
+    return { action: "Juridisch", icon: "⚖️", color: "text-red-800" };
   }
 }
 
@@ -96,7 +96,7 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
       setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % invoices.length);
         setIsAnimating(false);
-      }, 300);
+      }, 4000);
     }, 4000);
 
     return () => clearInterval(interval);
@@ -116,18 +116,44 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
     );
   }
 
+  // Calculate action summary
+  const actionSummary = invoices.reduce((acc, inv) => {
+    const days = inv.daysLate || 0;
+    if (days <= 7) acc.herinnering++;
+    else if (days <= 14) acc.bellen++;
+    else if (days <= 30) acc.regeling++;
+    else if (days <= 60) acc.incasso++;
+    else acc.juridisch++;
+    return acc;
+  }, { herinnering: 0, bellen: 0, regeling: 0, incasso: 0, juridisch: 0 });
+
   const currentInvoice = invoices[currentIndex];
   const daysLate = currentInvoice.daysLate || 0;
-  const { action, icon } = getActionForDaysLate(daysLate);
+  const { action, icon, color } = getActionForDaysLate(daysLate);
 
   return (
     <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
       <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
         <Bell className="h-3 w-3 text-orange-500 animate-pulse" />
         <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
-        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-orange-500 text-orange-600">
-          {invoices.length}
-        </Badge>
+      </div>
+      {/* Action summary badges */}
+      <div className="flex items-center gap-1 px-2 flex-shrink-0 border-r h-full">
+        {actionSummary.herinnering > 0 && (
+          <span className="text-[9px] px-1 bg-blue-100 text-blue-700 rounded" title="Herinnering sturen (1-7d)">📧{actionSummary.herinnering}</span>
+        )}
+        {actionSummary.bellen > 0 && (
+          <span className="text-[9px] px-1 bg-yellow-100 text-yellow-700 rounded" title="Bellen (8-14d)">📞{actionSummary.bellen}</span>
+        )}
+        {actionSummary.regeling > 0 && (
+          <span className="text-[9px] px-1 bg-orange-100 text-orange-700 rounded" title="Betalingsregeling (15-30d)">📋{actionSummary.regeling}</span>
+        )}
+        {actionSummary.incasso > 0 && (
+          <span className="text-[9px] px-1 bg-red-100 text-red-700 rounded" title="Incasso (31-60d)">⚠️{actionSummary.incasso}</span>
+        )}
+        {actionSummary.juridisch > 0 && (
+          <span className="text-[9px] px-1 bg-red-200 text-red-800 rounded" title="Juridisch (60+d)">⚖️{actionSummary.juridisch}</span>
+        )}
       </div>
       <div className="flex-1 min-w-0 overflow-hidden px-3">
         <div 
@@ -142,9 +168,9 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
             data-testid={`ticker-action-${currentInvoice.id}`}
             title={`${currentInvoice.company?.name}\nBTW: ${currentInvoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(currentInvoice.amount)}\nVervaldatum: ${formatDate(currentInvoice.dueDate)}\n${daysLate} dagen te laat\n\nActie: ${action}\nKlik om bedrijf te bekijken`}
           >
-            <strong className="text-orange-600">{action}</strong>
-            {' '}bij <strong>{currentInvoice.company?.name}</strong>
-            {' '}- {formatCurrency(currentInvoice.amount)}, {daysLate}d te laat
+            <strong className={color}>{action}</strong>
+            {' '}- <strong>{currentInvoice.company?.name}</strong>
+            {' '}- {formatCurrency(currentInvoice.amount)}, {daysLate}d
           </Link>
           <span className="text-[10px] text-muted-foreground flex-shrink-0">
             ({currentIndex + 1}/{invoices.length})
