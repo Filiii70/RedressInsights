@@ -378,13 +378,13 @@ export default function Dashboard() {
       </div>
 
       {/* KMO-Alert Actie Banner - Concrete acties met bedrijfsnamen */}
-      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
+      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden group">
         <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
           <Bell className="h-3 w-3 text-orange-500" />
           <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
         </div>
         <div className="flex-1 overflow-hidden">
-          <div className="animate-scroll-horizontal flex gap-8 whitespace-nowrap">
+          <div className="animate-scroll-horizontal group-hover:[animation-play-state:paused] flex gap-8 whitespace-nowrap">
             {/* Show actual critical invoices with company names */}
             {criticalInvoices && criticalInvoices.length > 0 ? (
               <>
@@ -392,8 +392,9 @@ export default function Dashboard() {
                   <Link 
                     key={invoice.id} 
                     href={`/companies/${invoice.companyId}`}
-                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-help px-2 py-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                     data-testid={`ticker-action-${invoice.id}`}
+                    title={`${invoice.company?.name}\nBTW: ${invoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(invoice.amount)}\nVervaldatum: ${formatDate(invoice.dueDate)}\n${invoice.daysLate || 0} dagen te laat\n\nKlik om bedrijf te bekijken`}
                   >
                     <AlertTriangle className="h-3 w-3 text-red-500" />
                     <span>
@@ -407,7 +408,8 @@ export default function Dashboard() {
                   <Link 
                     key={`dup-${invoice.id}`} 
                     href={`/companies/${invoice.companyId}`}
-                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-help px-2 py-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                    title={`${invoice.company?.name}\nBTW: ${invoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(invoice.amount)}\nVervaldatum: ${formatDate(invoice.dueDate)}\n${invoice.daysLate || 0} dagen te laat\n\nKlik om bedrijf te bekijken`}
                   >
                     <AlertTriangle className="h-3 w-3 text-red-500" />
                     <span>
@@ -418,7 +420,7 @@ export default function Dashboard() {
                 ))}
               </>
             ) : (
-              <span className="inline-flex items-center gap-2 text-xs text-green-600" data-testid="ticker-no-actions">
+              <span className="inline-flex items-center gap-2 text-xs text-green-600 cursor-help" data-testid="ticker-no-actions" title="Geen achterstallige facturen. Alle klanten betalen op tijd!">
                 <CheckCircle className="h-3 w-3" />
                 <span><strong>Geen openstaande acties</strong> - alle facturen op schema</span>
               </span>
