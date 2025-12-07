@@ -43,10 +43,7 @@ export default function UploadPage() {
                 Upload temporarily disabled
               </h3>
               <p className="text-xs text-muted-foreground">
-                Contact us at{" "}
-                <a href="mailto:hello@kmo-alert.be" className="text-primary font-medium hover:underline">
-                  hello@kmo-alert.be
-                </a>
+                This feature is coming soon
               </p>
             </CardContent>
           </Card>

@@ -224,13 +224,6 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <a 
-          href="mailto:hello@kmo-alert.be" 
-          className="text-[9px] text-center mt-2 block text-primary hover:underline"
-          data-testid="link-contact-email"
-        >
-          hello@kmo-alert.be
-        </a>
       </SidebarFooter>
     </Sidebar>
   );
