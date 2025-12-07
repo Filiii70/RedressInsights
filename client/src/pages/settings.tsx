@@ -53,9 +53,9 @@ export default function Settings() {
   const saveMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       if (contact) {
-        return apiRequest(`/api/contacts/${contact.id}`, "PATCH", data);
+        return apiRequest("PATCH", `/api/contacts/${contact.id}`, data);
       }
-      return apiRequest("/api/contacts", "POST", {
+      return apiRequest("POST", "/api/contacts", {
         companyId: defaultCompanyId,
         ...data,
       });
@@ -78,7 +78,7 @@ export default function Settings() {
 
   const testEmailMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/notifications/test", "POST", {
+      return apiRequest("POST", "/api/notifications/test", {
         channel: "email",
         email: formData.email,
       });
