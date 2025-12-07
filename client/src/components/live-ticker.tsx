@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Activity } from "lucide-react";
+import { Activity, FileText, Banknote, AlertTriangle, TrendingUp, Building2, Pin } from "lucide-react";
 import type { ActivityFeedWithCompany } from "@shared/schema";
 
-function getEventEmoji(eventType: string) {
+function getEventIcon(eventType: string) {
   switch (eventType) {
     case 'invoice_uploaded':
-      return '📄';
+      return <FileText className="h-3.5 w-3.5 text-blue-500" />;
     case 'payment_registered':
-      return '💰';
+      return <Banknote className="h-3.5 w-3.5 text-green-500" />;
     case 'risk_alert':
-      return '⚠️';
+      return <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />;
     case 'risk_improvement':
-      return '📈';
+      return <TrendingUp className="h-3.5 w-3.5 text-green-500" />;
     case 'company_added':
-      return '🏢';
+      return <Building2 className="h-3.5 w-3.5 text-blue-500" />;
     default:
-      return '📌';
+      return <Pin className="h-3.5 w-3.5 text-muted-foreground" />;
   }
 }
 
@@ -27,10 +27,10 @@ function formatTimeAgo(date: Date | string) {
   const diffMins = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   
-  if (diffMins < 1) return 'nu';
-  if (diffMins < 60) return `${diffMins}m geleden`;
-  if (diffHours < 24) return `${diffHours}u geleden`;
-  return `${Math.floor(diffHours / 24)}d geleden`;
+  if (diffMins < 1) return 'now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${Math.floor(diffHours / 24)}d ago`;
 }
 
 export function LiveTickerHeader() {
@@ -60,7 +60,7 @@ export function LiveTickerHeader() {
     return (
       <div className="flex items-center gap-2 text-muted-foreground">
         <Activity className="h-3 w-3 animate-pulse" />
-        <span className="text-xs">Wachten op activiteit...</span>
+        <span className="text-xs">Waiting for activity...</span>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export function LiveTickerHeader() {
             isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
           }`}
         >
-          <span className="text-sm flex-shrink-0">{getEventEmoji(currentItem.eventType)}</span>
+          <span className="flex-shrink-0">{getEventIcon(currentItem.eventType)}</span>
           <span className="text-sm truncate">{currentItem.message}</span>
           <span className="text-xs text-muted-foreground flex-shrink-0">
             {formatTimeAgo(currentItem.createdAt || new Date())}

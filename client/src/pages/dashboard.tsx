@@ -70,17 +70,17 @@ function formatDate(date: string | Date) {
   });
 }
 
-function getActionForDaysLate(daysLate: number): { action: string; icon: string; color: string } {
+function getActionForDaysLate(daysLate: number): { action: string; color: string } {
   if (daysLate <= 7) {
-    return { action: "Herinnering", icon: "📧", color: "text-blue-600" };
+    return { action: "Reminder", color: "text-blue-600" };
   } else if (daysLate <= 14) {
-    return { action: "Bellen", icon: "📞", color: "text-yellow-600" };
+    return { action: "Call", color: "text-yellow-600" };
   } else if (daysLate <= 30) {
-    return { action: "Betalingsregeling", icon: "📋", color: "text-orange-600" };
+    return { action: "Payment Plan", color: "text-orange-600" };
   } else if (daysLate <= 60) {
-    return { action: "Incasso", icon: "⚠️", color: "text-red-600" };
+    return { action: "Collection", color: "text-red-600" };
   } else {
-    return { action: "Juridisch", icon: "⚖️", color: "text-red-800" };
+    return { action: "Legal", color: "text-red-800" };
   }
 }
 
@@ -141,21 +141,21 @@ function ActiesCard({ invoices, isLoading }: { invoices: InvoiceWithCompany[]; i
   const currentAction = currentInvoice ? getActionForDaysLate(currentInvoice.daysLate || 0) : null;
 
   const actionTypes = [
-    { key: 'herinnering', label: 'Herinnering', icon: '📧', color: 'bg-blue-500', bgLight: 'bg-blue-50', text: 'text-blue-700', days: '1-7d' },
-    { key: 'bellen', label: 'Bellen', icon: '📞', color: 'bg-yellow-500', bgLight: 'bg-yellow-50', text: 'text-yellow-700', days: '8-14d' },
-    { key: 'regeling', label: 'Regeling', icon: '📋', color: 'bg-orange-500', bgLight: 'bg-orange-50', text: 'text-orange-700', days: '15-30d' },
-    { key: 'incasso', label: 'Incasso', icon: '⚠️', color: 'bg-red-500', bgLight: 'bg-red-50', text: 'text-red-700', days: '31-60d' },
-    { key: 'juridisch', label: 'Juridisch', icon: '⚖️', color: 'bg-red-800', bgLight: 'bg-red-100', text: 'text-red-800', days: '60+d' },
+    { key: 'herinnering', label: 'Reminder', bgLight: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', days: '1-7d' },
+    { key: 'bellen', label: 'Call', bgLight: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', days: '8-14d' },
+    { key: 'regeling', label: 'Payment Plan', bgLight: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', days: '15-30d' },
+    { key: 'incasso', label: 'Collection', bgLight: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', days: '31-60d' },
+    { key: 'juridisch', label: 'Legal', bgLight: 'bg-red-100', text: 'text-red-800', border: 'border-red-300', days: '60+d' },
   ];
 
   return (
-    <Card className="min-h-0 border-orange-200 bg-gradient-to-r from-orange-50/50 to-background">
+    <Card className="min-h-0">
       <CardHeader className="p-3 pb-2 flex-shrink-0">
         <CardTitle className="text-sm flex items-center gap-2">
-          <Bell className="h-4 w-4 text-orange-500" />
-          <span>Acties</span>
-          <Badge variant="outline" className="text-[10px] border-orange-500 text-orange-600">
-            {invoices.length} openstaand
+          <AlertTriangle className="h-4 w-4 text-orange-500" />
+          <span>Actions Required</span>
+          <Badge variant="outline" className="text-[10px]">
+            {invoices.length} pending
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -167,8 +167,7 @@ function ActiesCard({ invoices, isLoading }: { invoices: InvoiceWithCompany[]; i
             ))}
           </div>
         ) : actionGroups ? (
-          <div className="space-y-3">
-            {/* Action category cards */}
+          <div className="space-y-2">
             <div className="grid grid-cols-5 gap-2">
               {actionTypes.map((type) => {
                 const count = actionGroups[type.key as keyof typeof actionGroups]?.length || 0;
@@ -176,10 +175,9 @@ function ActiesCard({ invoices, isLoading }: { invoices: InvoiceWithCompany[]; i
                 return (
                   <div 
                     key={type.key} 
-                    className={`rounded-lg p-2 ${type.bgLight} border ${count > 0 ? 'border-current opacity-100' : 'opacity-40 border-transparent'}`}
+                    className={`rounded p-2 ${type.bgLight} border ${type.border} ${count > 0 ? 'opacity-100' : 'opacity-40'}`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-lg">{type.icon}</span>
                       <span className={`text-lg font-bold ${type.text}`}>{count}</span>
                     </div>
                     <p className={`text-[10px] font-medium ${type.text}`}>{type.label}</p>
@@ -197,30 +195,28 @@ function ActiesCard({ invoices, isLoading }: { invoices: InvoiceWithCompany[]; i
               })}
             </div>
             
-            {/* Current action ticker */}
             {currentInvoice && currentAction && (
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-100/50 border border-orange-200">
-                <span className="text-xl animate-pulse">{currentAction.icon}</span>
+              <div className="flex items-center gap-2 p-2 rounded bg-muted/50 border">
                 <div className="flex-1 min-w-0">
                   <div className={`transition-all duration-300 ${isAnimating ? 'opacity-0 -translate-y-1' : 'opacity-100 translate-y-0'}`}>
                     <Link 
                       href={`/companies/${currentInvoice.companyId}`}
                       className="hover:underline"
                     >
-                      <span className={`text-xs font-bold ${currentAction.color}`}>{currentAction.action}</span>
+                      <span className={`text-xs font-semibold ${currentAction.color}`}>{currentAction.action}</span>
                       <span className="text-xs"> - {currentInvoice.company?.name}</span>
-                      <span className="text-xs text-muted-foreground"> - {formatCurrency(currentInvoice.amount)}, {currentInvoice.daysLate}d te laat</span>
+                      <span className="text-xs text-muted-foreground"> - {formatCurrency(currentInvoice.amount)}, {currentInvoice.daysLate}d overdue</span>
                     </Link>
                   </div>
                 </div>
-                <span className="text-[10px] text-muted-foreground">({currentIndex + 1}/{sortedInvoices.length})</span>
+                <span className="text-[10px] text-muted-foreground">{currentIndex + 1}/{sortedInvoices.length}</span>
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-4">
             <CheckCircle className="h-6 w-6 text-green-500/50 mb-1" />
-            <p className="text-xs text-muted-foreground">Geen openstaande acties - alle facturen op schema</p>
+            <p className="text-xs text-muted-foreground">No pending actions - all invoices on schedule</p>
           </div>
         )}
       </CardContent>
@@ -286,10 +282,10 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
       <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
         <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
           <CheckCircle className="h-3 w-3 text-green-500" />
-          <span className="text-[10px] font-medium text-green-600">ACTIES</span>
+          <span className="text-[10px] font-medium text-green-600">ACTIONS</span>
         </div>
         <div className="flex-1 px-3">
-          <span className="text-xs text-green-600">Geen openstaande acties - alle facturen op schema</span>
+          <span className="text-xs text-green-600">No pending actions - all invoices on schedule</span>
         </div>
       </div>
     );
@@ -310,30 +306,30 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
   if (!currentInvoice) return null;
   
   const daysLate = currentInvoice.daysLate || 0;
-  const { action, icon, color } = getActionForDaysLate(daysLate);
+  const { action, color } = getActionForDaysLate(daysLate);
 
   return (
     <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
       <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
         <Bell className="h-3 w-3 text-orange-500 animate-pulse" />
-        <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
+        <span className="text-[10px] font-medium text-orange-600">ACTIONS</span>
       </div>
       {/* Action summary badges */}
       <div className="flex items-center gap-1 px-2 flex-shrink-0 border-r h-full">
         {actionSummary.herinnering > 0 && (
-          <span className="text-[9px] px-1 bg-blue-100 text-blue-700 rounded" title="Herinnering sturen (1-7d)">📧{actionSummary.herinnering}</span>
+          <span className="text-[9px] px-1 bg-blue-100 text-blue-700 rounded" title="Send reminder (1-7d)">{actionSummary.herinnering}</span>
         )}
         {actionSummary.bellen > 0 && (
-          <span className="text-[9px] px-1 bg-yellow-100 text-yellow-700 rounded" title="Bellen (8-14d)">📞{actionSummary.bellen}</span>
+          <span className="text-[9px] px-1 bg-yellow-100 text-yellow-700 rounded" title="Call (8-14d)">{actionSummary.bellen}</span>
         )}
         {actionSummary.regeling > 0 && (
-          <span className="text-[9px] px-1 bg-orange-100 text-orange-700 rounded" title="Betalingsregeling (15-30d)">📋{actionSummary.regeling}</span>
+          <span className="text-[9px] px-1 bg-orange-100 text-orange-700 rounded" title="Payment plan (15-30d)">{actionSummary.regeling}</span>
         )}
         {actionSummary.incasso > 0 && (
-          <span className="text-[9px] px-1 bg-red-100 text-red-700 rounded" title="Incasso (31-60d)">⚠️{actionSummary.incasso}</span>
+          <span className="text-[9px] px-1 bg-red-100 text-red-700 rounded" title="Collection (31-60d)">{actionSummary.incasso}</span>
         )}
         {actionSummary.juridisch > 0 && (
-          <span className="text-[9px] px-1 bg-red-200 text-red-800 rounded" title="Juridisch (60+d)">⚖️{actionSummary.juridisch}</span>
+          <span className="text-[9px] px-1 bg-red-200 text-red-800 rounded" title="Legal (60+d)">{actionSummary.juridisch}</span>
         )}
       </div>
       <div className="flex-1 min-w-0 overflow-hidden px-3">
@@ -342,12 +338,11 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
             isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
           }`}
         >
-          <span className="text-sm flex-shrink-0">{icon}</span>
           <Link 
             href={`/companies/${currentInvoice.companyId}`}
             className="text-xs hover:underline cursor-pointer truncate"
             data-testid={`ticker-action-${currentInvoice.id}`}
-            title={`${currentInvoice.company?.name}\nBTW: ${currentInvoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(currentInvoice.amount)}\nVervaldatum: ${formatDate(currentInvoice.dueDate)}\n${daysLate} dagen te laat\n\nActie: ${action}\nKlik om bedrijf te bekijken`}
+            title={`${currentInvoice.company?.name}\nVAT: ${currentInvoice.company?.vatNumber || 'Unknown'}\nInvoice: ${formatCurrency(currentInvoice.amount)}\nDue: ${formatDate(currentInvoice.dueDate)}\n${daysLate} days overdue\n\nAction: ${action}`}
           >
             <strong className={color}>{action}</strong>
             {' '}- <strong>{currentInvoice.company?.name}</strong>
@@ -405,11 +400,11 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blacklist"] });
-      toast({ title: "Toegevoegd", description: "Bedrijf is toegevoegd aan de blacklist" });
+      toast({ title: "Added", description: "Company added to blacklist" });
       setSelectedActivity(null);
     },
     onError: () => {
-      toast({ title: "Fout", description: "Kon niet toevoegen aan blacklist", variant: "destructive" });
+      toast({ title: "Error", description: "Could not add to blacklist", variant: "destructive" });
     },
   });
 
@@ -425,10 +420,10 @@ export default function Dashboard() {
   };
 
   const riskDistributionData = [
-    { name: "Laag", value: 35, color: "#22c55e" },
+    { name: "Low", value: 35, color: "#22c55e" },
     { name: "Medium", value: 40, color: "#f59e0b" },
-    { name: "Hoog", value: 18, color: "#f97316" },
-    { name: "Kritiek", value: 7, color: "#ef4444" },
+    { name: "High", value: 18, color: "#f97316" },
+    { name: "Critical", value: 7, color: "#ef4444" },
   ];
 
   return (
@@ -436,8 +431,8 @@ export default function Dashboard() {
       {/* Compact Header */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold" data-testid="text-page-title">📊 Dashboard</h1>
-          <p className="text-[10px] text-muted-foreground">Betalingsgedrag register 💰</p>
+          <h1 className="text-lg font-bold" data-testid="text-page-title">Dashboard</h1>
+          <p className="text-[10px] text-muted-foreground">Payment behavior registry</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Portfolio Risk Score Widget */}
@@ -445,11 +440,11 @@ export default function Dashboard() {
             <div 
               className="flex items-center gap-2 px-3 py-1.5 rounded-md border bg-card cursor-help"
               data-testid="widget-portfolio-risk"
-              title={`Portfolio Risico (0-10): Gewogen gemiddelde van risicoscores van al je klanten. Hoe lager, hoe beter! Uitstaand: €${Math.round(portfolioRisk.totalOutstanding).toLocaleString()}`}
+              title={`Portfolio Risk (0-10): Weighted average risk score of all customers. Lower is better. Outstanding: €${Math.round(portfolioRisk.totalOutstanding).toLocaleString()}`}
             >
               <Gauge className="h-4 w-4 text-primary" />
               <div className="flex flex-col">
-                <span className="text-[9px] text-muted-foreground">Portfolio Risico</span>
+                <span className="text-[9px] text-muted-foreground">Portfolio Risk</span>
                 <div className="flex items-center gap-1">
                   <span 
                     className={`text-sm font-bold ${
@@ -494,7 +489,7 @@ export default function Dashboard() {
               <CardContent className="p-3 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Ontvangen</p>
+                  <p className="text-xs text-muted-foreground truncate">Received</p>
                   <p className="text-sm font-bold text-green-600 truncate">{formatCurrency(stats?.totalPaid || 0)}</p>
                 </div>
               </CardContent>
@@ -503,7 +498,7 @@ export default function Dashboard() {
               <CardContent className="p-3 flex items-center gap-2">
                 <Euro className="h-4 w-4 text-orange-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Te innen</p>
+                  <p className="text-xs text-muted-foreground truncate">Outstanding</p>
                   <p className="text-sm font-bold text-orange-600 truncate">{formatCurrency(stats?.totalOutstanding || 0)}</p>
                 </div>
               </CardContent>
@@ -512,7 +507,7 @@ export default function Dashboard() {
               <CardContent className="p-3 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-red-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Achterstallig</p>
+                  <p className="text-xs text-muted-foreground truncate">Overdue</p>
                   <p className="text-sm font-bold text-red-600">{stats?.overdueInvoices || 0}</p>
                 </div>
               </CardContent>
@@ -521,7 +516,7 @@ export default function Dashboard() {
               <CardContent className="p-3 flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Open facturen</p>
+                  <p className="text-xs text-muted-foreground truncate">Open invoices</p>
                   <p className="text-sm font-bold">{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)}</p>
                 </div>
               </CardContent>
@@ -540,11 +535,11 @@ export default function Dashboard() {
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-xs flex-shrink-0 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  Actieve opvolging
+                  Active Follow-up
                 </CardTitle>
                 <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2 flex-shrink-0" asChild>
                   <Link href="/invoices">
-                    Alle <ArrowRight className="ml-1 h-2.5 w-2.5" />
+                    All <ArrowRight className="ml-1 h-2.5 w-2.5" />
                   </Link>
                 </Button>
               </div>
@@ -560,9 +555,9 @@ export default function Dashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-[10px] py-0.5">Bedrijf</TableHead>
-                      <TableHead className="text-[10px] py-0.5">Bedrag</TableHead>
-                      <TableHead className="text-[10px] py-0.5">Actie</TableHead>
+                      <TableHead className="text-[10px] py-0.5">Company</TableHead>
+                      <TableHead className="text-[10px] py-0.5">Amount</TableHead>
+                      <TableHead className="text-[10px] py-0.5">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -570,7 +565,7 @@ export default function Dashboard() {
                       <TableRow key={invoice.id} className="text-xs" data-testid={`row-invoice-${invoice.id}`}>
                         <TableCell className="py-1 font-medium truncate max-w-[100px]">
                           <Link href={`/companies/${invoice.companyId}`} className="hover:underline">
-                            {invoice.company?.name || "Onbekend"}
+                            {invoice.company?.name || "Unknown"}
                           </Link>
                         </TableCell>
                         <TableCell className="py-1 font-mono text-[10px]">
@@ -578,7 +573,7 @@ export default function Dashboard() {
                         </TableCell>
                         <TableCell className="py-1">
                           <Badge variant="outline" className="text-[9px] px-1 py-0">
-                            {(invoice.daysLate || 0) > 30 ? "Bel" : "Herinner"}
+                            {(invoice.daysLate || 0) > 30 ? "Call" : "Remind"}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -588,7 +583,7 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <CheckCircle className="h-6 w-6 text-green-500/50 mb-1" />
-                  <p className="text-[10px] text-muted-foreground">Alles op schema!</p>
+                  <p className="text-[10px] text-muted-foreground">All on schedule</p>
                 </div>
               )}
             </CardContent>
@@ -597,7 +592,7 @@ export default function Dashboard() {
           {/* Klantverdeling */}
           <Card className="flex flex-col min-h-0 overflow-hidden">
             <CardHeader className="p-2 pb-0 flex-shrink-0">
-              <CardTitle className="text-xs">Klantverdeling</CardTitle>
+              <CardTitle className="text-xs">Risk Distribution</CardTitle>
             </CardHeader>
             <CardContent className="p-2 pt-0 flex-1 flex flex-col min-h-0">
               <div className="flex-1 min-h-0">
@@ -642,14 +637,14 @@ export default function Dashboard() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedActivity && getActivityIcon(selectedActivity.eventType)}
-              Netwerk Update
+              Network Update
             </DialogTitle>
-            <DialogDescription>Details van deze activiteit</DialogDescription>
+            <DialogDescription>Activity details</DialogDescription>
           </DialogHeader>
           {selectedActivity && (
             <div className="space-y-4">
               <div>
-                <p className="text-xs text-muted-foreground">Bericht</p>
+                <p className="text-xs text-muted-foreground">Message</p>
                 <p className="text-sm font-medium">{selectedActivity.message}</p>
               </div>
               
@@ -660,7 +655,7 @@ export default function Dashboard() {
                       <Building2 className="h-4 w-4" />
                       <span className="font-medium">{selectedActivity.company.name}</span>
                       {selectedActivity.company.isCustomer && (
-                        <Badge variant="outline" className="text-[10px] border-blue-500 text-blue-500">Klant</Badge>
+                        <Badge variant="outline" className="text-[10px] border-blue-500 text-blue-500">Customer</Badge>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">{selectedActivity.company.vatNumber}</p>
@@ -673,7 +668,7 @@ export default function Dashboard() {
                     <Link href={`/companies/${selectedActivity.company.id}`}>
                       <Button size="sm" variant="outline" data-testid="button-view-company">
                         <Building2 className="h-3 w-3 mr-1" />
-                        Bekijk Bedrijf
+                        View Company
                       </Button>
                     </Link>
                     

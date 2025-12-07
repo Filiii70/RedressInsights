@@ -34,7 +34,7 @@ import {
 
 const mainMenuItems = [
   {
-    title: "BTW Check",
+    title: "VAT Check",
     url: "/btw-check",
     icon: Search,
     highlight: true,
@@ -45,12 +45,12 @@ const mainMenuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Facturen",
+    title: "Invoices",
     url: "/invoices",
     icon: FileText,
   },
   {
-    title: "Bedrijven",
+    title: "Companies",
     url: "/companies",
     icon: Building2,
   },
@@ -63,7 +63,7 @@ const mainMenuItems = [
 
 const analyticsItems = [
   {
-    title: "Risico Analyse",
+    title: "Risk Analysis",
     url: "/risk-analysis",
     icon: Shield,
   },
@@ -119,7 +119,7 @@ export function AppSidebar() {
             <div 
               className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500"
               data-testid="badge-streak"
-              title={`${currentStreak} ${currentStreak === 1 ? 'dag' : 'dagen'} streak!`}
+              title={`${currentStreak} day streak!`}
             >
               <Flame className="h-3.5 w-3.5" />
               <span className="text-xs font-bold">{currentStreak}</span>
@@ -168,7 +168,7 @@ export function AppSidebar() {
 
         <SidebarGroup className="p-1.5">
           <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground h-6 px-1.5">
-            Analyse
+            Analytics
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -201,14 +201,14 @@ export function AppSidebar() {
             >
               <Link href="/about" data-testid="link-nav-about">
                 <Info className="h-3 w-3 text-destructive" />
-                <span className="text-xs font-medium text-destructive">Over KMO-Alert</span>
+                <span className="text-xs font-medium text-destructive">About KMO-Alert</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton data-testid="button-nav-login" className="h-7">
               <LogIn className="h-3 w-3" />
-              <span className="text-xs">Inloggen</span>
+              <span className="text-xs">Login</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -219,7 +219,7 @@ export function AppSidebar() {
             >
               <Link href="/settings" data-testid="link-nav-settings">
                 <Settings className="h-3 w-3" />
-                <span className="text-xs">Instellingen</span>
+                <span className="text-xs">Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
