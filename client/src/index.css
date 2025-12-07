@@ -299,7 +299,7 @@
 }
 
 .animate-scroll-horizontal {
-  animation: scroll-horizontal 6s linear infinite;
+  animation: scroll-horizontal 120s linear infinite;
 }
 
 .animate-scroll-horizontal:hover {
