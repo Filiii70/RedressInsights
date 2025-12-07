@@ -385,10 +385,10 @@ export default function Dashboard() {
         </div>
         <div className="flex-1 overflow-hidden">
           <div className="animate-scroll-horizontal group-hover:[animation-play-state:paused] flex gap-8 whitespace-nowrap">
-            {/* Show actual critical invoices with company names */}
+            {/* Show ALL critical invoices with company names - most urgent first */}
             {criticalInvoices && criticalInvoices.length > 0 ? (
               <>
-                {criticalInvoices.slice(0, 5).map((invoice) => (
+                {criticalInvoices.map((invoice) => (
                   <Link 
                     key={invoice.id} 
                     href={`/companies/${invoice.companyId}`}
@@ -403,8 +403,8 @@ export default function Dashboard() {
                     </span>
                   </Link>
                 ))}
-                {/* Duplicate for loop */}
-                {criticalInvoices.slice(0, 3).map((invoice) => (
+                {/* Duplicate first few for seamless loop */}
+                {criticalInvoices.slice(0, 5).map((invoice) => (
                   <Link 
                     key={`dup-${invoice.id}`} 
                     href={`/companies/${invoice.companyId}`}
