@@ -258,18 +258,18 @@ export default function BTWCheck() {
               <Card className="border-2 border-dashed">
                 <CardContent className="p-6 text-center">
                   <XCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <h3 className="text-sm font-medium">Bedrijf niet gevonden</h3>
+                  <h3 className="text-sm font-medium">Company not found</h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    BTW-nummer "<strong>{searchVat}</strong>" is niet bekend in ons netwerk.
+                    VAT number "<strong>{searchVat}</strong>" is not in our network.
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Nog geen betalingsdata gedeeld over dit bedrijf.
+                    No payment data shared yet for this company.
                   </p>
                   <div className="mt-3">
                     <Link href="/upload">
                       <Button size="sm" className="text-xs" data-testid="button-upload-new">
                         <FileText className="h-3 w-3 mr-1" />
-                        Toevoegen via factuur
+                        Add via invoice
                       </Button>
                     </Link>
                   </div>
@@ -283,23 +283,23 @@ export default function BTWCheck() {
         {!searchVat && (
           <div className="max-w-md mx-auto text-center py-4">
             <Shield className="h-10 w-10 mx-auto text-primary/30 mb-2" />
-            <h3 className="text-sm font-medium">Hoe werkt het?</h3>
+            <h3 className="text-sm font-medium">How does it work?</h3>
             <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
               <div className="p-2 rounded-lg bg-muted/50">
                 <div className="text-base font-bold mb-1">1</div>
-                <p>BTW-nummer invoeren</p>
+                <p>Enter VAT number</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
                 <div className="text-base font-bold mb-1">2</div>
-                <p>Risicoscore bekijken</p>
+                <p>View risk score</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
                 <div className="text-base font-bold mb-1">3</div>
-                <p>Voorwaarden bepalen</p>
+                <p>Set payment terms</p>
               </div>
             </div>
             <p className="mt-4 text-muted-foreground text-[10px]">
-              Data van 500+ KMO's in Belgie, Nederland en Luxemburg
+              Data from 500+ SMEs in Belgium, Netherlands and Luxembourg
             </p>
           </div>
         )}
