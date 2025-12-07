@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
 import { Link } from "wouter";
-import { FileCheck, Clock, Sparkles, Construction, AlertTriangle } from "lucide-react";
+import { FileCheck, Clock, Sparkles, Construction, AlertTriangle, Upload } from "lucide-react";
 import type { InvoiceWithCompany } from "@shared/schema";
 
 function formatCurrency(amount: number | string) {
@@ -16,7 +16,7 @@ function formatCurrency(amount: number | string) {
   }).format(num);
 }
 
-export default function Upload() {
+export default function UploadPage() {
   const { data: recentInvoices, isLoading } = useQuery<InvoiceWithCompany[]>({
     queryKey: ["/api/invoices", "recent"],
   });
@@ -24,8 +24,11 @@ export default function Upload() {
   return (
     <div className="h-full flex flex-col gap-3">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold" data-testid="text-page-title">📤 Factuur uploaden</h1>
-        <p className="text-xs text-muted-foreground">AI extractie van factuurgegevens 🤖✨</p>
+        <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
+          <Upload className="h-5 w-5" />
+          Upload Invoice
+        </h1>
+        <p className="text-xs text-muted-foreground">AI extraction of invoice data</p>
       </div>
 
       <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
@@ -37,10 +40,10 @@ export default function Upload() {
               </div>
               <h3 className="text-sm font-semibold mb-1 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                Upload tijdelijk uitgeschakeld
+                Upload temporarily disabled
               </h3>
               <p className="text-xs text-muted-foreground">
-                Neem contact op via{" "}
+                Contact us at{" "}
                 <a href="mailto:hello@kmo-alert.be" className="text-primary font-medium hover:underline">
                   hello@kmo-alert.be
                 </a>
@@ -52,7 +55,7 @@ export default function Upload() {
             <CardHeader className="p-3 pb-2 flex-shrink-0">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                Hoe het werkt
+                How it works
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 pt-0">
@@ -62,21 +65,21 @@ export default function Upload() {
                     <span className="text-sm font-bold text-primary">1</span>
                   </div>
                   <h4 className="text-xs font-medium mb-1">Upload</h4>
-                  <p className="text-[10px] text-muted-foreground">Screenshot van factuur</p>
+                  <p className="text-[10px] text-muted-foreground">Screenshot of invoice</p>
                 </div>
                 <div className="flex flex-col items-center text-center p-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 mb-2">
                     <span className="text-sm font-bold text-primary">2</span>
                   </div>
-                  <h4 className="text-xs font-medium mb-1">AI Extractie</h4>
-                  <p className="text-[10px] text-muted-foreground">Automatische datalezing</p>
+                  <h4 className="text-xs font-medium mb-1">AI Extraction</h4>
+                  <p className="text-[10px] text-muted-foreground">Automatic data reading</p>
                 </div>
                 <div className="flex flex-col items-center text-center p-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 mb-2">
                     <span className="text-sm font-bold text-primary">3</span>
                   </div>
-                  <h4 className="text-xs font-medium mb-1">Analyse</h4>
-                  <p className="text-[10px] text-muted-foreground">Risicoprofiel & actieplan</p>
+                  <h4 className="text-xs font-medium mb-1">Analysis</h4>
+                  <p className="text-[10px] text-muted-foreground">Risk profile & action plan</p>
                 </div>
               </div>
             </CardContent>
@@ -84,17 +87,17 @@ export default function Upload() {
 
           <Card className="overflow-visible">
             <CardHeader className="p-3 pb-2">
-              <CardTitle className="text-sm">Geëxtraheerde gegevens</CardTitle>
+              <CardTitle className="text-sm">Extracted data</CardTitle>
             </CardHeader>
             <CardContent className="p-3 pt-0">
               <div className="grid grid-cols-4 gap-2 text-xs">
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Factuurdatum</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Vervaldatum</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />BTW-nummer</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Bedrijfsnaam</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Factuurbedrag</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Factuurnummer</div>
-                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Betaaldatum</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Invoice date</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Due date</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />VAT number</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Company name</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Invoice amount</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Invoice number</div>
+                <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Payment date</div>
                 <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Status</div>
               </div>
             </CardContent>
@@ -128,7 +131,7 @@ export default function Upload() {
                       <div className="flex items-start gap-2 min-w-0">
                         <FileCheck className="h-3 w-3 mt-0.5 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-medium truncate">{invoice.company?.name || "Onbekend"}</p>
+                          <p className="text-xs font-medium truncate">{invoice.company?.name || "Unknown"}</p>
                           <p className="text-[10px] text-muted-foreground font-mono">{formatCurrency(invoice.amount)}</p>
                         </div>
                       </div>
@@ -143,7 +146,7 @@ export default function Upload() {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <FileCheck className="h-6 w-6 text-muted-foreground/50 mb-2" />
-                <p className="text-xs text-muted-foreground">Nog geen facturen</p>
+                <p className="text-xs text-muted-foreground">No invoices yet</p>
               </div>
             )}
           </CardContent>

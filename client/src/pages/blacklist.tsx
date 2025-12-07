@@ -12,7 +12,8 @@ import {
   CheckCircle2, 
   Clock, 
   Trash2,
-  Eye
+  Eye,
+  AlertTriangle
 } from "lucide-react";
 import {
   Dialog,
@@ -49,9 +50,9 @@ function formatDate(date: string | Date | null) {
 function getStatusBadge(status: string) {
   switch (status) {
     case "active":
-      return <Badge variant="destructive" className="text-[10px]">Actief</Badge>;
+      return <Badge variant="destructive" className="text-[10px]">Active</Badge>;
     case "resolved":
-      return <Badge variant="default" className="text-[10px] bg-green-600">Opgelost</Badge>;
+      return <Badge variant="default" className="text-[10px] bg-green-600">Resolved</Badge>;
     case "reviewing":
       return <Badge variant="secondary" className="text-[10px]">In Review</Badge>;
     default:
@@ -72,7 +73,7 @@ export default function Blacklist() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blacklist"] });
-      toast({ title: "Status bijgewerkt", description: "Bedrijf is gemarkeerd als opgelost" });
+      toast({ title: "Status updated", description: "Company marked as resolved" });
     },
   });
 
@@ -82,7 +83,7 @@ export default function Blacklist() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blacklist"] });
-      toast({ title: "Verwijderd", description: "Bedrijf is van de blacklist verwijderd" });
+      toast({ title: "Removed", description: "Company removed from blacklist" });
     },
   });
 
@@ -92,8 +93,11 @@ export default function Blacklist() {
   return (
     <div className="h-full flex flex-col gap-3">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold" data-testid="text-page-title">⚠️ Blacklist</h1>
-        <p className="text-xs text-muted-foreground">Bedrijven met hoog risico of betalingsproblemen 🚨</p>
+        <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
+          <AlertTriangle className="h-5 w-5 text-yellow-500" />
+          Blacklist
+        </h1>
+        <p className="text-xs text-muted-foreground">Companies with high risk or payment issues</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2 flex-shrink-0">
@@ -101,7 +105,7 @@ export default function Blacklist() {
           <CardContent className="p-3 flex items-center gap-2">
             <Ban className="h-4 w-4 text-red-500 flex-shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Actief</p>
+              <p className="text-xs text-muted-foreground">Active</p>
               <p className="text-sm font-bold text-red-600" data-testid="stat-active">{activeEntries.length}</p>
             </div>
           </CardContent>
@@ -110,7 +114,7 @@ export default function Blacklist() {
           <CardContent className="p-3 flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Opgelost</p>
+              <p className="text-xs text-muted-foreground">Resolved</p>
               <p className="text-sm font-bold text-green-600" data-testid="stat-resolved">{resolvedEntries.length}</p>
             </div>
           </CardContent>
@@ -119,7 +123,7 @@ export default function Blacklist() {
           <CardContent className="p-3 flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Totaal</p>
+              <p className="text-xs text-muted-foreground">Total</p>
               <p className="text-sm font-bold" data-testid="stat-total">{entries?.length || 0}</p>
             </div>
           </CardContent>
@@ -131,7 +135,7 @@ export default function Blacklist() {
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <CardTitle className="text-sm flex items-center gap-2">
               <Ban className="h-4 w-4" />
-              Geblokkeerde Bedrijven
+              Blocked Companies
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 flex-1 overflow-auto">
@@ -159,13 +163,13 @@ export default function Blacklist() {
                         </Link>
                         {getStatusBadge(entry.status)}
                         {entry.company.isCustomer && (
-                          <Badge variant="outline" className="text-[10px] border-blue-500 text-blue-500">Klant</Badge>
+                          <Badge variant="outline" className="text-[10px] border-blue-500 text-blue-500">Customer</Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{entry.company.vatNumber}</span>
                         <span>•</span>
-                        <span>Toegevoegd: {formatDate(entry.createdAt)}</span>
+                        <span>Added: {formatDate(entry.createdAt)}</span>
                         {entry.reason && (
                           <>
                             <span>•</span>
@@ -190,7 +194,7 @@ export default function Blacklist() {
                           </DialogHeader>
                           <div className="space-y-3">
                             <div>
-                              <p className="text-xs text-muted-foreground">BTW Nummer</p>
+                              <p className="text-xs text-muted-foreground">VAT Number</p>
                               <p className="text-sm font-medium">{entry.company.vatNumber}</p>
                             </div>
                             <div>
@@ -198,30 +202,30 @@ export default function Blacklist() {
                               <div className="mt-1">{getStatusBadge(entry.status)}</div>
                             </div>
                             <div>
-                              <p className="text-xs text-muted-foreground">Risico Score (bij toevoeging)</p>
+                              <p className="text-xs text-muted-foreground">Risk Score (at time of addition)</p>
                               <div className="mt-1">
                                 <RiskScoreBadge score={entry.riskScoreAtTime || 50} />
                               </div>
                             </div>
                             {entry.reason && (
                               <div>
-                                <p className="text-xs text-muted-foreground">Reden</p>
+                                <p className="text-xs text-muted-foreground">Reason</p>
                                 <p className="text-sm">{entry.reason}</p>
                               </div>
                             )}
                             {entry.notes && (
                               <div>
-                                <p className="text-xs text-muted-foreground">Notities</p>
+                                <p className="text-xs text-muted-foreground">Notes</p>
                                 <p className="text-sm">{entry.notes}</p>
                               </div>
                             )}
                             <div>
-                              <p className="text-xs text-muted-foreground">Toegevoegd op</p>
+                              <p className="text-xs text-muted-foreground">Added on</p>
                               <p className="text-sm">{formatDate(entry.createdAt)}</p>
                             </div>
                             {entry.resolvedAt && (
                               <div>
-                                <p className="text-xs text-muted-foreground">Opgelost op</p>
+                                <p className="text-xs text-muted-foreground">Resolved on</p>
                                 <p className="text-sm">{formatDate(entry.resolvedAt)}</p>
                               </div>
                             )}
@@ -229,7 +233,7 @@ export default function Blacklist() {
                               <Link href={`/companies/${entry.company.id}`}>
                                 <Button size="sm" variant="outline" data-testid={`button-view-company-${entry.id}`}>
                                   <Building2 className="h-3 w-3 mr-1" />
-                                  Bekijk Bedrijf
+                                  View Company
                                 </Button>
                               </Link>
                             </div>
@@ -257,18 +261,18 @@ export default function Blacklist() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Verwijderen van blacklist?</AlertDialogTitle>
+                            <AlertDialogTitle>Remove from blacklist?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Weet je zeker dat je {entry.company.name} van de blacklist wilt verwijderen? Deze actie kan niet ongedaan gemaakt worden.
+                              Are you sure you want to remove {entry.company.name} from the blacklist? This action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => deleteMutation.mutate(entry.id)}
                               className="bg-red-600 hover:bg-red-700"
                             >
-                              Verwijderen
+                              Remove
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -280,8 +284,8 @@ export default function Blacklist() {
             ) : (
               <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                 <Ban className="h-8 w-8 mb-2 opacity-50" />
-                <p className="text-sm">Geen bedrijven op de blacklist</p>
-                <p className="text-xs">Voeg bedrijven toe via de dashboard updates</p>
+                <p className="text-sm">No companies on the blacklist</p>
+                <p className="text-xs">Add companies via the dashboard updates</p>
               </div>
             )}
           </CardContent>

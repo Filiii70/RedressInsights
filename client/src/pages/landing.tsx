@@ -11,23 +11,23 @@ export default function Landing() {
           <span className="text-lg font-bold">KMO-Alert</span>
         </div>
         <Button size="sm" asChild data-testid="button-login">
-          <a href="/api/login">Inloggen</a>
+          <a href="/api/login">Login</a>
         </Button>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-muted/30">
         <div className="text-center max-w-2xl mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-3" data-testid="text-hero-title">
-            Betalingsgedrag van KMO's
-            <span className="text-primary"> in realtime</span>
+            SME Payment Behavior
+            <span className="text-primary"> in Realtime</span>
           </h1>
           <p className="text-muted-foreground text-sm mb-6">
-            De Graydon voor KMO's — maar realtime, crowd-sourced en betaalbaar.
+            The Graydon for SMEs — but realtime, crowd-sourced and affordable.
             <br />
-            Bescherm je bedrijf tegen wanbetalers met AI-analyse en netwerk-effecten.
+            Protect your business from bad payers with AI analysis and network effects.
           </p>
           <Button size="lg" asChild data-testid="button-get-started">
-            <a href="/api/login">Start gratis</a>
+            <a href="/api/login">Start Free</a>
           </Button>
         </div>
 
@@ -37,9 +37,9 @@ export default function Landing() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mx-auto mb-3">
                 <Zap className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-sm font-semibold mb-1">AI Extractie</h3>
+              <h3 className="text-sm font-semibold mb-1">AI Extraction</h3>
               <p className="text-xs text-muted-foreground">
-                Upload facturen, AI leest alle data automatisch
+                Upload invoices, AI reads all data automatically
               </p>
             </CardContent>
           </Card>
@@ -49,9 +49,9 @@ export default function Landing() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mx-auto mb-3">
                 <BarChart3 className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-sm font-semibold mb-1">Risicoscores</h3>
+              <h3 className="text-sm font-semibold mb-1">Risk Scores</h3>
               <p className="text-xs text-muted-foreground">
-                Realtime risico-analyse van elke klant
+                Realtime risk analysis of every customer
               </p>
             </CardContent>
           </Card>
@@ -63,7 +63,7 @@ export default function Landing() {
               </div>
               <h3 className="text-sm font-semibold mb-1">Alerts</h3>
               <p className="text-xs text-muted-foreground">
-                Notificaties via email, SMS en WhatsApp
+                Notifications via email, SMS and WhatsApp
               </p>
             </CardContent>
           </Card>
@@ -75,7 +75,7 @@ export default function Landing() {
               </div>
               <h3 className="text-sm font-semibold mb-1">Crowd-sourced</h3>
               <p className="text-xs text-muted-foreground">
-                Netwerk-effect met andere ondernemers
+                Network effect with other entrepreneurs
               </p>
             </CardContent>
           </Card>
@@ -87,7 +87,7 @@ export default function Landing() {
               </div>
               <h3 className="text-sm font-semibold mb-1">Trends</h3>
               <p className="text-xs text-muted-foreground">
-                Historische trends en voorspellingen
+                Historical trends and predictions
               </p>
             </CardContent>
           </Card>
@@ -99,7 +99,7 @@ export default function Landing() {
               </div>
               <h3 className="text-sm font-semibold mb-1">GDPR</h3>
               <p className="text-xs text-muted-foreground">
-                Alleen zakelijke data, 100% GDPR-conform
+                Business data only, 100% GDPR compliant
               </p>
             </CardContent>
           </Card>
@@ -107,7 +107,7 @@ export default function Landing() {
       </main>
 
       <footer className="flex-shrink-0 text-center p-4 text-xs text-muted-foreground border-t bg-card">
-        KMO-Alert — Benelux B2B betalingsplatform
+        KMO-Alert — Benelux B2B Payment Platform
       </footer>
     </div>
   );

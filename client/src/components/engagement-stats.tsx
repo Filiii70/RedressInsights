@@ -41,18 +41,18 @@ export function EngagementStats({ companyId }: EngagementStatsProps) {
   };
 
   const getPercentileMessage = (percentile: number) => {
-    if (percentile >= 90) return "Top 10%! Uitstekend!";
-    if (percentile >= 75) return "Beter dan 75% van je collega's";
-    if (percentile >= 50) return "Beter dan de helft";
-    if (percentile > 0) return "Blijf actief om hoger te scoren";
-    return "Begin met uploaden!";
+    if (percentile >= 90) return "Top 10%! Excellent!";
+    if (percentile >= 75) return "Better than 75% of peers";
+    if (percentile >= 50) return "Better than half";
+    if (percentile > 0) return "Stay active to score higher";
+    return "Start uploading!";
   };
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Jouw Activiteit</CardTitle>
+          <CardTitle className="text-base">Your Activity</CardTitle>
           {stats.rank > 0 && (
             <Badge variant="outline" className="flex items-center gap-1">
               <Trophy className="h-3 w-3" />
@@ -76,7 +76,7 @@ export function EngagementStats({ companyId }: EngagementStatsProps) {
                   : "+∞"}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Facturen</p>
+            <p className="text-xs text-muted-foreground mt-1">Invoices</p>
           </div>
 
           <div className="text-center">
@@ -92,7 +92,7 @@ export function EngagementStats({ companyId }: EngagementStatsProps) {
                   : stats.thisWeek.paymentsRegistered > 0 ? "+∞" : "0"}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Betalingen</p>
+            <p className="text-xs text-muted-foreground mt-1">Payments</p>
           </div>
 
           <div className="text-center">
@@ -116,7 +116,7 @@ export function EngagementStats({ companyId }: EngagementStatsProps) {
           <div className="bg-primary/5 rounded-lg p-3 text-center">
             <p className="text-sm font-medium">{getPercentileMessage(stats.percentile)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Netwerk gemiddelde: {stats.networkAverage.invoicesUploaded} facturen, {stats.networkAverage.paymentsRegistered} betalingen
+              Network average: {stats.networkAverage.invoicesUploaded} invoices, {stats.networkAverage.paymentsRegistered} payments
             </p>
           </div>
         )}
@@ -124,7 +124,7 @@ export function EngagementStats({ companyId }: EngagementStatsProps) {
         {stats.percentile === 0 && (
           <div className="bg-muted/50 rounded-lg p-3 text-center">
             <p className="text-sm text-muted-foreground">
-              Upload facturen en registreer betalingen om je score te verhogen
+              Upload invoices and register payments to increase your score
             </p>
           </div>
         )}

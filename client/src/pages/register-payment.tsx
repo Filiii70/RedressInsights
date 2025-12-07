@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Loader2, AlertCircle, Building2, FileText, Euro, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { InvoiceWithCompany } from "@shared/schema";
@@ -37,7 +37,7 @@ export default function RegisterPayment() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Factuur laden...</p>
+          <p className="text-muted-foreground">Loading invoice...</p>
         </div>
       </div>
     );
@@ -49,9 +49,9 @@ export default function RegisterPayment() {
         <Card className="max-w-md w-full">
           <CardContent className="pt-6 text-center">
             <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Factuur niet gevonden</h2>
+            <h2 className="text-xl font-semibold mb-2">Invoice not found</h2>
             <p className="text-muted-foreground">
-              Deze QR-code is niet meer geldig of de factuur bestaat niet.
+              This QR code is no longer valid or the invoice does not exist.
             </p>
           </CardContent>
         </Card>
@@ -68,10 +68,10 @@ export default function RegisterPayment() {
               <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
             <h2 className="text-xl font-semibold mb-2 text-green-700">
-              Betaling Geregistreerd!
+              Payment Registered!
             </h2>
             <p className="text-muted-foreground mb-4">
-              Bedankt voor het registreren van de betaling.
+              Thank you for registering the payment.
             </p>
             <div className="bg-muted/50 rounded-lg p-4 text-left">
               <div className="flex items-center gap-2 mb-2">
@@ -80,7 +80,7 @@ export default function RegisterPayment() {
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                <span>Factuur {invoice.invoiceNumber || invoice.id.slice(0, 8)}</span>
+                <span>Invoice {invoice.invoiceNumber || invoice.id.slice(0, 8)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Euro className="h-4 w-4 text-muted-foreground" />
@@ -102,9 +102,9 @@ export default function RegisterPayment() {
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <FileText className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle>Betaling Registreren</CardTitle>
+          <CardTitle>Register Payment</CardTitle>
           <CardDescription>
-            Is deze factuur betaald? Registreer het in 30 seconden.
+            Has this invoice been paid? Register it in 30 seconds.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,31 +119,31 @@ export default function RegisterPayment() {
                   variant={invoice.status === "overdue" ? "destructive" : "secondary"}
                   data-testid={`badge-status-${invoice.id}`}
                 >
-                  {invoice.status === "overdue" ? "Vervallen" : "Openstaand"}
+                  {invoice.status === "overdue" ? "Overdue" : "Pending"}
                 </Badge>
               </div>
               
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground">Factuurnummer</p>
+                  <p className="text-muted-foreground">Invoice number</p>
                   <p className="font-medium">{invoice.invoiceNumber || invoice.id.slice(0, 8)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Bedrag</p>
+                  <p className="text-muted-foreground">Amount</p>
                   <p className="font-mono font-semibold text-lg">
                     €{parseFloat(invoice.amount.toString()).toLocaleString("nl-BE", { minimumFractionDigits: 2 })}
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Factuurdatum</p>
+                  <p className="text-muted-foreground">Invoice date</p>
                   <p className="font-medium">
-                    {format(new Date(invoice.invoiceDate), "d MMM yyyy", { locale: nl })}
+                    {format(new Date(invoice.invoiceDate), "d MMM yyyy", { locale: enUS })}
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Vervaldatum</p>
+                  <p className="text-muted-foreground">Due date</p>
                   <p className={`font-medium ${invoice.status === "overdue" ? "text-destructive" : ""}`}>
-                    {format(new Date(invoice.dueDate), "d MMM yyyy", { locale: nl })}
+                    {format(new Date(invoice.dueDate), "d MMM yyyy", { locale: enUS })}
                   </p>
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function RegisterPayment() {
               {invoice.status === "overdue" && invoice.daysLate && invoice.daysLate > 0 && (
                 <div className="mt-3 pt-3 border-t flex items-center gap-2 text-destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">{invoice.daysLate} dagen over tijd</span>
+                  <span className="text-sm font-medium">{invoice.daysLate} days overdue</span>
                 </div>
               )}
             </div>
@@ -166,18 +166,18 @@ export default function RegisterPayment() {
               {registerPaymentMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Registreren...
+                  Registering...
                 </>
               ) : (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Ja, deze is betaald
+                  Yes, this has been paid
                 </>
               )}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Door te bevestigen wordt de betaling geregistreerd op {format(new Date(), "d MMMM yyyy", { locale: nl })}
+              By confirming, the payment will be registered on {format(new Date(), "d MMMM yyyy", { locale: enUS })}
             </p>
           </div>
         </CardContent>

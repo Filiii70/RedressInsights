@@ -45,8 +45,8 @@ export function LeaderboardWidget() {
         <CardContent>
           <div className="text-center py-6 text-muted-foreground">
             <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Nog geen activiteit deze week</p>
-            <p className="text-xs mt-1">Upload facturen om op de leaderboard te komen!</p>
+            <p className="text-sm">No activity this week yet</p>
+            <p className="text-xs mt-1">Upload invoices to get on the leaderboard!</p>
           </div>
         </CardContent>
       </Card>
@@ -106,7 +106,7 @@ export function LeaderboardWidget() {
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <TrendingUp className="h-3 w-3" />
-            <span>Upload meer facturen om hoger te scoren!</span>
+            <span>Upload more invoices to score higher!</span>
           </div>
         </div>
       </CardContent>

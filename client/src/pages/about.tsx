@@ -13,7 +13,7 @@ export default function About() {
       <div className="print:hidden mb-4 flex justify-end">
         <Button onClick={handlePrint} data-testid="button-print-pdf">
           <FileDown className="h-4 w-4 mr-2" />
-          Opslaan als PDF
+          Save as PDF
         </Button>
       </div>
 
@@ -24,7 +24,7 @@ export default function About() {
         <div className="text-center border-b pb-4 print:pb-3">
           <h1 className="text-xl font-bold text-primary print:text-lg">KMO-Alert</h1>
           <p className="text-sm text-muted-foreground mt-1 print:text-xs">
-            "De Graydon voor KMO's — maar realtime, crowd-sourced en betaalbaar"
+            "The Graydon for SMEs — but realtime, crowd-sourced and affordable"
           </p>
         </div>
 
@@ -33,20 +33,20 @@ export default function About() {
           <CardHeader className="pb-1 pt-3">
             <CardTitle className="flex items-center gap-2 text-sm print:text-xs">
               <Users className="h-4 w-4 text-primary" />
-              Het Concept in het Kort
+              The Concept in Brief
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-xs print:text-[10px]">
             <p>
-              KMO-Alert is een <strong>crowd-sourced platform</strong> waar bedrijven samen betalingsgedrag delen. 
-              Denk aan het als een <strong>"Waze voor facturen"</strong> — iedereen draagt bij, iedereen profiteert.
+              KMO-Alert is a <strong>crowd-sourced platform</strong> where businesses share payment behavior together. 
+              Think of it as <strong>"Waze for invoices"</strong> — everyone contributes, everyone benefits.
             </p>
             <p>
-              Wanneer een bedrijf te laat betaalt bij meerdere leveranciers, weet het hele netwerk dit. 
-              Nieuwe leveranciers worden gewaarschuwd. Betrouwbare betalers krijgen betere voorwaarden.
+              When a company pays late to multiple suppliers, the entire network knows. 
+              New suppliers are warned. Reliable payers get better terms.
             </p>
             <div className="bg-primary/5 p-2 rounded-lg print:bg-gray-100 text-xs">
-              <strong>Het resultaat:</strong> Minder wanbetalers, snellere betalingen, betere cashflow.
+              <strong>The result:</strong> Fewer bad payers, faster payments, better cash flow.
             </div>
           </CardContent>
         </Card>
@@ -62,7 +62,7 @@ export default function About() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-[11px] print:text-[9px] pb-2">
-              <p>Upload facturen via foto of PDF. AI leest automatisch alle gegevens uit.</p>
+              <p>Upload invoices via photo or PDF. AI automatically reads all data.</p>
             </CardContent>
           </Card>
 
@@ -70,11 +70,11 @@ export default function About() {
             <CardHeader className="pb-1 pt-2">
               <CardTitle className="flex items-center gap-1.5 text-xs print:text-[10px]">
                 <Shield className="h-3 w-3 text-red-500" />
-                Risico Analyse
+                Risk Analysis
               </CardTitle>
             </CardHeader>
             <CardContent className="text-[11px] print:text-[9px] pb-2">
-              <p>Risicoscores van 0-100. Zie gemiddelde dagen te laat en trend.</p>
+              <p>Risk scores from 0-100. See average days late and trend.</p>
             </CardContent>
           </Card>
 
@@ -86,7 +86,7 @@ export default function About() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-[11px] print:text-[9px] pb-2">
-              <p>Volg betalingsgedrag over tijd. Ontdek seizoenspatronen.</p>
+              <p>Track payment behavior over time. Discover seasonal patterns.</p>
             </CardContent>
           </Card>
 
@@ -98,7 +98,7 @@ export default function About() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-[11px] print:text-[9px] pb-2">
-              <p>Automatische waarschuwingen voor bedrijven met hoog risico.</p>
+              <p>Automatic warnings for high-risk companies.</p>
             </CardContent>
           </Card>
 
@@ -114,10 +114,10 @@ export default function About() {
           </CardHeader>
           <CardContent className="text-xs print:text-[10px] space-y-1.5 pb-3">
             <p>
-              <strong>Top 10 Beste Betalers</strong> toont bedrijven met de laagste risicoscores.
+              <strong>Top 10 Best Payers</strong> shows companies with the lowest risk scores.
             </p>
             <div className="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg print:bg-gray-100 text-[11px]">
-              Facturen uploaden, betalingen registreren, streaks opbouwen = punten!
+              Upload invoices, register payments, build streaks = points!
             </div>
           </CardContent>
         </Card>
@@ -125,20 +125,20 @@ export default function About() {
         {/* Network Power */}
         <Card className="bg-primary/5 print:bg-gray-50 print:shadow-none print:border">
           <CardHeader className="pb-1 pt-3">
-            <CardTitle className="text-sm print:text-xs">De Kracht van het Netwerk</CardTitle>
+            <CardTitle className="text-sm print:text-xs">The Power of the Network</CardTitle>
           </CardHeader>
           <CardContent className="text-xs print:text-[10px] space-y-2 pb-3">
             <p>
-              <strong>500+ KMO's</strong> delen betalingservaringen in Belgie, Nederland en Luxemburg.
+              <strong>500+ SMEs</strong> share payment experiences in Belgium, Netherlands and Luxembourg.
             </p>
             <div className="grid grid-cols-3 gap-1.5 text-center">
               <div className="bg-white dark:bg-gray-800 p-2 rounded print:border">
                 <div className="text-sm font-bold text-primary">500+</div>
-                <div className="text-[10px] text-muted-foreground">Leden</div>
+                <div className="text-[10px] text-muted-foreground">Members</div>
               </div>
               <div className="bg-white dark:bg-gray-800 p-2 rounded print:border">
-                <div className="text-sm font-bold text-green-600">10.000+</div>
-                <div className="text-[10px] text-muted-foreground">Facturen</div>
+                <div className="text-sm font-bold text-green-600">10,000+</div>
+                <div className="text-[10px] text-muted-foreground">Invoices</div>
               </div>
               <div className="bg-white dark:bg-gray-800 p-2 rounded print:border">
                 <div className="text-sm font-bold text-orange-600">Realtime</div>
@@ -151,7 +151,7 @@ export default function About() {
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground border-t pt-3 print:text-[10px]">
           <p><strong>www.kmo-alert.be</strong></p>
-          <p>Crowd-sourced betalingsdata voor Benelux KMO's</p>
+          <p>Crowd-sourced payment data for Benelux SMEs</p>
           <a href="mailto:hello@kmo-alert.be" className="text-primary hover:underline">hello@kmo-alert.be</a>
         </div>
 

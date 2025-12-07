@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
 import { TrendIndicator } from "@/components/trend-indicator";
 import { Link } from "wouter";
-import { Building2, ArrowRight, AlertTriangle, Shield, TrendingUp } from "lucide-react";
+import { Building2, ArrowRight, AlertTriangle, Shield, TrendingUp, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   PieChart,
@@ -33,18 +33,18 @@ export default function RiskAnalysis() {
   };
 
   const pieData = [
-    { name: "Laag", value: riskDistribution.low, color: "#22c55e" },
+    { name: "Low", value: riskDistribution.low, color: "#22c55e" },
     { name: "Medium", value: riskDistribution.medium, color: "#f59e0b" },
-    { name: "Hoog", value: riskDistribution.high, color: "#f97316" },
-    { name: "Kritiek", value: riskDistribution.critical, color: "#ef4444" },
+    { name: "High", value: riskDistribution.high, color: "#f97316" },
+    { name: "Critical", value: riskDistribution.critical, color: "#ef4444" },
   ];
 
   const sectorData = [
-    { sector: "Bouw", avgRisk: 68 },
+    { sector: "Construction", avgRisk: 68 },
     { sector: "Retail", avgRisk: 52 },
     { sector: "IT", avgRisk: 35 },
     { sector: "Transport", avgRisk: 61 },
-    { sector: "Horeca", avgRisk: 74 },
+    { sector: "Hospitality", avgRisk: 74 },
   ];
 
   const highRiskCompanies = companies
@@ -59,8 +59,11 @@ export default function RiskAnalysis() {
   return (
     <div className="h-full flex flex-col gap-3">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold" data-testid="text-page-title">🎯 Risico Analyse</h1>
-        <p className="text-xs text-muted-foreground">Risico-overzicht van je portfolio 📈</p>
+        <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
+          <Target className="h-5 w-5" />
+          Risk Analysis
+        </h1>
+        <p className="text-xs text-muted-foreground">Risk overview of your portfolio</p>
       </div>
 
       <div className="grid grid-cols-4 gap-2 flex-shrink-0">
@@ -68,7 +71,7 @@ export default function RiskAnalysis() {
           <CardContent className="p-3 flex items-center gap-2">
             <Shield className="h-4 w-4 text-green-500 flex-shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Laag</p>
+              <p className="text-xs text-muted-foreground">Low</p>
               <p className="text-sm font-bold text-green-600" data-testid="stat-low-risk">{riskDistribution.low}</p>
             </div>
           </CardContent>
@@ -86,7 +89,7 @@ export default function RiskAnalysis() {
           <CardContent className="p-3 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Hoog</p>
+              <p className="text-xs text-muted-foreground">High</p>
               <p className="text-sm font-bold text-orange-600" data-testid="stat-high-risk">{riskDistribution.high}</p>
             </div>
           </CardContent>
@@ -95,7 +98,7 @@ export default function RiskAnalysis() {
           <CardContent className="p-3 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">Kritiek</p>
+              <p className="text-xs text-muted-foreground">Critical</p>
               <p className="text-sm font-bold text-red-600" data-testid="stat-critical-risk">{riskDistribution.critical}</p>
             </div>
           </CardContent>
@@ -105,7 +108,7 @@ export default function RiskAnalysis() {
       <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
         <Card className="overflow-visible flex flex-col min-h-0">
           <CardHeader className="p-3 pb-1 flex-shrink-0">
-            <CardTitle className="text-sm">Risicoverdeling</CardTitle>
+            <CardTitle className="text-sm">Risk Distribution</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 flex-1 min-h-0 flex flex-col">
             {isLoading ? (
@@ -140,14 +143,14 @@ export default function RiskAnalysis() {
 
         <Card className="overflow-visible flex flex-col min-h-0">
           <CardHeader className="p-3 pb-1 flex-shrink-0">
-            <CardTitle className="text-sm">Risico per sector</CardTitle>
+            <CardTitle className="text-sm">Risk by Sector</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 flex-1 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sectorData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                <YAxis type="category" dataKey="sector" stroke="hsl(var(--muted-foreground))" fontSize={10} width={50} />
+                <YAxis type="category" dataKey="sector" stroke="hsl(var(--muted-foreground))" fontSize={10} width={70} />
                 <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "4px", fontSize: 11 }} />
                 <Bar dataKey="avgRisk" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -159,11 +162,11 @@ export default function RiskAnalysis() {
           <CardHeader className="p-3 pb-1 flex-shrink-0 flex flex-row items-center justify-between gap-2">
             <CardTitle className="text-sm flex items-center gap-1">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              Hoogste risico
+              Highest Risk
             </CardTitle>
             <Button variant="ghost" size="sm" className="h-6 text-xs" asChild>
               <Link href="/companies?risk=high">
-                Alle <ArrowRight className="ml-1 h-3 w-3" />
+                All <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
             </Button>
           </CardHeader>
@@ -193,7 +196,7 @@ export default function RiskAnalysis() {
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
                 <Shield className="h-6 w-6 text-green-500 mb-1" />
-                <p className="text-xs text-muted-foreground">Geen hoog risico</p>
+                <p className="text-xs text-muted-foreground">No high risk</p>
               </div>
             )}
           </CardContent>
@@ -203,11 +206,11 @@ export default function RiskAnalysis() {
           <CardHeader className="p-3 pb-1 flex-shrink-0 flex flex-row items-center justify-between gap-2">
             <CardTitle className="text-sm flex items-center gap-1">
               <TrendingUp className="h-4 w-4 text-orange-500 rotate-180" />
-              Verslechterend
+              Worsening Trend
             </CardTitle>
             <Button variant="ghost" size="sm" className="h-6 text-xs" asChild>
               <Link href="/companies">
-                Alle <ArrowRight className="ml-1 h-3 w-3" />
+                All <ArrowRight className="ml-1 h-3 w-3" />
               </Link>
             </Button>
           </CardHeader>
@@ -228,7 +231,7 @@ export default function RiskAnalysis() {
                       <div className="min-w-0">
                         <p className="text-xs font-medium truncate">{company.name}</p>
                         <p className="text-[10px] text-muted-foreground">
-                          {Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"))}d te laat
+                          {Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"))}d late
                         </p>
                       </div>
                     </div>
@@ -239,7 +242,7 @@ export default function RiskAnalysis() {
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
                 <TrendingUp className="h-6 w-6 text-green-500 mb-1" />
-                <p className="text-xs text-muted-foreground">Geen verslechterende trends</p>
+                <p className="text-xs text-muted-foreground">No worsening trends</p>
               </div>
             )}
           </CardContent>

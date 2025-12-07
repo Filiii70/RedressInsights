@@ -3,16 +3,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, Trophy, CheckCircle } from "lucide-react";
+import { Star, Trophy, CheckCircle, Clock } from "lucide-react";
 import { Link } from "wouter";
 import type { LeaderboardEntry } from "@shared/schema";
 
-function getRankEmoji(rank: number) {
+function getRankDisplay(rank: number) {
   switch (rank) {
-    case 1: return "🥇";
-    case 2: return "🥈";
-    case 3: return "🥉";
-    default: return `${rank}.`;
+    case 1: return "#1";
+    case 2: return "#2";
+    case 3: return "#3";
+    default: return `#${rank}`;
   }
 }
 
@@ -49,17 +49,17 @@ export default function Leaderboard() {
 
   return (
     <div className="h-full flex flex-col gap-1">
-      {/* Banner - Beste Betalers */}
+      {/* Banner - Best Payers */}
       <div className="flex-shrink-0 bg-gradient-to-r from-green-500/20 via-emerald-500/10 to-teal-500/20 rounded px-2 py-1.5 border border-green-500/30">
         <div className="flex items-center justify-center gap-1">
-          <span className="text-[12px]">⭐</span>
-          <h1 className="text-[12px] font-bold" data-testid="text-leaderboard-title">Top 10 Beste Betalers</h1>
-          <span className="text-[12px]">⭐</span>
+          <Star className="h-3 w-3 text-yellow-500" />
+          <h1 className="text-[12px] font-bold" data-testid="text-leaderboard-title">Top 10 Best Payers</h1>
+          <Star className="h-3 w-3 text-yellow-500" />
         </div>
-        <p className="text-[9px] text-center text-muted-foreground">Meest betrouwbare bedrijven in het netwerk</p>
+        <p className="text-[9px] text-center text-muted-foreground">Most reliable companies in the network</p>
       </div>
 
-      {/* Top 10 list - KLIKBAAR naar bedrijfsdetails */}
+      {/* Top 10 list - Clickable to company details */}
       <div className="flex-1 flex flex-col gap-0.5 min-h-0 overflow-auto">
         {leaderboard && leaderboard.length > 0 ? (
           leaderboard.slice(0, 10).map((entry) => (
@@ -72,7 +72,7 @@ export default function Leaderboard() {
                 <CardContent className="p-1.5 px-2">
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] w-5 text-center flex-shrink-0 font-medium">
-                      {getRankEmoji(entry.rank)}
+                      {getRankDisplay(entry.rank)}
                     </span>
                     
                     <Avatar className="h-6 w-6 flex-shrink-0">
@@ -85,15 +85,19 @@ export default function Leaderboard() {
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-medium truncate flex items-center gap-1">
                         {entry.userName}
-                        {entry.rank === 1 && <span className="text-[10px]">👑</span>}
+                        {entry.rank === 1 && <Trophy className="h-3 w-3 text-yellow-500" />}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0 text-[9px] text-muted-foreground">
-                      <span title="Facturen betaald">✅ {entry.paymentsRegistered}/{entry.invoicesUploaded}</span>
+                      <span title="Invoices paid" className="flex items-center gap-0.5">
+                        <CheckCircle className="h-2.5 w-2.5 text-green-500" />
+                        {entry.paymentsRegistered}/{entry.invoicesUploaded}
+                      </span>
                       {entry.currentStreak > 0 && (
-                        <span title="Gemiddeld dagen op tijd" className="text-green-600">
-                          ⏱️ {entry.currentStreak}d
+                        <span title="Avg. days on time" className="text-green-600 flex items-center gap-0.5">
+                          <Clock className="h-2.5 w-2.5" />
+                          {entry.currentStreak}d
                         </span>
                       )}
                     </div>
@@ -110,8 +114,8 @@ export default function Leaderboard() {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
             <Trophy className="h-8 w-8 mb-2 opacity-50" />
-            <p className="text-xs">Nog geen data beschikbaar</p>
-            <p className="text-[10px]">Er zijn nog geen bedrijven met voldoende betalingshistoriek</p>
+            <p className="text-xs">No companies rated yet</p>
+            <p className="text-[10px]">No companies with sufficient payment history yet</p>
           </div>
         )}
       </div>
@@ -119,9 +123,9 @@ export default function Leaderboard() {
       {/* Bottom legend */}
       <div className="flex-shrink-0 bg-muted/50 rounded px-2 py-1">
         <div className="flex items-center justify-center gap-3 text-[9px] text-muted-foreground">
-          <span>✅ betaald/totaal</span>
-          <span>⏱️ dagen op tijd</span>
-          <span>⭐ betrouwbaarheid</span>
+          <span className="flex items-center gap-0.5"><CheckCircle className="h-2.5 w-2.5" /> paid/total</span>
+          <span className="flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" /> days on time</span>
+          <span className="flex items-center gap-0.5"><Star className="h-2.5 w-2.5" /> reliability</span>
         </div>
       </div>
     </div>

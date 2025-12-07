@@ -44,7 +44,7 @@ export function InvoiceUploadZone() {
       } catch (error) {
         clearTimeout(timeoutId);
         if ((error as Error).name === 'AbortError') {
-          throw new Error("Upload timeout - probeer een kleinere afbeelding");
+          throw new Error("Upload timeout - try a smaller image");
         }
         throw error;
       }
@@ -54,8 +54,8 @@ export function InvoiceUploadZone() {
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/invoices/recent"] });
       toast({
-        title: "Factuur geüpload",
-        description: "De factuur is succesvol verwerkt.",
+        title: "Invoice uploaded",
+        description: "The invoice has been successfully processed.",
       });
     },
   });
@@ -80,8 +80,8 @@ export function InvoiceUploadZone() {
     
     if (droppedFiles.length === 0) {
       toast({
-        title: "Ongeldig bestandstype",
-        description: "Upload een PDF of afbeelding (PNG, JPG).",
+        title: "Invalid file type",
+        description: "Upload a PDF or image (PNG, JPG).",
         variant: "destructive",
       });
       return;
@@ -153,14 +153,14 @@ export function InvoiceUploadZone() {
             <Upload className="h-8 w-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold mb-2">
-            Sleep je factuur hierheen
+            Drop your invoice here
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            of klik om een bestand te selecteren
+            or click to select a file
           </p>
           <Button asChild variant="outline" data-testid="button-select-file">
             <label className="cursor-pointer">
-              Bestand selecteren
+              Select file
               <input
                 type="file"
                 accept=".pdf,image/*"
@@ -172,7 +172,7 @@ export function InvoiceUploadZone() {
             </label>
           </Button>
           <p className="mt-4 text-xs text-muted-foreground">
-            Ondersteunde formaten: PDF, PNG, JPG
+            Supported formats: PDF, PNG, JPG
           </p>
         </CardContent>
       </Card>
@@ -180,7 +180,7 @@ export function InvoiceUploadZone() {
       {files.length > 0 && (
         <Card className="overflow-visible">
           <CardContent className="p-4">
-            <h4 className="text-sm font-medium mb-3">Geüploade bestanden</h4>
+            <h4 className="text-sm font-medium mb-3">Uploaded files</h4>
             <ul className="space-y-2">
               {files.map((uploadedFile, index) => (
                 <li

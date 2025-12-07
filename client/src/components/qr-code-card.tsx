@@ -37,14 +37,14 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/invoices", invoiceId, "qr"], data);
       toast({
-        title: "QR-code gegenereerd",
-        description: "Je kunt deze nu downloaden of delen.",
+        title: "QR code generated",
+        description: "You can now download or share it.",
       });
     },
     onError: () => {
       toast({
-        title: "Fout",
-        description: "Kon QR-code niet genereren.",
+        title: "Error",
+        description: "Could not generate QR code.",
         variant: "destructive",
       });
     },
@@ -56,8 +56,8 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({
-        title: "Link gekopieerd",
-        description: "De quick-link is gekopieerd naar je klembord.",
+        title: "Link copied",
+        description: "The quick link has been copied to your clipboard.",
       });
     }
   };
@@ -66,7 +66,7 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
     if (qrData?.qrCodeDataUrl) {
       const link = document.createElement("a");
       link.href = qrData.qrCodeDataUrl;
-      link.download = `qr-factuur-${invoiceNumber || invoiceId.slice(0, 8)}.png`;
+      link.download = `qr-invoice-${invoiceNumber || invoiceId.slice(0, 8)}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -89,12 +89,12 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <QrCode className="h-4 w-4" />
-            QR-code voor Snelle Registratie
+            QR Code for Quick Registration
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Genereer een QR-code die je klant kan scannen om snel een betaling te bevestigen.
+            Generate a QR code that your customer can scan to quickly confirm a payment.
           </p>
           <Button
             onClick={() => generateQRMutation.mutate()}
@@ -105,12 +105,12 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
             {generateQRMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Genereren...
+                Generating...
               </>
             ) : (
               <>
                 <QrCode className="h-4 w-4 mr-2" />
-                QR-code Genereren
+                Generate QR Code
               </>
             )}
           </Button>
@@ -125,7 +125,7 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <QrCode className="h-4 w-4" />
-            Quick-Link QR-code
+            Quick-Link QR Code
           </CardTitle>
           <Badge variant="secondary" className="flex items-center gap-1">
             <MousePointerClick className="h-3 w-3" />
@@ -145,7 +145,7 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
           </div>
           
           <p className="text-xs text-center text-muted-foreground max-w-[200px]">
-            Scan deze code om betaling te bevestigen in 30 seconden
+            Scan this code to confirm payment in 30 seconds
           </p>
 
           <div className="flex gap-2 w-full">
@@ -169,12 +169,12 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
               {copied ? (
                 <>
                   <Check className="h-4 w-4 mr-1" />
-                  Gekopieerd
+                  Copied
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4 mr-1" />
-                  Kopieer Link
+                  Copy Link
                 </>
               )}
             </Button>
@@ -187,7 +187,7 @@ export function QRCodeCard({ invoiceId, invoiceNumber }: QRCodeCardProps) {
             className="text-xs text-primary hover:underline flex items-center gap-1"
           >
             <ExternalLink className="h-3 w-3" />
-            Bekijk registratiepagina
+            View registration page
           </a>
         </div>
       </CardContent>

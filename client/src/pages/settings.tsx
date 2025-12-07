@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Mail, Smartphone, Bell, Clock, AlertTriangle, Save, Send } from "lucide-react";
+import { Mail, Smartphone, Bell, Clock, AlertTriangle, Save, Send, Settings as SettingsIcon } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import type { CompanyContact } from "@shared/schema";
 import { useState, useEffect } from "react";
@@ -63,14 +63,14 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts", defaultCompanyId] });
       toast({
-        title: "Opgeslagen",
-        description: "Je voorkeuren zijn bijgewerkt.",
+        title: "Saved",
+        description: "Your preferences have been updated.",
       });
     },
     onError: () => {
       toast({
-        title: "Fout",
-        description: "Kon niet opslaan.",
+        title: "Error",
+        description: "Could not save.",
         variant: "destructive",
       });
     },
@@ -84,17 +84,17 @@ export default function Settings() {
       });
     },
     onSuccess: () => {
-      toast({ title: "Test verstuurd", description: `Check ${formData.email}` });
+      toast({ title: "Test sent", description: `Check ${formData.email}` });
     },
     onError: () => {
-      toast({ title: "Test mislukt", variant: "destructive" });
+      toast({ title: "Test failed", variant: "destructive" });
     },
   });
 
   if (isLoading) {
     return (
       <div className="h-full flex flex-col gap-3">
-        <h1 className="text-lg font-bold">Instellingen</h1>
+        <h1 className="text-lg font-bold">Settings</h1>
         <Skeleton className="flex-1" />
       </div>
     );
@@ -104,12 +104,18 @@ export default function Settings() {
     <div className="h-full flex flex-col gap-3">
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold" data-testid="text-page-title">⚙️ Instellingen</h1>
-          <p className="text-xs text-muted-foreground">Notificatievoorkeuren 🔔</p>
+          <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
+            <SettingsIcon className="h-5 w-5" />
+            Settings
+          </h1>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Bell className="h-3 w-3" />
+            Notification preferences
+          </p>
         </div>
         <Button size="sm" onClick={() => saveMutation.mutate(formData)} disabled={saveMutation.isPending} data-testid="button-save-settings">
           <Save className="h-3 w-3 mr-1" />
-          {saveMutation.isPending ? "..." : "Opslaan"}
+          {saveMutation.isPending ? "..." : "Save"}
         </Button>
       </div>
 
@@ -127,7 +133,7 @@ export default function Settings() {
               <div className="flex gap-1">
                 <Input
                   type="email"
-                  placeholder="jouw@bedrijf.be"
+                  placeholder="your@company.be"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="h-8 text-xs"
@@ -146,7 +152,7 @@ export default function Settings() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Telefoon (SMS)</Label>
+              <Label className="text-xs">Phone (SMS)</Label>
               <Input
                 type="tel"
                 placeholder="+32 xxx xx xx xx"
@@ -174,7 +180,7 @@ export default function Settings() {
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <CardTitle className="text-sm flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Kanalen
+              Channels
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 space-y-3 flex-1">
@@ -223,7 +229,7 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-500" />
                 <div>
-                  <p className="text-sm">Wekelijks</p>
+                  <p className="text-sm">Weekly</p>
                   <Badge variant="secondary" className="text-[10px] h-4">Email</Badge>
                 </div>
               </div>
@@ -237,7 +243,7 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-orange-500" />
                 <div>
-                  <p className="text-sm">Vervallen</p>
+                  <p className="text-sm">Overdue</p>
                   <div className="flex gap-1">
                     <Badge variant="secondary" className="text-[10px] h-4">Email</Badge>
                     <Badge variant="secondary" className="text-[10px] h-4">WA</Badge>
@@ -254,7 +260,7 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
                 <div>
-                  <p className="text-sm">Kritiek</p>
+                  <p className="text-sm">Critical</p>
                   <div className="flex gap-1">
                     <Badge variant="destructive" className="text-[10px] h-4">SMS</Badge>
                     <Badge variant="secondary" className="text-[10px] h-4">WA</Badge>

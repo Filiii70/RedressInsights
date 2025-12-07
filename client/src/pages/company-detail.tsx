@@ -80,7 +80,7 @@ export default function CompanyDetail() {
     { month: "Jul", daysLate: 22 },
     { month: "Aug", daysLate: 18 },
     { month: "Sep", daysLate: 28 },
-    { month: "Okt", daysLate: 35 },
+    { month: "Oct", daysLate: 35 },
     { month: "Nov", daysLate: 42 },
   ];
 
@@ -104,11 +104,11 @@ export default function CompanyDetail() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <Building2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <h2 className="text-lg font-medium mb-2">Bedrijf niet gevonden</h2>
+        <h2 className="text-lg font-medium mb-2">Company not found</h2>
         <Button asChild variant="outline">
           <Link href="/companies">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Terug naar overzicht
+            Back to overview
           </Link>
         </Button>
       </div>
@@ -156,7 +156,7 @@ export default function CompanyDetail() {
               {company.foundingDate && (
                 <span className="flex items-center gap-1.5 text-sm">
                   <Calendar className="h-4 w-4" />
-                  Opgericht {company.foundingDate}
+                  Founded {company.foundingDate}
                 </span>
               )}
             </div>
@@ -167,7 +167,7 @@ export default function CompanyDetail() {
       {/* Stats row */}
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard
-          title="Risicoscore"
+          title="Risk Score"
           value={riskScore}
           icon={
             <div className="h-5 w-5">
@@ -176,18 +176,18 @@ export default function CompanyDetail() {
           }
         />
         <StatCard
-          title="Gem. dagen te laat"
-          value={`${avgDaysLate} dagen`}
-          subtitle={`Sector: ${sectorBenchmark} dagen`}
+          title="Avg. days late"
+          value={`${avgDaysLate} days`}
+          subtitle={`Sector: ${sectorBenchmark} days`}
           icon={<Clock className="h-5 w-5" />}
         />
         <StatCard
-          title="Totaal facturen"
+          title="Total invoices"
           value={company.paymentBehavior?.totalInvoices || 0}
           icon={<FileText className="h-5 w-5" />}
         />
         <StatCard
-          title="Totaal bedrag"
+          title="Total amount"
           value={formatCurrency(company.paymentBehavior?.totalAmount || 0)}
           icon={<Euro className="h-5 w-5" />}
         />
@@ -198,15 +198,15 @@ export default function CompanyDetail() {
         <div className="lg:col-span-2">
           <Tabs defaultValue="history" className="space-y-4">
             <TabsList data-testid="tabs-company-detail">
-              <TabsTrigger value="history">Betalingsgeschiedenis</TabsTrigger>
-              <TabsTrigger value="analysis">Risico analyse</TabsTrigger>
+              <TabsTrigger value="history">Payment History</TabsTrigger>
+              <TabsTrigger value="analysis">Risk Analysis</TabsTrigger>
             </TabsList>
 
             <TabsContent value="history">
               <Card className="overflow-visible">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between gap-4">
-                    <CardTitle className="text-lg">Facturen</CardTitle>
+                    <CardTitle className="text-lg">Invoices</CardTitle>
                     <TrendIndicator trend={trend} />
                   </div>
                 </CardHeader>
@@ -221,12 +221,12 @@ export default function CompanyDetail() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Factuurnummer</TableHead>
-                          <TableHead>Bedrag</TableHead>
-                          <TableHead>Vervaldatum</TableHead>
-                          <TableHead>Betaaldatum</TableHead>
+                          <TableHead>Invoice Number</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Due Date</TableHead>
+                          <TableHead>Payment Date</TableHead>
                           <TableHead>Status</TableHead>
-                          <TableHead>Dagen te laat</TableHead>
+                          <TableHead>Days Late</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -264,7 +264,7 @@ export default function CompanyDetail() {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <FileText className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground">Geen facturen gevonden</p>
+                      <p className="text-muted-foreground">No invoices found</p>
                     </div>
                   )}
                 </CardContent>
@@ -274,7 +274,7 @@ export default function CompanyDetail() {
             <TabsContent value="analysis">
               <Card className="overflow-visible">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg">Betalingstrend</CardTitle>
+                  <CardTitle className="text-lg">Payment Trend</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64">
@@ -292,7 +292,7 @@ export default function CompanyDetail() {
                           tickFormatter={(value) => `${value}d`}
                         />
                         <Tooltip
-                          formatter={(value: number) => [`${value} dagen`, "Te laat"]}
+                          formatter={(value: number) => [`${value} days`, "Late"]}
                           contentStyle={{
                             backgroundColor: "hsl(var(--card))",
                             border: "1px solid hsl(var(--border))",
@@ -313,7 +313,7 @@ export default function CompanyDetail() {
                         <Line
                           type="monotone"
                           dataKey="daysLate"
-                          name="Dagen te laat"
+                          name="Days late"
                           stroke="hsl(var(--primary))"
                           strokeWidth={2}
                           dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }}
@@ -325,7 +325,7 @@ export default function CompanyDetail() {
                   <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     <div className="rounded-lg border p-4">
                       <p className="text-sm text-muted-foreground mb-1">
-                        Betalingspercentage op tijd
+                        On-time payment rate
                       </p>
                       <p className="text-2xl font-bold">
                         {Math.round(
@@ -337,11 +337,11 @@ export default function CompanyDetail() {
                     </div>
                     <div className="rounded-lg border p-4">
                       <p className="text-sm text-muted-foreground mb-1">
-                        Gemiddelde afwijking sector
+                        Avg. sector deviation
                       </p>
                       <p className="text-2xl font-bold">
                         {avgDaysLate > sectorBenchmark ? "+" : ""}
-                        {avgDaysLate - sectorBenchmark} dagen
+                        {avgDaysLate - sectorBenchmark} days
                       </p>
                     </div>
                   </div>
@@ -361,7 +361,7 @@ export default function CompanyDetail() {
             <Card className="overflow-visible">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <p className="text-muted-foreground text-center">
-                  Geen actieplan beschikbaar
+                  No action plan available
                 </p>
               </CardContent>
             </Card>
@@ -370,12 +370,12 @@ export default function CompanyDetail() {
           {/* Risk Score Large */}
           <Card className="mt-6 overflow-visible">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-center">Risicoscore</CardTitle>
+              <CardTitle className="text-lg text-center">Risk Score</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center pb-6">
               <RiskScoreGauge score={riskScore} size="lg" />
               <p className="mt-4 text-sm text-muted-foreground text-center">
-                Gebaseerd op {company.paymentBehavior?.totalInvoices || 0} facturen
+                Based on {company.paymentBehavior?.totalInvoices || 0} invoices
               </p>
             </CardContent>
           </Card>
