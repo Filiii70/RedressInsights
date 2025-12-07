@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { RiskScoreBadge } from "@/components/risk-score-gauge";
 import { TrendIndicator } from "@/components/trend-indicator";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Euro,
   Clock,
@@ -67,6 +67,74 @@ function formatDate(date: string | Date) {
     day: "2-digit",
     month: "2-digit",
   });
+}
+
+function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!invoices || invoices.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % invoices.length);
+        setIsAnimating(false);
+      }, 300);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [invoices]);
+
+  if (!invoices || invoices.length === 0) {
+    return (
+      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
+        <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
+          <CheckCircle className="h-3 w-3 text-green-500" />
+          <span className="text-[10px] font-medium text-green-600">ACTIES</span>
+        </div>
+        <div className="flex-1 px-3">
+          <span className="text-xs text-green-600">Geen openstaande acties - alle facturen op schema</span>
+        </div>
+      </div>
+    );
+  }
+
+  const currentInvoice = invoices[currentIndex];
+
+  return (
+    <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
+      <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
+        <Bell className="h-3 w-3 text-orange-500 animate-pulse" />
+        <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
+        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-orange-500 text-orange-600">
+          {invoices.length}
+        </Badge>
+      </div>
+      <div className="flex-1 min-w-0 overflow-hidden px-3">
+        <div 
+          className={`flex items-center gap-2 transition-all duration-300 ${
+            isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />
+          <Link 
+            href={`/companies/${currentInvoice.companyId}`}
+            className="text-xs hover:underline cursor-pointer truncate"
+            data-testid={`ticker-action-${currentInvoice.id}`}
+            title={`${currentInvoice.company?.name}\nBTW: ${currentInvoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(currentInvoice.amount)}\nVervaldatum: ${formatDate(currentInvoice.dueDate)}\n${currentInvoice.daysLate || 0} dagen te laat\n\nKlik om bedrijf te bekijken`}
+          >
+            <strong className="text-red-600">Bel {currentInvoice.company?.name}</strong>
+            {' '}- {formatCurrency(currentInvoice.amount)}, {currentInvoice.daysLate || 0}d te laat
+          </Link>
+          <span className="text-[10px] text-muted-foreground flex-shrink-0">
+            ({currentIndex + 1}/{invoices.length})
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Dashboard() {
@@ -379,57 +447,8 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* KMO-Alert Actie Banner - Concrete acties met bedrijfsnamen */}
-      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden group">
-        <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
-          <Bell className="h-3 w-3 text-orange-500" />
-          <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <div className="animate-scroll-horizontal group-hover:[animation-play-state:paused] flex gap-8 whitespace-nowrap">
-            {/* Show ALL critical invoices with company names - most urgent first */}
-            {criticalInvoices && criticalInvoices.length > 0 ? (
-              <>
-                {criticalInvoices.map((invoice) => (
-                  <Link 
-                    key={invoice.id} 
-                    href={`/companies/${invoice.companyId}`}
-                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-help px-2 py-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                    data-testid={`ticker-action-${invoice.id}`}
-                    title={`${invoice.company?.name}\nBTW: ${invoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(invoice.amount)}\nVervaldatum: ${formatDate(invoice.dueDate)}\n${invoice.daysLate || 0} dagen te laat\n\nKlik om bedrijf te bekijken`}
-                  >
-                    <AlertTriangle className="h-3 w-3 text-red-500" />
-                    <span>
-                      <strong className="text-red-600">Bel {invoice.company?.name?.split(' ').slice(0, 2).join(' ')}</strong>
-                      {' '}- {formatCurrency(invoice.amount)}, {invoice.daysLate || 0}d te laat
-                    </span>
-                  </Link>
-                ))}
-                {/* Duplicate first few for seamless loop */}
-                {criticalInvoices.slice(0, 5).map((invoice) => (
-                  <Link 
-                    key={`dup-${invoice.id}`} 
-                    href={`/companies/${invoice.companyId}`}
-                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-help px-2 py-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                    title={`${invoice.company?.name}\nBTW: ${invoice.company?.vatNumber || 'Onbekend'}\nFactuur: ${formatCurrency(invoice.amount)}\nVervaldatum: ${formatDate(invoice.dueDate)}\n${invoice.daysLate || 0} dagen te laat\n\nKlik om bedrijf te bekijken`}
-                  >
-                    <AlertTriangle className="h-3 w-3 text-red-500" />
-                    <span>
-                      <strong className="text-red-600">Bel {invoice.company?.name?.split(' ').slice(0, 2).join(' ')}</strong>
-                      {' '}- {formatCurrency(invoice.amount)}, {invoice.daysLate || 0}d te laat
-                    </span>
-                  </Link>
-                ))}
-              </>
-            ) : (
-              <span className="inline-flex items-center gap-2 text-xs text-green-600 cursor-help" data-testid="ticker-no-actions" title="Geen achterstallige facturen. Alle klanten betalen op tijd!">
-                <CheckCircle className="h-3 w-3" />
-                <span><strong>Geen openstaande acties</strong> - alle facturen op schema</span>
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* KMO-Alert Actie Banner - Fade ticker like top banner */}
+      <ActionTickerBanner invoices={criticalInvoices || []} />
 
       {/* Activity Detail Dialog */}
       <Dialog open={!!selectedActivity} onOpenChange={(open) => !open && setSelectedActivity(null)}>
