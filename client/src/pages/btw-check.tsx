@@ -14,39 +14,39 @@ function normalizeVatNumber(input: string): string {
 
 function getRiskLevel(score: number): { label: string; color: string; bgColor: string; icon: typeof CheckCircle; advice: string } {
   if (score <= 25) return { 
-    label: "Uitstekend", 
+    label: "Excellent", 
     color: "text-green-600", 
     bgColor: "bg-green-500",
     icon: CheckCircle,
-    advice: "Dit bedrijf betaalt consequent op tijd. Standaard betalingstermijnen zijn veilig."
+    advice: "This company pays consistently on time. Standard payment terms are safe."
   };
   if (score <= 50) return { 
-    label: "Goed", 
+    label: "Good", 
     color: "text-emerald-600", 
     bgColor: "bg-emerald-500",
     icon: CheckCircle,
-    advice: "Betrouwbare betaler. Normale factuurvoorwaarden zijn aanvaardbaar."
+    advice: "Reliable payer. Normal invoice terms are acceptable."
   };
   if (score <= 70) return { 
-    label: "Matig", 
+    label: "Moderate", 
     color: "text-yellow-600", 
     bgColor: "bg-yellow-500",
     icon: AlertTriangle,
-    advice: "Enige vertraging mogelijk. Overweeg kortere betalingstermijnen of deelbetalingen."
+    advice: "Some delays possible. Consider shorter payment terms or partial payments."
   };
   if (score <= 85) return { 
-    label: "Risicovol", 
+    label: "Risky", 
     color: "text-orange-600", 
     bgColor: "bg-orange-500",
     icon: AlertTriangle,
-    advice: "Hoog risico op late betaling. Vraag voorschot of betaling bij levering."
+    advice: "High risk of late payment. Request deposit or payment on delivery."
   };
   return { 
-    label: "Kritiek", 
+    label: "Critical", 
     color: "text-red-600", 
     bgColor: "bg-red-500",
     icon: XCircle,
-    advice: "Zeer hoog risico! Alleen vooruitbetaling of geen krediet verlenen."
+    advice: "Very high risk! Only accept prepayment or extend no credit."
   };
 }
 
@@ -58,14 +58,28 @@ function getTrendIcon(trend: string | null | undefined) {
   }
 }
 
+type LookupResponse = {
+  found: boolean;
+  company?: CompanyWithBehavior;
+  source?: string;
+  message?: string;
+};
+
 export default function BTWCheck() {
   const [searchInput, setSearchInput] = useState("");
   const [searchVat, setSearchVat] = useState<string | null>(null);
 
-  const { data: result, isLoading, isFetched } = useQuery<CompanyWithBehavior | null>({
+  const { data: response, isLoading, isFetched } = useQuery<LookupResponse>({
     queryKey: ["/api/companies/lookup", searchVat],
+    queryFn: async () => {
+      const res = await fetch(`/api/companies/lookup/${searchVat}`);
+      if (!res.ok) throw new Error("Failed to lookup company");
+      return res.json();
+    },
     enabled: !!searchVat,
   });
+
+  const result = response?.found ? response.company : null;
 
   const handleSearch = () => {
     const normalized = normalizeVatNumber(searchInput);
@@ -90,10 +104,10 @@ export default function BTWCheck() {
       <div className="flex-shrink-0 text-center">
         <h1 className="text-base font-bold flex items-center justify-center gap-1.5">
           <Search className="h-4 w-4 text-primary" />
-          BTW-nummer Check
+          VAT Number Check
         </h1>
         <p className="text-xs text-muted-foreground">
-          Controleer betalingsgedrag van Benelux bedrijven
+          Verify payment behavior of Benelux companies
         </p>
       </div>
 
@@ -101,10 +115,10 @@ export default function BTWCheck() {
       <Card className="flex-shrink-0 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-background">
         <CardContent className="p-4">
           <div className="max-w-lg mx-auto">
-            <label className="text-xs font-medium mb-1.5 block">Voer BTW-nummer in</label>
+            <label className="text-xs font-medium mb-1.5 block">Enter VAT number</label>
             <div className="flex gap-2">
               <Input
-                placeholder="BE0123456789, NL123456789B01 of LU12345678"
+                placeholder="BE0123456789, NL123456789B01 or LU12345678"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -122,13 +136,13 @@ export default function BTWCheck() {
                 ) : (
                   <>
                     <Search className="h-4 w-4 mr-1" />
-                    Zoeken
+                    Search
                   </>
                 )}
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-              BE (Belgie), NL (Nederland) en LU (Luxemburg) BTW-nummers
+              BE (Belgium), NL (Netherlands) and LU (Luxembourg) VAT numbers
             </p>
           </div>
         </CardContent>
@@ -175,7 +189,7 @@ export default function BTWCheck() {
                       <div className="flex items-start gap-2">
                         <RiskIcon className={`h-4 w-4 flex-shrink-0 mt-0.5 ${riskInfo.color}`} />
                         <div>
-                          <p className={`text-xs font-bold ${riskInfo.color}`}>Advies</p>
+                          <p className={`text-xs font-bold ${riskInfo.color}`}>Recommendation</p>
                           <p className="text-xs mt-0.5" data-testid="text-advice">{riskInfo.advice}</p>
                         </div>
                       </div>
@@ -189,14 +203,14 @@ export default function BTWCheck() {
                         <CardContent className="p-2 text-center">
                           <FileText className="h-3 w-3 mx-auto text-muted-foreground mb-0.5" />
                           <div className="text-sm font-bold">{result.paymentBehavior.totalInvoices}</div>
-                          <div className="text-[10px] text-muted-foreground">Facturen</div>
+                          <div className="text-[10px] text-muted-foreground">Invoices</div>
                         </CardContent>
                       </Card>
                       <Card>
                         <CardContent className="p-2 text-center">
                           <CheckCircle className="h-3 w-3 mx-auto text-green-500 mb-0.5" />
                           <div className="text-sm font-bold text-green-600">{result.paymentBehavior.paidInvoices}</div>
-                          <div className="text-[10px] text-muted-foreground">Betaald</div>
+                          <div className="text-[10px] text-muted-foreground">Paid</div>
                         </CardContent>
                       </Card>
                       <Card>
@@ -205,7 +219,7 @@ export default function BTWCheck() {
                           <div className="text-sm font-bold text-orange-600">
                             {parseFloat(result.paymentBehavior.avgDaysLate || '0').toFixed(0)}
                           </div>
-                          <div className="text-[10px] text-muted-foreground">Dagen laat</div>
+                          <div className="text-[10px] text-muted-foreground">Days late</div>
                         </CardContent>
                       </Card>
                       <Card>
@@ -214,8 +228,8 @@ export default function BTWCheck() {
                             {getTrendIcon(result.paymentBehavior.trend)}
                           </div>
                           <div className="text-sm font-bold capitalize">
-                            {result.paymentBehavior.trend === 'improving' ? 'Beter' :
-                             result.paymentBehavior.trend === 'worsening' ? 'Slechter' : 'Stabiel'}
+                            {result.paymentBehavior.trend === 'improving' ? 'Improving' :
+                             result.paymentBehavior.trend === 'worsening' ? 'Worsening' : 'Stable'}
                           </div>
                           <div className="text-[10px] text-muted-foreground">Trend</div>
                         </CardContent>
@@ -227,13 +241,13 @@ export default function BTWCheck() {
                   <div className="flex gap-2">
                     <Link href={`/companies/${result.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full text-xs" data-testid="button-view-details">
-                        Volledige analyse
+                        Full analysis
                       </Button>
                     </Link>
                     <Link href="/upload" className="flex-1">
                       <Button size="sm" className="w-full text-xs" data-testid="button-upload-invoice">
                         <FileText className="h-3 w-3 mr-1" />
-                        Upload factuur
+                        Upload invoice
                       </Button>
                     </Link>
                   </div>

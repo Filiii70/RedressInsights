@@ -289,17 +289,64 @@ export async function registerRoutes(
       let company = await storage.getCompanyByVat(vatNumber);
       
       if (!company) {
-        // Company not in our database yet
-        // In production, you would call KBO/KVK API here
+        // Try to fetch from KBO API for Belgian companies
+        if (vatNumber.startsWith("BE")) {
+          const enterpriseNumber = vatNumber.replace("BE", "");
+          try {
+            const kboResponse = await fetch(`https://www.kbo.party/api/v1/enterprise/${enterpriseNumber}`);
+            if (kboResponse.ok) {
+              const kboData = await kboResponse.json();
+              
+              // Create company from KBO data
+              if (kboData && kboData.enterprise) {
+                const enterprise = kboData.enterprise;
+                const name = enterprise.names?.find((n: any) => n.language === "nl")?.name 
+                  || enterprise.names?.find((n: any) => n.language === "fr")?.name
+                  || enterprise.names?.[0]?.name
+                  || `Company ${enterpriseNumber}`;
+                
+                // Get address
+                const address = enterprise.addresses?.[0];
+                const addressStr = address 
+                  ? `${address.street || ''} ${address.houseNumber || ''}, ${address.zipCode || ''} ${address.city || ''}`.trim()
+                  : undefined;
+                
+                // Get activity/sector from NACE codes
+                const activity = enterprise.activities?.[0];
+                const sector = activity?.description?.nl || activity?.description?.fr || "Services";
+                
+                // Create the company in our database
+                company = await storage.createCompany({
+                  name: name.substring(0, 255),
+                  vatNumber: vatNumber,
+                  sector: sector.substring(0, 100),
+                  address: addressStr?.substring(0, 255),
+                  isCustomer: false,
+                });
+                
+                res.json({
+                  found: true,
+                  company,
+                  source: "kbo",
+                });
+                return;
+              }
+            }
+          } catch (kboError) {
+            console.error("KBO API error:", kboError);
+          }
+        }
+        
         res.json({
           found: false,
           vatNumber,
-          message: "Company not found in database. Will be created on first invoice upload."
+          message: "Company not found. Enter details manually or upload an invoice."
         });
       } else {
         res.json({
           found: true,
           company,
+          source: "database",
         });
       }
     } catch (error) {

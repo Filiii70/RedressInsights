@@ -14,45 +14,60 @@ function normalizeVatNumber(input: string): string {
 
 function getRiskLevel(score: number): { label: string; color: string; icon: typeof CheckCircle; advice: string } {
   if (score <= 25) return { 
-    label: "Uitstekend", 
+    label: "Excellent", 
     color: "bg-green-500", 
     icon: CheckCircle,
-    advice: "Dit bedrijf betaalt consequent op tijd. Standaard betalingstermijnen zijn veilig."
+    advice: "This company pays consistently on time. Standard payment terms are safe."
   };
   if (score <= 50) return { 
-    label: "Goed", 
+    label: "Good", 
     color: "bg-emerald-500", 
     icon: CheckCircle,
-    advice: "Betrouwbare betaler. Normale factuurvoorwaarden zijn aanvaardbaar."
+    advice: "Reliable payer. Normal invoice terms are acceptable."
   };
   if (score <= 70) return { 
-    label: "Matig", 
+    label: "Moderate", 
     color: "bg-yellow-500", 
     icon: AlertTriangle,
-    advice: "Enige vertraging mogelijk. Overweeg kortere betalingstermijnen of deelbetalingen."
+    advice: "Some delays possible. Consider shorter payment terms or partial payments."
   };
   if (score <= 85) return { 
-    label: "Risicovol", 
+    label: "Risky", 
     color: "bg-orange-500", 
     icon: AlertTriangle,
-    advice: "Hoog risico op late betaling. Vraag voorschot of betaling bij levering."
+    advice: "High risk of late payment. Request deposit or payment on delivery."
   };
   return { 
-    label: "Kritiek", 
+    label: "Critical", 
     color: "bg-red-500", 
     icon: XCircle,
-    advice: "Zeer hoog risico! Alleen vooruitbetaling of geen krediet verlenen."
+    advice: "Very high risk! Only accept prepayment or extend no credit."
   };
 }
+
+type LookupResponse = {
+  found: boolean;
+  company?: CompanyWithBehavior;
+  source?: string;
+  message?: string;
+  vatNumber?: string;
+};
 
 export function BTWChecker() {
   const [searchInput, setSearchInput] = useState("");
   const [searchVat, setSearchVat] = useState<string | null>(null);
 
-  const { data: result, isLoading, error } = useQuery<CompanyWithBehavior | null>({
+  const { data: response, isLoading, error } = useQuery<LookupResponse>({
     queryKey: ["/api/companies/lookup", searchVat],
+    queryFn: async () => {
+      const res = await fetch(`/api/companies/lookup/${searchVat}`);
+      if (!res.ok) throw new Error("Failed to lookup company");
+      return res.json();
+    },
     enabled: !!searchVat,
   });
+
+  const result = response?.found ? response.company : null;
 
   const handleSearch = () => {
     const normalized = normalizeVatNumber(searchInput);
@@ -80,15 +95,15 @@ export function BTWChecker() {
             <Search className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h2 className="text-sm font-bold">BTW-nummer Checker</h2>
-            <p className="text-[10px] text-muted-foreground">Controleer betrouwbaarheid voor factuurvoorwaarden</p>
+            <h2 className="text-sm font-bold">VAT Number Check</h2>
+            <p className="text-[10px] text-muted-foreground">Verify payment reliability before invoicing</p>
           </div>
         </div>
 
         {/* Search Input */}
         <div className="flex gap-2 mb-3">
           <Input
-            placeholder="BE0123456789 of NL123456789B01"
+            placeholder="BE0123456789 or NL123456789B01"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -135,7 +150,7 @@ export function BTWChecker() {
                     riskScore! <= 70 ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
                     'bg-red-500/10 text-red-700 dark:text-red-400'
                   }`} data-testid="text-btw-advice">
-                    <strong>Advies:</strong> {riskInfo.advice}
+                    <strong>Advice:</strong> {riskInfo.advice}
                   </div>
                 )}
 
@@ -144,22 +159,22 @@ export function BTWChecker() {
                   <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
                     <div className="p-1.5 rounded bg-muted/50">
                       <div className="font-bold">{result.paymentBehavior.totalInvoices}</div>
-                      <div className="text-muted-foreground">Facturen</div>
+                      <div className="text-muted-foreground">Invoices</div>
                     </div>
                     <div className="p-1.5 rounded bg-muted/50">
                       <div className="font-bold">{result.paymentBehavior.paidInvoices}</div>
-                      <div className="text-muted-foreground">Betaald</div>
+                      <div className="text-muted-foreground">Paid</div>
                     </div>
                     <div className="p-1.5 rounded bg-muted/50">
                       <div className="font-bold">{parseFloat(result.paymentBehavior.avgDaysLate || '0').toFixed(0)}d</div>
-                      <div className="text-muted-foreground">Gem. laat</div>
+                      <div className="text-muted-foreground">Avg. late</div>
                     </div>
                   </div>
                 )}
 
                 <Link href={`/companies/${result.id}`}>
                   <Button variant="outline" size="sm" className="w-full text-xs h-7 mt-1" data-testid="button-btw-details">
-                    Bekijk volledige analyse
+                    View full analysis
                   </Button>
                 </Link>
               </>
@@ -167,12 +182,12 @@ export function BTWChecker() {
               /* Company Not Found */
               <div className="text-center p-3 bg-muted/50 rounded">
                 <XCircle className="h-6 w-6 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-sm font-medium">Bedrijf niet gevonden</p>
+                <p className="text-sm font-medium">Company not found</p>
                 <p className="text-[10px] text-muted-foreground">
-                  BTW-nummer "{searchVat}" is niet bekend in ons netwerk.
+                  VAT number "{searchVat}" is not in our network.
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  Upload facturen om dit bedrijf toe te voegen.
+                  Upload invoices to add this company.
                 </p>
               </div>
             )}
@@ -182,7 +197,7 @@ export function BTWChecker() {
         {/* Empty state hint */}
         {!searchVat && (
           <p className="text-[10px] text-center text-muted-foreground">
-            Voer een Belgisch (BE) of Nederlands (NL) BTW-nummer in om de betrouwbaarheid te checken
+            Enter a Belgian (BE) or Dutch (NL) VAT number to check payment reliability
           </p>
         )}
       </CardContent>
