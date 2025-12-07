@@ -8,9 +8,10 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 
 ## User Preferences
 
-- Preferred communication style: Simple, everyday language (Dutch)
+- **UI Language**: ALL text in English (fully translated from Dutch)
 - **CRITICAL**: ALL pages must have fixed-height layout with NO vertical scrolling
 - **CRITICAL**: NEVER modify dashboard UI without explicit request
+- **CRITICAL**: NO emojis anywhere - clean, professional design with Lucide icons only
 - Dashboard must remain publicly accessible without login
 - Design philosophy: Focus on "verslaving" (addiction) - engagement drives data contribution
 
@@ -100,19 +101,21 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 
 ### Pages & Navigation
 
-**Sidebar Menu (Compact, Non-scrolling)**
-- Menu: Dashboard, Facturen, Bedrijven, Upload
-- Analyse: Risico Analyse, Trends, Blacklist
-- Footer: Inloggen, Instellingen
+**Sidebar Menu (Compact, Non-scrolling)** - ALL IN ENGLISH
+- Menu: Dashboard, Invoices, Companies, Upload
+- Analysis: Risk Analysis, Trends, Blacklist, Leaderboard
+- Footer: About KMO-Alert (red), BTW Check, Settings, Login
 
-**Main Pages**
-- Dashboard: Stats row (Ontvangen, Te innen, Achterstallig, Open facturen), Actieve opvolging, Klantverdeling, Aandachtspunten, Bottom banner with scrolling KMO-Alert KPIs
-- Facturen: Invoice list with filtering
-- Bedrijven: Company directory
+**Main Pages** - ALL IN ENGLISH
+- Dashboard: Stats row (Received, Outstanding, Overdue, Open invoices), Active Follow-up, Risk Distribution, Actions, Bottom banner with scrolling KPIs
+- Invoices: Invoice list with filtering
+- Companies: Company directory with column tooltips
 - Upload: AI-powered invoice upload
-- Risico Analyse: Risk scoring analysis
+- Risk Analysis: Risk scoring analysis
 - Trends: Payment behavior trends
 - Blacklist: Manage blacklisted companies (auto-populated from high-risk companies)
+- Leaderboard: Top performers ranking
+- BTW Check: VAT number verification (BE/NL/LU)
 - Settings: User preferences
 
 ### External Dependencies
