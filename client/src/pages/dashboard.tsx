@@ -377,57 +377,52 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* KMO-Alert Actie Banner - Horizontal at bottom */}
+      {/* KMO-Alert Actie Banner - Concrete acties met bedrijfsnamen */}
       <div className="h-8 flex-shrink-0 bg-gradient-to-r from-orange-500/10 via-primary/5 to-orange-500/10 border-t flex items-center overflow-hidden">
         <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
           <Bell className="h-3 w-3 text-orange-500" />
-          <span className="text-[10px] font-medium text-orange-600">TO-DO</span>
+          <span className="text-[10px] font-medium text-orange-600">ACTIES</span>
         </div>
         <div className="flex-1 overflow-hidden">
-          <div className="animate-scroll-horizontal flex gap-12 whitespace-nowrap">
-            {(stats?.overdueInvoices || 0) > 0 && (
-              <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-call">
-                <AlertTriangle className="h-3 w-3 text-red-500" />
-                <span><strong className="text-red-600">{stats?.overdueInvoices} klanten bellen</strong> - achterstallige facturen</span>
+          <div className="animate-scroll-horizontal flex gap-8 whitespace-nowrap">
+            {/* Show actual critical invoices with company names */}
+            {criticalInvoices && criticalInvoices.length > 0 ? (
+              <>
+                {criticalInvoices.slice(0, 5).map((invoice) => (
+                  <Link 
+                    key={invoice.id} 
+                    href={`/companies/${invoice.companyId}`}
+                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-pointer"
+                    data-testid={`ticker-action-${invoice.id}`}
+                  >
+                    <AlertTriangle className="h-3 w-3 text-red-500" />
+                    <span>
+                      <strong className="text-red-600">Bel {invoice.company?.name?.split(' ').slice(0, 2).join(' ')}</strong>
+                      {' '}- {formatCurrency(invoice.amount)}, {invoice.daysLate || 0}d te laat
+                    </span>
+                  </Link>
+                ))}
+                {/* Duplicate for loop */}
+                {criticalInvoices.slice(0, 3).map((invoice) => (
+                  <Link 
+                    key={`dup-${invoice.id}`} 
+                    href={`/companies/${invoice.companyId}`}
+                    className="inline-flex items-center gap-2 text-xs hover:underline cursor-pointer"
+                  >
+                    <AlertTriangle className="h-3 w-3 text-red-500" />
+                    <span>
+                      <strong className="text-red-600">Bel {invoice.company?.name?.split(' ').slice(0, 2).join(' ')}</strong>
+                      {' '}- {formatCurrency(invoice.amount)}, {invoice.daysLate || 0}d te laat
+                    </span>
+                  </Link>
+                ))}
+              </>
+            ) : (
+              <span className="inline-flex items-center gap-2 text-xs text-green-600" data-testid="ticker-no-actions">
+                <CheckCircle className="h-3 w-3" />
+                <span><strong>Geen openstaande acties</strong> - alle facturen op schema</span>
               </span>
             )}
-            {(stats?.pendingInvoices || 0) > 0 && (
-              <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-followup">
-                <Clock className="h-3 w-3 text-orange-500" />
-                <span><strong className="text-orange-600">{stats?.pendingInvoices} opvolgen</strong> - binnen betaaltermijn</span>
-              </span>
-            )}
-            {(stats?.highRiskClients || 0) > 0 && (
-              <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-highrisk">
-                <Ban className="h-3 w-3 text-red-500" />
-                <span><strong className="text-red-600">{stats?.highRiskClients} hoog-risico</strong> - voorwaarden herzien</span>
-              </span>
-            )}
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-toinnen">
-              <Euro className="h-3 w-3 text-orange-500" />
-              <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-check">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              <span><strong className="text-green-600">{stats?.reliableClients || 0} betrouwbaar</strong> - geen actie nodig</span>
-            </span>
-            {/* Duplicate for seamless loop */}
-            {(stats?.overdueInvoices || 0) > 0 && (
-              <span className="inline-flex items-center gap-2 text-xs">
-                <AlertTriangle className="h-3 w-3 text-red-500" />
-                <span><strong className="text-red-600">{stats?.overdueInvoices} klanten bellen</strong> - achterstallige facturen</span>
-              </span>
-            )}
-            {(stats?.pendingInvoices || 0) > 0 && (
-              <span className="inline-flex items-center gap-2 text-xs">
-                <Clock className="h-3 w-3 text-orange-500" />
-                <span><strong className="text-orange-600">{stats?.pendingInvoices} opvolgen</strong> - binnen betaaltermijn</span>
-              </span>
-            )}
-            <span className="inline-flex items-center gap-2 text-xs">
-              <Euro className="h-3 w-3 text-orange-500" />
-              <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
-            </span>
           </div>
         </div>
       </div>
