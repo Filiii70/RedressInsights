@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
+import { Link } from "wouter";
 import type { ActivityFeedWithCompany } from "@shared/schema";
 
 function getEventEmoji(eventType: string) {
@@ -67,8 +68,10 @@ export function LiveTickerHeader() {
 
   const currentItem = feed[currentIndex];
 
+  const companyLink = currentItem.companyId ? `/companies/${currentItem.companyId}` : null;
+
   return (
-    <div className="flex-1 flex items-center gap-2 min-w-0 overflow-hidden group cursor-help" title={`${currentItem.message}\n\nKlik voor meer details`}>
+    <div className="flex-1 flex items-center gap-2 min-w-0 overflow-hidden">
       <div className="flex items-center gap-1 flex-shrink-0">
         <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Live</span>
@@ -80,7 +83,18 @@ export function LiveTickerHeader() {
           }`}
         >
           <span className="text-xs flex-shrink-0">{getEventEmoji(currentItem.eventType)}</span>
-          <span className="text-xs truncate">{currentItem.message}</span>
+          {companyLink ? (
+            <Link 
+              href={companyLink}
+              className="text-xs truncate hover:underline cursor-pointer hover:text-primary transition-colors"
+              title={`${currentItem.message}\n\n${currentItem.company?.name || ''}\n${currentItem.company?.vatNumber || ''}\n\nKlik om bedrijf te bekijken`}
+              data-testid="link-live-ticker-item"
+            >
+              {currentItem.message}
+            </Link>
+          ) : (
+            <span className="text-xs truncate" title={currentItem.message}>{currentItem.message}</span>
+          )}
           <span className="text-[10px] text-muted-foreground flex-shrink-0">
             {formatTimeAgo(currentItem.createdAt || new Date())}
           </span>
