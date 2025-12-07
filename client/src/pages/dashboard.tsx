@@ -463,6 +463,9 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Action Ticker - Tiered actions based on days late */}
+      <ActionTickerBanner invoices={criticalInvoices || []} />
+
       {/* KMO-Alert Bedrijfsgegevens Banner - Horizontal at bottom */}
       <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
         <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
