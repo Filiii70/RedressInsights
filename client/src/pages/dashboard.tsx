@@ -224,7 +224,12 @@ export default function Dashboard() {
   });
 
   const { data: criticalInvoices, isLoading: invoicesLoading } = useQuery<InvoiceWithCompany[]>({
-    queryKey: ["/api/invoices/critical"],
+    queryKey: ["/api/invoices/critical", { limit: 50 }],
+    queryFn: async () => {
+      const res = await fetch("/api/invoices/critical?limit=50");
+      if (!res.ok) throw new Error("Failed to fetch critical invoices");
+      return res.json();
+    },
   });
 
   const { data: riskyCompanies, isLoading: companiesLoading } = useQuery<CompanyWithBehavior[]>({
