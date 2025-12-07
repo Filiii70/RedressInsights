@@ -76,6 +76,8 @@ export default function Dashboard() {
 
   const { data: criticalInvoices, isLoading: invoicesLoading } = useQuery<InvoiceWithCompany[]>({
     queryKey: ["/api/invoices/critical"],
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: riskyCompanies, isLoading: companiesLoading } = useQuery<CompanyWithBehavior[]>({
