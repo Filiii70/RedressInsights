@@ -68,7 +68,7 @@ export async function registerRoutes(
 
   app.get("/api/invoices/critical", async (req, res) => {
     try {
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseInt(req.query.limit as string) || 10;
       const invoices = await storage.getCriticalInvoices(limit);
       res.json(invoices);
     } catch (error) {
