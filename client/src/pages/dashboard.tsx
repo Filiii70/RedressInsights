@@ -193,38 +193,38 @@ export default function Dashboard() {
         ) : (
           <>
             <Card className="border-green-200 bg-green-50/50">
-              <CardContent className="p-3 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+              <CardContent className="p-2 flex items-center gap-2">
+                <CheckCircle className="h-3 w-3 text-green-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Ontvangen</p>
-                  <p className="text-sm font-bold text-green-600 truncate">{formatCurrency(stats?.totalPaid || 0)}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">Ontvangen</p>
+                  <p className="text-xs font-bold text-green-600 truncate">{formatCurrency(stats?.totalPaid || 0)}</p>
                 </div>
               </CardContent>
             </Card>
             <Card className="border-orange-200 bg-orange-50/50">
-              <CardContent className="p-3 flex items-center gap-2">
-                <Euro className="h-4 w-4 text-orange-500 flex-shrink-0" />
+              <CardContent className="p-2 flex items-center gap-2">
+                <Euro className="h-3 w-3 text-orange-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Te innen</p>
-                  <p className="text-sm font-bold text-orange-600 truncate">{formatCurrency(stats?.totalOutstanding || 0)}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">Te innen</p>
+                  <p className="text-xs font-bold text-orange-600 truncate">{formatCurrency(stats?.totalOutstanding || 0)}</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-3 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-red-500 flex-shrink-0" />
+              <CardContent className="p-2 flex items-center gap-2">
+                <Clock className="h-3 w-3 text-red-500 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Achterstallig</p>
-                  <p className="text-sm font-bold text-red-600">{stats?.overdueInvoices || 0}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">Achterstallig</p>
+                  <p className="text-xs font-bold text-red-600">{stats?.overdueInvoices || 0}</p>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-3 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary flex-shrink-0" />
+              <CardContent className="p-2 flex items-center gap-2">
+                <FileText className="h-3 w-3 text-primary flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground truncate">Open facturen</p>
-                  <p className="text-sm font-bold">{stats?.pendingInvoices || 0}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">Open facturen</p>
+                  <p className="text-xs font-bold">{stats?.pendingInvoices || 0}</p>
                 </div>
               </CardContent>
             </Card>
