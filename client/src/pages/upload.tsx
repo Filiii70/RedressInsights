@@ -8,7 +8,7 @@ import type { InvoiceWithCompany } from "@shared/schema";
 
 function formatCurrency(amount: number | string) {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat("en-BE", {
+  return new Intl.NumberFormat("nl-BE", {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 0,
@@ -26,9 +26,9 @@ export default function UploadPage() {
       <div className="flex-shrink-0">
         <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
           <Upload className="h-5 w-5" />
-          Upload Invoice
+          Factuur Uploaden
         </h1>
-        <p className="text-xs text-muted-foreground">AI extraction of invoice data</p>
+        <p className="text-xs text-muted-foreground">AI-extractie van factuurgegevens</p>
       </div>
 
       <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
@@ -40,10 +40,10 @@ export default function UploadPage() {
               </div>
               <h3 className="text-sm font-semibold mb-1 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                Upload temporarily disabled
+                Uploaden tijdelijk uitgeschakeld
               </h3>
               <p className="text-xs text-muted-foreground">
-                This feature is coming soon
+                Deze functie komt binnenkort beschikbaar
               </p>
             </CardContent>
           </Card>
@@ -52,7 +52,7 @@ export default function UploadPage() {
             <CardHeader className="p-3 pb-2 flex-shrink-0">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                How it works
+                Hoe werkt het?
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 pt-0">
@@ -61,22 +61,22 @@ export default function UploadPage() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 mb-2">
                     <span className="text-sm font-bold text-primary">1</span>
                   </div>
-                  <h4 className="text-xs font-medium mb-1">Upload</h4>
-                  <p className="text-[10px] text-muted-foreground">Screenshot of invoice</p>
+                  <h4 className="text-xs font-medium mb-1">Uploaden</h4>
+                  <p className="text-[10px] text-muted-foreground">Screenshot van factuur</p>
                 </div>
                 <div className="flex flex-col items-center text-center p-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 mb-2">
                     <span className="text-sm font-bold text-primary">2</span>
                   </div>
-                  <h4 className="text-xs font-medium mb-1">AI Extraction</h4>
-                  <p className="text-[10px] text-muted-foreground">Automatic data reading</p>
+                  <h4 className="text-xs font-medium mb-1">AI Extractie</h4>
+                  <p className="text-[10px] text-muted-foreground">Automatisch uitlezen</p>
                 </div>
                 <div className="flex flex-col items-center text-center p-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 mb-2">
                     <span className="text-sm font-bold text-primary">3</span>
                   </div>
-                  <h4 className="text-xs font-medium mb-1">Analysis</h4>
-                  <p className="text-[10px] text-muted-foreground">Risk profile & action plan</p>
+                  <h4 className="text-xs font-medium mb-1">Analyse</h4>
+                  <p className="text-[10px] text-muted-foreground">Risicoprofiel & actieplan</p>
                 </div>
               </div>
             </CardContent>
@@ -84,50 +84,50 @@ export default function UploadPage() {
 
           <Card className="overflow-visible">
             <CardHeader className="p-3 pb-2">
-              <CardTitle className="text-sm">AI Extracted Fields</CardTitle>
+              <CardTitle className="text-sm">AI Geëxtraheerde Velden</CardTitle>
             </CardHeader>
             <CardContent className="p-3 pt-0">
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
                   <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
                   <div>
-                    <p className="text-xs font-medium">Invoice Date</p>
-                    <p className="text-[10px] text-muted-foreground">Issue date</p>
+                    <p className="text-xs font-medium">Factuurdatum</p>
+                    <p className="text-[10px] text-muted-foreground">Uitgiftedatum</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
                   <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
                   <div>
-                    <p className="text-xs font-medium">Due Date</p>
-                    <p className="text-[10px] text-muted-foreground">Payment deadline</p>
+                    <p className="text-xs font-medium">Vervaldatum</p>
+                    <p className="text-[10px] text-muted-foreground">Betalingsdeadline</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
                   <Hash className="h-4 w-4 text-blue-500 flex-shrink-0" />
                   <div>
-                    <p className="text-xs font-medium">VAT Number</p>
-                    <p className="text-[10px] text-muted-foreground">BE/NL/LU format</p>
+                    <p className="text-xs font-medium">BTW Nummer</p>
+                    <p className="text-[10px] text-muted-foreground">BE/NL/LU formaat</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
                   <Building2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                   <div>
-                    <p className="text-xs font-medium">Company Name</p>
-                    <p className="text-[10px] text-muted-foreground">Customer info</p>
+                    <p className="text-xs font-medium">Bedrijfsnaam</p>
+                    <p className="text-[10px] text-muted-foreground">Klantgegevens</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
                   <Euro className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                   <div>
-                    <p className="text-xs font-medium">Invoice Amount</p>
-                    <p className="text-[10px] text-muted-foreground">Total due</p>
+                    <p className="text-xs font-medium">Factuurbedrag</p>
+                    <p className="text-[10px] text-muted-foreground">Totaal te betalen</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
                   <FileText className="h-4 w-4 text-purple-500 flex-shrink-0" />
                   <div>
-                    <p className="text-xs font-medium">Invoice Number</p>
-                    <p className="text-[10px] text-muted-foreground">Reference</p>
+                    <p className="text-xs font-medium">Factuurnummer</p>
+                    <p className="text-[10px] text-muted-foreground">Referentie</p>
                   </div>
                 </div>
               </div>
@@ -162,7 +162,7 @@ export default function UploadPage() {
                       <div className="flex items-start gap-2 min-w-0">
                         <FileCheck className="h-3 w-3 mt-0.5 text-muted-foreground shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-medium truncate">{invoice.company?.name || "Unknown"}</p>
+                          <p className="text-xs font-medium truncate">{invoice.company?.name || "Onbekend"}</p>
                           <p className="text-[10px] text-muted-foreground font-mono">{formatCurrency(invoice.amount)}</p>
                         </div>
                       </div>
@@ -177,7 +177,7 @@ export default function UploadPage() {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <FileCheck className="h-6 w-6 text-muted-foreground/50 mb-2" />
-                <p className="text-xs text-muted-foreground">No invoices yet</p>
+                <p className="text-xs text-muted-foreground">Nog geen facturen</p>
               </div>
             )}
           </CardContent>

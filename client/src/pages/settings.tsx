@@ -63,14 +63,14 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts", defaultCompanyId] });
       toast({
-        title: "Saved",
-        description: "Your preferences have been updated.",
+        title: "Opgeslagen",
+        description: "Uw voorkeuren zijn bijgewerkt.",
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Could not save.",
+        title: "Fout",
+        description: "Kon niet opslaan.",
         variant: "destructive",
       });
     },
@@ -84,17 +84,17 @@ export default function Settings() {
       });
     },
     onSuccess: () => {
-      toast({ title: "Test sent", description: `Check ${formData.email}` });
+      toast({ title: "Test verzonden", description: `Controleer ${formData.email}` });
     },
     onError: () => {
-      toast({ title: "Test failed", variant: "destructive" });
+      toast({ title: "Test mislukt", variant: "destructive" });
     },
   });
 
   if (isLoading) {
     return (
       <div className="h-full flex flex-col gap-3">
-        <h1 className="text-lg font-bold">Settings</h1>
+        <h1 className="text-lg font-bold">Instellingen</h1>
         <Skeleton className="flex-1" />
       </div>
     );
@@ -106,16 +106,16 @@ export default function Settings() {
         <div>
           <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
             <SettingsIcon className="h-5 w-5" />
-            Settings
+            Instellingen
           </h1>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <Bell className="h-3 w-3" />
-            Notification preferences
+            Notificatievoorkeuren
           </p>
         </div>
         <Button size="sm" onClick={() => saveMutation.mutate(formData)} disabled={saveMutation.isPending} data-testid="button-save-settings">
           <Save className="h-3 w-3 mr-1" />
-          {saveMutation.isPending ? "..." : "Save"}
+          {saveMutation.isPending ? "..." : "Opslaan"}
         </Button>
       </div>
 
@@ -129,11 +129,11 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="p-3 pt-0 space-y-3 flex-1">
             <div className="space-y-1">
-              <Label className="text-xs">Email</Label>
+              <Label className="text-xs">E-mail</Label>
               <div className="flex gap-1">
                 <Input
                   type="email"
-                  placeholder="your@company.be"
+                  placeholder="uw@bedrijf.be"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="h-8 text-xs"
@@ -152,7 +152,7 @@ export default function Settings() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Phone (SMS)</Label>
+              <Label className="text-xs">Telefoon (SMS)</Label>
               <Input
                 type="tel"
                 placeholder="+32 xxx xx xx xx"
@@ -180,14 +180,14 @@ export default function Settings() {
           <CardHeader className="p-3 pb-2 flex-shrink-0">
             <CardTitle className="text-sm flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Channels
+              Kanalen
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 space-y-3 flex-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Email</span>
+                <span className="text-sm">E-mail</span>
               </div>
               <Switch
                 checked={formData.emailEnabled}
@@ -222,15 +222,15 @@ export default function Settings() {
 
         <Card className="overflow-visible flex flex-col">
           <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <CardTitle className="text-sm">Alerts</CardTitle>
+            <CardTitle className="text-sm">Meldingen</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 space-y-3 flex-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-500" />
                 <div>
-                  <p className="text-sm">Weekly</p>
-                  <Badge variant="secondary" className="text-[10px] h-4">Email</Badge>
+                  <p className="text-sm">Wekelijks</p>
+                  <Badge variant="secondary" className="text-[10px] h-4">E-mail</Badge>
                 </div>
               </div>
               <Switch
@@ -243,9 +243,9 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-orange-500" />
                 <div>
-                  <p className="text-sm">Overdue</p>
+                  <p className="text-sm">Achterstallig</p>
                   <div className="flex gap-1">
-                    <Badge variant="secondary" className="text-[10px] h-4">Email</Badge>
+                    <Badge variant="secondary" className="text-[10px] h-4">E-mail</Badge>
                     <Badge variant="secondary" className="text-[10px] h-4">WA</Badge>
                   </div>
                 </div>
@@ -260,7 +260,7 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
                 <div>
-                  <p className="text-sm">Critical</p>
+                  <p className="text-sm">Kritiek</p>
                   <div className="flex gap-1">
                     <Badge variant="destructive" className="text-[10px] h-4">SMS</Badge>
                     <Badge variant="secondary" className="text-[10px] h-4">WA</Badge>

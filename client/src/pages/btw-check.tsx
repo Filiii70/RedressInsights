@@ -14,39 +14,39 @@ function normalizeVatNumber(input: string): string {
 
 function getRiskLevel(score: number): { label: string; color: string; bgColor: string; icon: typeof CheckCircle; advice: string } {
   if (score <= 25) return { 
-    label: "Excellent", 
+    label: "Uitstekend", 
     color: "text-green-600", 
     bgColor: "bg-green-500",
     icon: CheckCircle,
-    advice: "This company pays consistently on time. Standard payment terms are safe."
+    advice: "Dit bedrijf betaalt consequent op tijd. Standaard betalingstermijnen zijn veilig."
   };
   if (score <= 50) return { 
-    label: "Good", 
+    label: "Goed", 
     color: "text-emerald-600", 
     bgColor: "bg-emerald-500",
     icon: CheckCircle,
-    advice: "Reliable payer. Normal invoice terms are acceptable."
+    advice: "Betrouwbare betaler. Normale factuurvoorwaarden zijn aanvaardbaar."
   };
   if (score <= 70) return { 
-    label: "Moderate", 
+    label: "Matig", 
     color: "text-yellow-600", 
     bgColor: "bg-yellow-500",
     icon: AlertTriangle,
-    advice: "Some delays possible. Consider shorter payment terms or partial payments."
+    advice: "Enige vertragingen mogelijk. Overweeg kortere betalingstermijnen of deelbetalingen."
   };
   if (score <= 85) return { 
-    label: "Risky", 
+    label: "Risicovol", 
     color: "text-orange-600", 
     bgColor: "bg-orange-500",
     icon: AlertTriangle,
-    advice: "High risk of late payment. Request deposit or payment on delivery."
+    advice: "Hoog risico op late betaling. Vraag voorschot of betaling bij levering."
   };
   return { 
-    label: "Critical", 
+    label: "Kritiek", 
     color: "text-red-600", 
     bgColor: "bg-red-500",
     icon: XCircle,
-    advice: "Very high risk! Only accept prepayment or extend no credit."
+    advice: "Zeer hoog risico! Accepteer alleen vooruitbetaling of verleen geen krediet."
   };
 }
 
@@ -102,25 +102,23 @@ export default function BTWCheck() {
 
   return (
     <div className="h-full flex flex-col gap-4">
-      {/* Header */}
       <div className="flex-shrink-0 text-center">
         <h1 className="text-base font-bold flex items-center justify-center gap-1.5">
           <Search className="h-4 w-4 text-primary" />
-          VAT Number Check
+          BTW Nummer Check
         </h1>
         <p className="text-xs text-muted-foreground">
-          Verify payment behavior of Benelux companies
+          Controleer betalingsgedrag van Benelux bedrijven
         </p>
       </div>
 
-      {/* Search Box - Prominent */}
       <Card className="flex-shrink-0 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-background">
         <CardContent className="p-4">
           <div className="max-w-lg mx-auto">
-            <label className="text-xs font-medium mb-1.5 block">Enter VAT number</label>
+            <label className="text-xs font-medium mb-1.5 block">Voer BTW nummer in</label>
             <div className="flex gap-2">
               <Input
-                placeholder="BE0123456789, NL123456789B01 or LU12345678"
+                placeholder="BE0123456789, NL123456789B01 of LU12345678"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -138,19 +136,18 @@ export default function BTWCheck() {
                 ) : (
                   <>
                     <Search className="h-4 w-4 mr-1" />
-                    Search
+                    Zoeken
                   </>
                 )}
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-              BE (Belgium), NL (Netherlands) and LU (Luxembourg) VAT numbers
+              BE (België), NL (Nederland) en LU (Luxemburg) BTW nummers
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Results Area */}
       <div className="flex-1 min-h-0 overflow-auto">
         {searchVat && isFetched && (
           <div className="max-w-2xl mx-auto">
@@ -181,7 +178,6 @@ export default function BTWCheck() {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  {/* Risk Advice */}
                   {riskInfo && (
                     <div className={`p-3 rounded-lg border ${
                       riskScore! <= 50 ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
@@ -191,28 +187,27 @@ export default function BTWCheck() {
                       <div className="flex items-start gap-2">
                         <RiskIcon className={`h-4 w-4 flex-shrink-0 mt-0.5 ${riskInfo.color}`} />
                         <div>
-                          <p className={`text-xs font-bold ${riskInfo.color}`}>Recommendation</p>
+                          <p className={`text-xs font-bold ${riskInfo.color}`}>Aanbeveling</p>
                           <p className="text-xs mt-0.5" data-testid="text-advice">{riskInfo.advice}</p>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Stats Grid */}
                   {result.paymentBehavior && (
                     <div className="grid grid-cols-4 gap-2">
                       <Card>
                         <CardContent className="p-2 text-center">
                           <FileText className="h-3 w-3 mx-auto text-muted-foreground mb-0.5" />
                           <div className="text-sm font-bold">{result.paymentBehavior.totalInvoices}</div>
-                          <div className="text-[10px] text-muted-foreground">Invoices</div>
+                          <div className="text-[10px] text-muted-foreground">Facturen</div>
                         </CardContent>
                       </Card>
                       <Card>
                         <CardContent className="p-2 text-center">
                           <CheckCircle className="h-3 w-3 mx-auto text-green-500 mb-0.5" />
                           <div className="text-sm font-bold text-green-600">{result.paymentBehavior.paidInvoices}</div>
-                          <div className="text-[10px] text-muted-foreground">Paid</div>
+                          <div className="text-[10px] text-muted-foreground">Betaald</div>
                         </CardContent>
                       </Card>
                       <Card>
@@ -221,7 +216,7 @@ export default function BTWCheck() {
                           <div className="text-sm font-bold text-orange-600">
                             {parseFloat(result.paymentBehavior.avgDaysLate || '0').toFixed(0)}
                           </div>
-                          <div className="text-[10px] text-muted-foreground">Days late</div>
+                          <div className="text-[10px] text-muted-foreground">Dagen laat</div>
                         </CardContent>
                       </Card>
                       <Card>
@@ -230,8 +225,8 @@ export default function BTWCheck() {
                             {getTrendIcon(result.paymentBehavior.trend)}
                           </div>
                           <div className="text-sm font-bold capitalize">
-                            {result.paymentBehavior.trend === 'improving' ? 'Improving' :
-                             result.paymentBehavior.trend === 'worsening' ? 'Worsening' : 'Stable'}
+                            {result.paymentBehavior.trend === 'improving' ? 'Verbeterend' :
+                             result.paymentBehavior.trend === 'worsening' ? 'Verslechterend' : 'Stabiel'}
                           </div>
                           <div className="text-[10px] text-muted-foreground">Trend</div>
                         </CardContent>
@@ -239,39 +234,37 @@ export default function BTWCheck() {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
                   <div className="flex gap-2">
                     <Link href={`/companies/${result.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full text-xs" data-testid="button-view-details">
-                        Full analysis
+                        Volledige analyse
                       </Button>
                     </Link>
                     <Link href="/upload" className="flex-1">
                       <Button size="sm" className="w-full text-xs" data-testid="button-upload-invoice">
                         <FileText className="h-3 w-3 mr-1" />
-                        Upload invoice
+                        Factuur uploaden
                       </Button>
                     </Link>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              /* Company Not Found */
               <Card className="border-2 border-dashed">
                 <CardContent className="p-6 text-center">
                   <XCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <h3 className="text-sm font-medium">Company not found</h3>
+                  <h3 className="text-sm font-medium">Bedrijf niet gevonden</h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    VAT number "<strong>{searchVat}</strong>" is not in our network.
+                    BTW nummer "<strong>{searchVat}</strong>" staat niet in ons netwerk.
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    No payment data shared yet for this company.
+                    Nog geen betalingsdata gedeeld voor dit bedrijf.
                   </p>
                   <div className="mt-3">
                     <Link href="/upload">
                       <Button size="sm" className="text-xs" data-testid="button-upload-new">
                         <FileText className="h-3 w-3 mr-1" />
-                        Add via invoice
+                        Toevoegen via factuur
                       </Button>
                     </Link>
                   </div>
@@ -281,27 +274,26 @@ export default function BTWCheck() {
           </div>
         )}
 
-        {/* Empty state - before search */}
         {!searchVat && (
           <div className="max-w-md mx-auto text-center py-4">
             <Shield className="h-10 w-10 mx-auto text-primary/30 mb-2" />
-            <h3 className="text-sm font-medium">How does it work?</h3>
+            <h3 className="text-sm font-medium">Hoe werkt het?</h3>
             <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
               <div className="p-2 rounded-lg bg-muted/50">
                 <div className="text-base font-bold mb-1">1</div>
-                <p>Enter VAT number</p>
+                <p>Voer BTW nummer in</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
                 <div className="text-base font-bold mb-1">2</div>
-                <p>View risk score</p>
+                <p>Bekijk risicoscore</p>
               </div>
               <div className="p-2 rounded-lg bg-muted/50">
                 <div className="text-base font-bold mb-1">3</div>
-                <p>Set payment terms</p>
+                <p>Bepaal betalingsvoorwaarden</p>
               </div>
             </div>
             <p className="mt-4 text-muted-foreground text-[10px]">
-              Data from 500+ SMEs in Belgium, Netherlands and Luxembourg
+              Data van 500+ KMO's in België, Nederland en Luxemburg
             </p>
           </div>
         )}

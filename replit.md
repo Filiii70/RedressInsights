@@ -8,7 +8,7 @@ KMO-Alert is a B2B financial data platform for tracking and analyzing payment be
 
 ## User Preferences
 
-- **UI Language**: ALL text in English (fully translated from Dutch)
+- **UI Language**: ALL text in Dutch (fully translated)
 - **CRITICAL**: ALL pages must have fixed-height layout with NO vertical scrolling
 - **CRITICAL**: NEVER modify dashboard UI without explicit request
 - **CRITICAL**: NO emojis anywhere - clean, professional design with Lucide icons only

@@ -68,24 +68,24 @@ export default function Companies() {
           <div>
             <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
               <Building2 className="h-5 w-5 text-primary" />
-              Companies
+              Bedrijven
             </h1>
-            <p className="text-xs text-muted-foreground">Risk profiles of your customers</p>
+            <p className="text-xs text-muted-foreground">Risicoprofielen van uw klanten</p>
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs text-xs">
-              <p className="font-medium mb-1">What is this page?</p>
-              <p>Overview of all companies in your network with their payment behavior data. Click on a company row to see detailed analysis, payment history, and recommended actions.</p>
+              <p className="font-medium mb-1">Wat is deze pagina?</p>
+              <p>Overzicht van alle bedrijven in uw netwerk met hun betalingsgedrag. Klik op een bedrijf voor gedetailleerde analyse, betalingsgeschiedenis en aanbevolen acties.</p>
             </TooltipContent>
           </Tooltip>
         </div>
         <Button size="sm" asChild data-testid="button-upload-invoice">
           <Link href="/upload">
             <Upload className="mr-1 h-3 w-3" />
-            Upload
+            Uploaden
           </Link>
         </Button>
       </div>
@@ -96,13 +96,13 @@ export default function Companies() {
             <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Total
+                Totaal
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    Total companies tracked in KMO-Alert network
+                    Totaal aantal bedrijven in het KMO-Alert netwerk
                   </TooltipContent>
                 </Tooltip>
               </p>
@@ -115,13 +115,13 @@ export default function Companies() {
             <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Low risk
+                Laag risico
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    Companies with risk score below 30% - reliable payers
+                    Bedrijven met risicoscore onder 30% - betrouwbare betalers
                   </TooltipContent>
                 </Tooltip>
               </p>
@@ -134,13 +134,13 @@ export default function Companies() {
             <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                High risk
+                Hoog risico
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    Companies with risk score above 70% - consider prepayment
+                    Bedrijven met risicoscore boven 70% - overweeg vooruitbetaling
                   </TooltipContent>
                 </Tooltip>
               </p>
@@ -153,13 +153,13 @@ export default function Companies() {
             <div className="h-4 w-4 text-muted-foreground flex-shrink-0 font-mono text-xs">Ø</div>
             <div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Avg. late
+                Gem. laat
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <HelpCircle className="h-3 w-3 cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="text-xs">
-                    Average days past due date across all invoices
+                    Gemiddeld aantal dagen na vervaldatum
                   </TooltipContent>
                 </Tooltip>
               </p>
@@ -172,12 +172,12 @@ export default function Companies() {
       <Card className="overflow-visible flex-1 flex flex-col min-h-0">
         <CardHeader className="p-3 pb-2 flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-sm">All companies</CardTitle>
+            <CardTitle className="text-sm">Alle bedrijven</CardTitle>
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search..."
+                  placeholder="Zoeken..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-7 h-8 w-40 text-xs"
@@ -186,14 +186,14 @@ export default function Companies() {
               </div>
               <Select value={riskFilter} onValueChange={setRiskFilter}>
                 <SelectTrigger className="w-28 h-8 text-xs" data-testid="select-risk-filter">
-                  <SelectValue placeholder="Risk" />
+                  <SelectValue placeholder="Risico" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
+                  <SelectItem value="low">Laag</SelectItem>
+                  <SelectItem value="medium">Gemiddeld</SelectItem>
+                  <SelectItem value="high">Hoog</SelectItem>
+                  <SelectItem value="critical">Kritiek</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -210,25 +210,25 @@ export default function Companies() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs py-1">Company</TableHead>
-                  <TableHead className="text-xs py-1">VAT</TableHead>
+                  <TableHead className="text-xs py-1">Bedrijf</TableHead>
+                  <TableHead className="text-xs py-1">BTW</TableHead>
                   <TableHead className="text-xs py-1">Sector</TableHead>
                   <TableHead className="text-xs py-1">
                     <Tooltip>
                       <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        Inv.
+                        Fact.
                         <HelpCircle className="h-2.5 w-2.5" />
                       </TooltipTrigger>
-                      <TooltipContent className="text-xs">Total invoices tracked</TooltipContent>
+                      <TooltipContent className="text-xs">Totaal aantal facturen</TooltipContent>
                     </Tooltip>
                   </TableHead>
                   <TableHead className="text-xs py-1">
                     <Tooltip>
                       <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        +days
+                        +dagen
                         <HelpCircle className="h-2.5 w-2.5" />
                       </TooltipTrigger>
-                      <TooltipContent className="text-xs">Average days late past due date</TooltipContent>
+                      <TooltipContent className="text-xs">Gemiddeld dagen na vervaldatum</TooltipContent>
                     </Tooltip>
                   </TableHead>
                   <TableHead className="text-xs py-1">
@@ -237,16 +237,16 @@ export default function Companies() {
                         Trend
                         <HelpCircle className="h-2.5 w-2.5" />
                       </TooltipTrigger>
-                      <TooltipContent className="text-xs">Payment behavior trend (improving/stable/worsening)</TooltipContent>
+                      <TooltipContent className="text-xs">Betalingsgedrag trend (verbeterend/stabiel/verslechterend)</TooltipContent>
                     </Tooltip>
                   </TableHead>
                   <TableHead className="text-xs py-1">
                     <Tooltip>
                       <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        Risk
+                        Risico
                         <HelpCircle className="h-2.5 w-2.5" />
                       </TooltipTrigger>
-                      <TooltipContent className="text-xs">Risk score 0-100% based on payment history</TooltipContent>
+                      <TooltipContent className="text-xs">Risicoscore 0-100% gebaseerd op betalingsgeschiedenis</TooltipContent>
                     </Tooltip>
                   </TableHead>
                   <TableHead className="text-xs py-1 w-8"></TableHead>
@@ -296,11 +296,11 @@ export default function Companies() {
             <div className="flex flex-col items-center justify-center h-full text-center">
               <Building2 className="h-8 w-8 text-muted-foreground/50 mb-2" />
               <p className="text-xs text-muted-foreground">
-                {search || riskFilter !== "all" ? "No results found" : "No companies yet"}
+                {search || riskFilter !== "all" ? "Geen resultaten gevonden" : "Nog geen bedrijven"}
               </p>
               {!search && riskFilter === "all" && (
                 <Button size="sm" className="mt-2" asChild data-testid="link-upload-first-invoice">
-                  <Link href="/upload">Upload invoice</Link>
+                  <Link href="/upload">Factuur uploaden</Link>
                 </Button>
               )}
             </div>

@@ -34,7 +34,7 @@ import {
 
 const mainMenuItems = [
   {
-    title: "VAT Check",
+    title: "BTW Check",
     url: "/btw-check",
     icon: Search,
     highlight: true,
@@ -45,17 +45,17 @@ const mainMenuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Invoices",
+    title: "Facturen",
     url: "/invoices",
     icon: FileText,
   },
   {
-    title: "Companies",
+    title: "Bedrijven",
     url: "/companies",
     icon: Building2,
   },
   {
-    title: "Upload",
+    title: "Uploaden",
     url: "/upload",
     icon: Upload,
   },
@@ -63,7 +63,7 @@ const mainMenuItems = [
 
 const analyticsItems = [
   {
-    title: "Risk Analysis",
+    title: "Risico Analyse",
     url: "/risk-analysis",
     icon: Shield,
   },
@@ -73,12 +73,12 @@ const analyticsItems = [
     icon: TrendingUp,
   },
   {
-    title: "Blacklist",
+    title: "Zwarte Lijst",
     url: "/blacklist",
     icon: Ban,
   },
   {
-    title: "Leaderboard",
+    title: "Ranglijst",
     url: "/leaderboard",
     icon: Trophy,
   },
@@ -94,7 +94,7 @@ export function AppSidebar() {
 
   const { data: streakInfo } = useQuery<UserStreakInfo>({
     queryKey: ["/api/gamification/streak"],
-    refetchInterval: 300000, // 5 minutes
+    refetchInterval: 300000,
     retry: false,
   });
 
@@ -119,7 +119,7 @@ export function AppSidebar() {
             <div 
               className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500"
               data-testid="badge-streak"
-              title={`${currentStreak} day streak!`}
+              title={`${currentStreak} dagen streak!`}
             >
               <Flame className="h-3.5 w-3.5" />
               <span className="text-xs font-bold">{currentStreak}</span>
@@ -129,7 +129,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-sidebar-border">
           <Mail className="h-3 w-3 text-muted-foreground" />
           <SiWhatsapp className="h-3 w-3 text-green-500" />
-          <span className="text-[9px] text-muted-foreground">Email & WhatsApp alerts</span>
+          <span className="text-[9px] text-muted-foreground">E-mail & WhatsApp meldingen</span>
         </div>
       </SidebarHeader>
 
@@ -168,7 +168,7 @@ export function AppSidebar() {
 
         <SidebarGroup className="p-1.5">
           <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground h-6 px-1.5">
-            Analytics
+            Analyse
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -201,14 +201,14 @@ export function AppSidebar() {
             >
               <Link href="/about" data-testid="link-nav-about">
                 <Info className="h-3 w-3 text-destructive" />
-                <span className="text-xs font-medium text-destructive">About KMO-Alert</span>
+                <span className="text-xs font-medium text-destructive">Over KMO-Alert</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton data-testid="button-nav-login" className="h-7">
               <LogIn className="h-3 w-3" />
-              <span className="text-xs">Login</span>
+              <span className="text-xs">Inloggen</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -219,7 +219,7 @@ export function AppSidebar() {
             >
               <Link href="/settings" data-testid="link-nav-settings">
                 <Settings className="h-3 w-3" />
-                <span className="text-xs">Settings</span>
+                <span className="text-xs">Instellingen</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

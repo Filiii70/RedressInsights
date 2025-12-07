@@ -74,17 +74,16 @@ export default function CompanyDetail() {
     queryKey: ["/api/companies", companyId, "action-plan"],
   });
 
-  // Mock payment trend data for chart
   const paymentTrendData = [
     { month: "Jun", daysLate: 15 },
     { month: "Jul", daysLate: 22 },
     { month: "Aug", daysLate: 18 },
     { month: "Sep", daysLate: 28 },
-    { month: "Oct", daysLate: 35 },
+    { month: "Okt", daysLate: 35 },
     { month: "Nov", daysLate: 42 },
   ];
 
-  const sectorBenchmark = 14; // Average days late for sector
+  const sectorBenchmark = 14;
 
   if (companyLoading) {
     return (
@@ -104,11 +103,11 @@ export default function CompanyDetail() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <Building2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <h2 className="text-lg font-medium mb-2">Company not found</h2>
+        <h2 className="text-lg font-medium mb-2">Bedrijf niet gevonden</h2>
         <Button asChild variant="outline">
           <Link href="/companies">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to overview
+            Terug naar overzicht
           </Link>
         </Button>
       </div>
@@ -121,7 +120,6 @@ export default function CompanyDetail() {
 
   return (
     <div className="space-y-6">
-      {/* Back button and header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <Button variant="outline" size="icon" asChild>
@@ -156,7 +154,7 @@ export default function CompanyDetail() {
               {company.foundingDate && (
                 <span className="flex items-center gap-1.5 text-sm">
                   <Calendar className="h-4 w-4" />
-                  Founded {company.foundingDate}
+                  Opgericht {company.foundingDate}
                 </span>
               )}
             </div>
@@ -164,10 +162,9 @@ export default function CompanyDetail() {
         </div>
       </div>
 
-      {/* Stats row */}
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard
-          title="Risk Score"
+          title="Risicoscore"
           value={riskScore}
           icon={
             <div className="h-5 w-5">
@@ -176,37 +173,36 @@ export default function CompanyDetail() {
           }
         />
         <StatCard
-          title="Avg. days late"
-          value={`${avgDaysLate} days`}
-          subtitle={`Sector: ${sectorBenchmark} days`}
+          title="Gem. dagen laat"
+          value={`${avgDaysLate} dagen`}
+          subtitle={`Sector: ${sectorBenchmark} dagen`}
           icon={<Clock className="h-5 w-5" />}
         />
         <StatCard
-          title="Total invoices"
+          title="Totaal facturen"
           value={company.paymentBehavior?.totalInvoices || 0}
           icon={<FileText className="h-5 w-5" />}
         />
         <StatCard
-          title="Total amount"
+          title="Totaal bedrag"
           value={formatCurrency(company.paymentBehavior?.totalAmount || 0)}
           icon={<Euro className="h-5 w-5" />}
         />
       </div>
 
-      {/* Main content */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Tabs defaultValue="history" className="space-y-4">
             <TabsList data-testid="tabs-company-detail">
-              <TabsTrigger value="history">Payment History</TabsTrigger>
-              <TabsTrigger value="analysis">Risk Analysis</TabsTrigger>
+              <TabsTrigger value="history">Betalingsgeschiedenis</TabsTrigger>
+              <TabsTrigger value="analysis">Risico Analyse</TabsTrigger>
             </TabsList>
 
             <TabsContent value="history">
               <Card className="overflow-visible">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between gap-4">
-                    <CardTitle className="text-lg">Invoices</CardTitle>
+                    <CardTitle className="text-lg">Facturen</CardTitle>
                     <TrendIndicator trend={trend} />
                   </div>
                 </CardHeader>
@@ -221,12 +217,12 @@ export default function CompanyDetail() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Invoice Number</TableHead>
-                          <TableHead>Amount</TableHead>
-                          <TableHead>Due Date</TableHead>
-                          <TableHead>Payment Date</TableHead>
+                          <TableHead>Factuurnummer</TableHead>
+                          <TableHead>Bedrag</TableHead>
+                          <TableHead>Vervaldatum</TableHead>
+                          <TableHead>Betaaldatum</TableHead>
                           <TableHead>Status</TableHead>
-                          <TableHead>Days Late</TableHead>
+                          <TableHead>Dagen Laat</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -264,7 +260,7 @@ export default function CompanyDetail() {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <FileText className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground">No invoices found</p>
+                      <p className="text-muted-foreground">Geen facturen gevonden</p>
                     </div>
                   )}
                 </CardContent>
@@ -274,7 +270,7 @@ export default function CompanyDetail() {
             <TabsContent value="analysis">
               <Card className="overflow-visible">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg">Payment Trend</CardTitle>
+                  <CardTitle className="text-lg">Betalingstrend</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64">
@@ -292,7 +288,7 @@ export default function CompanyDetail() {
                           tickFormatter={(value) => `${value}d`}
                         />
                         <Tooltip
-                          formatter={(value: number) => [`${value} days`, "Late"]}
+                          formatter={(value: number) => [`${value} dagen`, "Laat"]}
                           contentStyle={{
                             backgroundColor: "hsl(var(--card))",
                             border: "1px solid hsl(var(--border))",
@@ -313,7 +309,7 @@ export default function CompanyDetail() {
                         <Line
                           type="monotone"
                           dataKey="daysLate"
-                          name="Days late"
+                          name="Dagen laat"
                           stroke="hsl(var(--primary))"
                           strokeWidth={2}
                           dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }}
@@ -325,7 +321,7 @@ export default function CompanyDetail() {
                   <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     <div className="rounded-lg border p-4">
                       <p className="text-sm text-muted-foreground mb-1">
-                        On-time payment rate
+                        Op tijd betaald percentage
                       </p>
                       <p className="text-2xl font-bold">
                         {Math.round(
@@ -337,11 +333,11 @@ export default function CompanyDetail() {
                     </div>
                     <div className="rounded-lg border p-4">
                       <p className="text-sm text-muted-foreground mb-1">
-                        Avg. sector deviation
+                        Gem. sector afwijking
                       </p>
                       <p className="text-2xl font-bold">
                         {avgDaysLate > sectorBenchmark ? "+" : ""}
-                        {avgDaysLate - sectorBenchmark} days
+                        {avgDaysLate - sectorBenchmark} dagen
                       </p>
                     </div>
                   </div>
@@ -351,7 +347,6 @@ export default function CompanyDetail() {
           </Tabs>
         </div>
 
-        {/* Action Plan Sidebar */}
         <div>
           {actionPlanLoading ? (
             <Skeleton className="h-96 w-full" />
@@ -361,31 +356,28 @@ export default function CompanyDetail() {
             <Card className="overflow-visible">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <p className="text-muted-foreground text-center">
-                  No action plan available
+                  Geen actieplan beschikbaar
                 </p>
               </CardContent>
             </Card>
           )}
 
-          {/* Risk Score Large */}
           <Card className="mt-6 overflow-visible">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-center">Risk Score</CardTitle>
+              <CardTitle className="text-lg text-center">Risicoscore</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center pb-6">
               <RiskScoreGauge score={riskScore} size="lg" />
               <p className="mt-4 text-sm text-muted-foreground text-center">
-                Based on {company.paymentBehavior?.totalInvoices || 0} invoices
+                Gebaseerd op {company.paymentBehavior?.totalInvoices || 0} facturen
               </p>
             </CardContent>
           </Card>
 
-          {/* Engagement Stats */}
           <div className="mt-6">
             <EngagementStats companyId={companyId || ""} />
           </div>
 
-          {/* QR Code for first pending/overdue invoice */}
           {invoices && invoices.length > 0 && (
             <div className="mt-6">
               {invoices.filter(inv => inv.status !== "paid")[0] && (
