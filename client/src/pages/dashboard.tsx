@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -88,19 +88,54 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Sort invoices by action category to cycle through different actions
+  const sortedInvoices = useMemo(() => {
+    if (!invoices || invoices.length === 0) return [];
+    
+    // Group by action category
+    const groups: { [key: string]: InvoiceWithCompany[] } = {
+      herinnering: [],
+      bellen: [],
+      regeling: [],
+      incasso: [],
+      juridisch: []
+    };
+    
+    invoices.forEach(inv => {
+      const days = inv.daysLate || 0;
+      if (days <= 7) groups.herinnering.push(inv);
+      else if (days <= 14) groups.bellen.push(inv);
+      else if (days <= 30) groups.regeling.push(inv);
+      else if (days <= 60) groups.incasso.push(inv);
+      else groups.juridisch.push(inv);
+    });
+    
+    // Interleave: take one from each category in rotation
+    const result: InvoiceWithCompany[] = [];
+    const maxLen = Math.max(...Object.values(groups).map(g => g.length));
+    for (let i = 0; i < maxLen; i++) {
+      if (groups.herinnering[i]) result.push(groups.herinnering[i]);
+      if (groups.bellen[i]) result.push(groups.bellen[i]);
+      if (groups.regeling[i]) result.push(groups.regeling[i]);
+      if (groups.incasso[i]) result.push(groups.incasso[i]);
+      if (groups.juridisch[i]) result.push(groups.juridisch[i]);
+    }
+    return result;
+  }, [invoices]);
+
   useEffect(() => {
-    if (!invoices || invoices.length === 0) return;
+    if (!sortedInvoices || sortedInvoices.length === 0) return;
 
     const interval = setInterval(() => {
       setIsAnimating(true);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % invoices.length);
+        setCurrentIndex((prev) => (prev + 1) % sortedInvoices.length);
         setIsAnimating(false);
-      }, 4000);
-    }, 4000);
+      }, 300);
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [invoices]);
+  }, [sortedInvoices]);
 
   if (!invoices || invoices.length === 0) {
     return (
@@ -127,7 +162,9 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
     return acc;
   }, { herinnering: 0, bellen: 0, regeling: 0, incasso: 0, juridisch: 0 });
 
-  const currentInvoice = invoices[currentIndex];
+  const currentInvoice = sortedInvoices[currentIndex];
+  if (!currentInvoice) return null;
+  
   const daysLate = currentInvoice.daysLate || 0;
   const { action, icon, color } = getActionForDaysLate(daysLate);
 
@@ -173,7 +210,7 @@ function ActionTickerBanner({ invoices }: { invoices: InvoiceWithCompany[] }) {
             {' '}- {formatCurrency(currentInvoice.amount)}, {daysLate}d
           </Link>
           <span className="text-[10px] text-muted-foreground flex-shrink-0">
-            ({currentIndex + 1}/{invoices.length})
+            ({currentIndex + 1}/{sortedInvoices.length})
           </span>
         </div>
       </div>
@@ -491,59 +528,6 @@ export default function Dashboard() {
 
       {/* Action Ticker - Tiered actions based on days late */}
       <ActionTickerBanner invoices={criticalInvoices || []} />
-
-      {/* KMO-Alert Bedrijfsgegevens Banner - Horizontal at bottom */}
-      <div className="h-8 flex-shrink-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-green-500/10 border-t flex items-center overflow-hidden">
-        <div className="flex items-center gap-2 px-3 flex-shrink-0 border-r h-full bg-background/50">
-          <Building2 className="h-3 w-3 text-primary" />
-          <span className="text-[10px] font-medium text-primary">KMO-ALERT</span>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <div className="animate-scroll-horizontal flex gap-12 whitespace-nowrap">
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-paid">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              <span>Ontvangen: <strong className="text-green-600">{formatCurrency(stats?.totalPaid || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-outstanding">
-              <Euro className="h-3 w-3 text-orange-500" />
-              <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-overdue">
-              <Clock className="h-3 w-3 text-red-500" />
-              <span>Achterstallig: <strong className="text-red-600">{stats?.overdueInvoices || 0} facturen</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-pending">
-              <FileText className="h-3 w-3 text-primary" />
-              <span>Open: <strong>{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)} facturen</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-ontime">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span>Op tijd betaald: <strong className="text-green-600">{stats?.onTimePayments || 0}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs" data-testid="ticker-reliable">
-              <Users className="h-3 w-3 text-green-500" />
-              <span>Betrouwbare klanten: <strong className="text-green-600">{stats?.reliableClients || 0}</strong></span>
-            </span>
-            {/* Duplicate for seamless loop */}
-            <span className="inline-flex items-center gap-2 text-xs">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              <span>Ontvangen: <strong className="text-green-600">{formatCurrency(stats?.totalPaid || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs">
-              <Euro className="h-3 w-3 text-orange-500" />
-              <span>Te innen: <strong className="text-orange-600">{formatCurrency(stats?.totalOutstanding || 0)}</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs">
-              <Clock className="h-3 w-3 text-red-500" />
-              <span>Achterstallig: <strong className="text-red-600">{stats?.overdueInvoices || 0} facturen</strong></span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs">
-              <FileText className="h-3 w-3 text-primary" />
-              <span>Open: <strong>{(stats?.pendingInvoices || 0) + (stats?.overdueInvoices || 0)} facturen</strong></span>
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* Activity Detail Dialog */}
       <Dialog open={!!selectedActivity} onOpenChange={(open) => !open && setSelectedActivity(null)}>
