@@ -69,14 +69,16 @@ export default function BTWCheck() {
   const [searchInput, setSearchInput] = useState("");
   const [searchVat, setSearchVat] = useState<string | null>(null);
 
-  const { data: response, isLoading, isFetched } = useQuery<LookupResponse>({
+  const { data: response, isLoading, isFetched, refetch } = useQuery<LookupResponse>({
     queryKey: ["/api/companies/lookup", searchVat],
     queryFn: async () => {
-      const res = await fetch(`/api/companies/lookup/${searchVat}`);
+      const res = await fetch(`/api/companies/lookup/${searchVat}?t=${Date.now()}`);
       if (!res.ok) throw new Error("Failed to lookup company");
       return res.json();
     },
     enabled: !!searchVat,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const result = response?.found ? response.company : null;
