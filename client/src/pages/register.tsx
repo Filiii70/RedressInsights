@@ -1,4 +1,12 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   BarChart,
   Bar,
@@ -12,20 +20,38 @@ import {
   ComposedChart,
 } from "recharts";
 
-// Payment behavior demo data - 12 companies
-const paymentDaysDistribution = [
-  { range: "<30 Days", count: 4, color: "#3b82f6" },
-  { range: "30-45 Days", count: 3, color: "#3b82f6" },
-  { range: "45-60 Days", count: 3, color: "#f97316" },
-  { range: ">60 Days", count: 2, color: "#ef4444" },
+// 124 companies dataset
+const companies = [
+  { id: 1, name: "BuildRight NV", sector: "Construction", exposure: 125000, avgDays: 68, prevAvgDays: 40, action: "escalate" },
+  { id: 2, name: "Steel Works BVBA", sector: "Manufacturing", exposure: 89000, avgDays: 62, prevAvgDays: 40, action: "formal_notice" },
+  { id: 3, name: "Transport Pro", sector: "Logistics", exposure: 67000, avgDays: 58, prevAvgDays: 40, action: "formal_notice" },
+  { id: 4, name: "Logistics Plus", sector: "Logistics", exposure: 54000, avgDays: 52, prevAvgDays: 37, action: "inform" },
+  { id: 5, name: "PackageCo NV", sector: "Retail", exposure: 43000, avgDays: 48, prevAvgDays: 36, action: "inform" },
+  { id: 6, name: "MegaBuild BVBA", sector: "Construction", exposure: 98000, avgDays: 65, prevAvgDays: 42, action: "formal_notice" },
+  { id: 7, name: "FastFreight", sector: "Logistics", exposure: 76000, avgDays: 55, prevAvgDays: 38, action: "inform" },
+  { id: 8, name: "TechSupply NV", sector: "IT Services", exposure: 62000, avgDays: 61, prevAvgDays: 35, action: "escalate" },
+  { id: 9, name: "MetalWorks", sector: "Manufacturing", exposure: 51000, avgDays: 49, prevAvgDays: 34, action: "inform" },
+  // Remaining 115 companies with monitor status (good payers)
+  ...Array.from({ length: 115 }, (_, i) => ({
+    id: 10 + i,
+    name: `Company ${10 + i}`,
+    sector: ["Retail", "IT Services", "Manufacturing", "Logistics", "Construction"][i % 5],
+    exposure: Math.floor(Math.random() * 50000) + 10000,
+    avgDays: Math.floor(Math.random() * 10) + 22,
+    prevAvgDays: Math.floor(Math.random() * 8) + 25,
+    action: "monitor",
+  })),
 ];
 
-const topAlertCompanies = [
-  { name: "BuildRight NV", shift: 28, action: "Escalate" },
-  { name: "Steel Works BVBA", shift: 22, action: "Formal Notice" },
-  { name: "Transport Pro", shift: 18, action: "Formal Notice" },
-  { name: "Logistics Plus", shift: 15, action: "Inform" },
-  { name: "PackageCo NV", shift: 12, action: "Inform" },
+// Filter alerts (non-monitor actions)
+const alerts = companies.filter(c => c.action !== "monitor");
+
+// Aggregated data for charts
+const paymentDaysDistribution = [
+  { range: "<30 Days", count: companies.filter(c => c.avgDays < 30).length },
+  { range: "30-45 Days", count: companies.filter(c => c.avgDays >= 30 && c.avgDays < 45).length },
+  { range: "45-60 Days", count: companies.filter(c => c.avgDays >= 45 && c.avgDays < 60).length },
+  { range: ">60 Days", count: companies.filter(c => c.avgDays >= 60).length },
 ];
 
 const paymentTrendData = [
@@ -44,35 +70,95 @@ const paymentTrendData = [
 ];
 
 const actionDistribution = [
-  { action: "Monitor", count: 4, color: "#3b82f6" },
-  { action: "Inform", count: 3, color: "#f97316" },
-  { action: "Formal Notice", count: 3, color: "#f97316" },
-  { action: "Escalate", count: 2, color: "#ef4444" },
+  { action: "Monitor", count: companies.filter(c => c.action === "monitor").length },
+  { action: "Inform", count: companies.filter(c => c.action === "inform").length },
+  { action: "Formal Notice", count: companies.filter(c => c.action === "formal_notice").length },
+  { action: "Escalate", count: companies.filter(c => c.action === "escalate").length },
 ];
 
+function getActionColor(action: string) {
+  switch (action) {
+    case "escalate": return "bg-red-500 text-white";
+    case "formal_notice": return "bg-orange-500 text-white";
+    case "inform": return "bg-amber-500 text-white";
+    default: return "bg-blue-500 text-white";
+  }
+}
+
+function getActionLabel(action: string) {
+  switch (action) {
+    case "escalate": return "Escalate";
+    case "formal_notice": return "Formal Notice";
+    case "inform": return "Inform";
+    default: return "Monitor";
+  }
+}
+
+type Company = typeof companies[0];
+
 export default function Register() {
-  const companiesTracked = 12;
-  const activeAlerts = 5;
-  const totalExposure = 857000;
+  const [selectedAlert, setSelectedAlert] = useState<Company | null>(null);
+
+  const totalExposure = alerts.reduce((sum, c) => sum + c.exposure, 0);
 
   return (
     <div className="h-full flex gap-6 overflow-hidden bg-slate-50">
-      {/* Left KPI Column - exactly 2 cards like example */}
-      <div className="flex flex-col gap-4 w-44 flex-shrink-0">
+      {/* Left Column - KPIs + Alerts List */}
+      <div className="flex flex-col gap-3 w-64 flex-shrink-0">
+        {/* KPI Cards */}
+        <div className="flex gap-3">
+          <Card className="bg-white border-0 shadow-sm flex-1">
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900 font-mono" data-testid="stat-companies">
+                {companies.length}
+              </p>
+              <p className="text-xs text-slate-500">Companies</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-0 shadow-sm flex-1 border-l-4 border-l-orange-500">
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-orange-600 font-mono" data-testid="stat-alerts">
+                {alerts.length}
+              </p>
+              <p className="text-xs text-orange-600">Alerts</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Exposure Card */}
         <Card className="bg-white border-0 shadow-sm">
-          <CardContent className="p-6">
-            <p className="text-3xl font-bold text-slate-900 font-mono" data-testid="stat-companies">
-              {companiesTracked}
+          <CardContent className="p-4 text-center">
+            <p className="text-xl font-bold text-slate-900 font-mono" data-testid="stat-exposure">
+              €{(totalExposure / 1000).toFixed(0)}K
             </p>
-            <p className="text-sm text-slate-500 mt-1">Companies Tracked</p>
+            <p className="text-xs text-slate-500">Total Exposure at Risk</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-0 shadow-sm border-l-4 border-l-orange-500">
-          <CardContent className="p-6">
-            <p className="text-3xl font-bold text-orange-600 font-mono" data-testid="stat-alerts">
-              {activeAlerts}
-            </p>
-            <p className="text-sm text-orange-600 mt-1">Active Alerts</p>
+
+        {/* Alerts List - All visible, clickable */}
+        <Card className="bg-white border-0 shadow-sm flex-1">
+          <CardHeader className="pb-2 pt-3 px-4">
+            <CardTitle className="text-sm font-semibold text-slate-700">Active Alerts</CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 pb-3">
+            <div className="flex flex-col gap-2">
+              {alerts.map((alert) => (
+                <button
+                  key={alert.id}
+                  onClick={() => setSelectedAlert(alert)}
+                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors text-left w-full"
+                  data-testid={`alert-${alert.id}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 truncate">{alert.name}</p>
+                    <p className="text-xs text-slate-500">+{alert.avgDays - alert.prevAvgDays}d shift</p>
+                  </div>
+                  <Badge className={`${getActionColor(alert.action)} text-xs ml-2 flex-shrink-0`}>
+                    {getActionLabel(alert.action)}
+                  </Badge>
+                </button>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -82,14 +168,7 @@ export default function Register() {
         {/* Chart 1: Payment Days by Category */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Payment Days by Category</CardTitle>
-              <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-            </div>
+            <CardTitle className="text-sm font-semibold text-slate-700">Payment Days by Category</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
@@ -114,18 +193,9 @@ export default function Register() {
                 />
                 <Tooltip
                   formatter={(value: number) => [`${value} companies`, "Count"]}
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
+                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "12px" }}
                 />
-                <Bar 
-                  dataKey="count" 
-                  radius={[4, 4, 0, 0]}
-                  fill="#3b82f6"
-                />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]} fill="#3b82f6" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -134,44 +204,21 @@ export default function Register() {
         {/* Chart 2: Top Alert Companies */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Top Alert Companies</CardTitle>
-              <div className="w-6 h-6 rounded bg-orange-100 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-            </div>
+            <CardTitle className="text-sm font-semibold text-slate-700">Top Alert Companies</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topAlertCompanies} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+              <BarChart 
+                data={alerts.slice(0, 5).map(a => ({ name: a.name.length > 12 ? a.name.slice(0, 12) + "..." : a.name, shift: a.avgDays - a.prevAvgDays }))} 
+                layout="vertical" 
+                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                <XAxis 
-                  type="number" 
-                  fontSize={10} 
-                  stroke="#64748b" 
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => `+${v}d`}
-                />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  fontSize={10} 
-                  stroke="#64748b" 
-                  tickLine={false}
-                  axisLine={false}
-                  width={90}
-                />
+                <XAxis type="number" fontSize={10} stroke="#64748b" tickLine={false} axisLine={false} tickFormatter={(v) => `+${v}d`} />
+                <YAxis dataKey="name" type="category" fontSize={10} stroke="#64748b" tickLine={false} axisLine={false} width={90} />
                 <Tooltip
                   formatter={(value: number) => [`+${value} days shift`, "Payment Delay"]}
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
+                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "12px" }}
                 />
                 <Bar dataKey="shift" fill="#f97316" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -179,69 +226,24 @@ export default function Register() {
           </CardContent>
         </Card>
 
-        {/* Chart 3: Payment Trend Over Time - bar+line combo like example */}
+        {/* Chart 3: Payment Trend Over Time */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Payment Trend Over Time</CardTitle>
-              <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-            </div>
+            <CardTitle className="text-sm font-semibold text-slate-700">Payment Trend Over Time</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={paymentTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis 
-                  dataKey="month" 
-                  fontSize={10} 
-                  stroke="#64748b" 
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  fontSize={10} 
-                  stroke="#64748b" 
-                  tickLine={false}
-                  axisLine={false}
-                  domain={[20, 50]}
-                  tickFormatter={(v) => `${v}d`}
-                />
+                <XAxis dataKey="month" fontSize={10} stroke="#64748b" tickLine={false} axisLine={false} />
+                <YAxis fontSize={10} stroke="#64748b" tickLine={false} axisLine={false} domain={[20, 50]} tickFormatter={(v) => `${v}d`} />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    `${value} days`, 
-                    name === "avgDays" ? "Avg Payment" : "Target"
-                  ]}
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
+                  formatter={(value: number, name: string) => [`${value} days`, name === "avgDays" ? "Avg Payment" : "Target"]}
+                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "12px" }}
                 />
-                <Legend 
-                  wrapperStyle={{ fontSize: "10px", paddingTop: "8px" }}
-                  iconType="rect"
-                  iconSize={8}
-                />
-                <Bar 
-                  dataKey="avgDays" 
-                  fill="#3b82f6" 
-                  name="Avg Payment Days" 
-                  radius={[4, 4, 0, 0]} 
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="target" 
-                  stroke="#f97316" 
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  dot={false}
-                  name="30-Day Target"
-                />
+                <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "8px" }} iconType="rect" iconSize={8} />
+                <Bar dataKey="avgDays" fill="#3b82f6" name="Avg Payment Days" radius={[4, 4, 0, 0]} />
+                <Line type="monotone" dataKey="target" stroke="#f97316" strokeWidth={2} strokeDasharray="4 4" dot={false} name="30-Day Target" />
               </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
@@ -250,55 +252,73 @@ export default function Register() {
         {/* Chart 4: Actions Required */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Actions Required</CardTitle>
-              <div className="w-6 h-6 rounded bg-orange-100 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-            </div>
+            <CardTitle className="text-sm font-semibold text-slate-700">Actions Required</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={actionDistribution} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                <XAxis 
-                  type="number" 
-                  fontSize={10} 
-                  stroke="#64748b" 
-                  tickLine={false}
-                  axisLine={false}
-                  allowDecimals={false}
-                />
-                <YAxis 
-                  dataKey="action" 
-                  type="category" 
-                  fontSize={10} 
-                  stroke="#64748b" 
-                  tickLine={false}
-                  axisLine={false}
-                  width={85}
-                />
+                <XAxis type="number" fontSize={10} stroke="#64748b" tickLine={false} axisLine={false} allowDecimals={false} />
+                <YAxis dataKey="action" type="category" fontSize={10} stroke="#64748b" tickLine={false} axisLine={false} width={85} />
                 <Tooltip
                   formatter={(value: number) => [`${value} companies`, "Count"]}
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
+                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", fontSize: "12px" }}
                 />
-                <Bar 
-                  dataKey="count" 
-                  radius={[0, 4, 4, 0]}
-                  fill="#f97316"
-                />
+                <Bar dataKey="count" radius={[0, 4, 4, 0]} fill="#f97316" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
+
+      {/* Alert Detail Dialog */}
+      <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedAlert?.name}
+              {selectedAlert && (
+                <Badge className={getActionColor(selectedAlert.action)}>
+                  {getActionLabel(selectedAlert.action)}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAlert && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-3 rounded-lg">
+                  <p className="text-xs text-slate-500">Sector</p>
+                  <p className="text-sm font-medium">{selectedAlert.sector}</p>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-lg">
+                  <p className="text-xs text-slate-500">Exposure</p>
+                  <p className="text-sm font-medium font-mono">€{selectedAlert.exposure.toLocaleString()}</p>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-lg">
+                  <p className="text-xs text-slate-500">Previous Avg</p>
+                  <p className="text-sm font-medium font-mono">{selectedAlert.prevAvgDays} days</p>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-lg">
+                  <p className="text-xs text-slate-500">Current Avg</p>
+                  <p className="text-sm font-medium font-mono text-orange-600">{selectedAlert.avgDays} days</p>
+                </div>
+              </div>
+              <div className="bg-orange-50 border border-orange-200 p-3 rounded-lg">
+                <p className="text-xs text-orange-600 font-medium">Payment Shift</p>
+                <p className="text-lg font-bold text-orange-600 font-mono">
+                  +{selectedAlert.avgDays - selectedAlert.prevAvgDays} days
+                </p>
+                <p className="text-xs text-slate-600 mt-1">
+                  {selectedAlert.action === "escalate" && "Immediate escalation required - significant payment deterioration"}
+                  {selectedAlert.action === "formal_notice" && "Send formal notice - payment terms exceeded"}
+                  {selectedAlert.action === "inform" && "Contact customer - payment pattern changing"}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
