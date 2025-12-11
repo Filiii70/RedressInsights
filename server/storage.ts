@@ -1074,14 +1074,18 @@ Wat kunnen wij afspreken?
     const entries: LeaderboardEntry[] = [];
     
     for (const behavior of allBehavior) {
+      const totalInvoices = behavior.totalInvoices ?? 0;
+      const riskScore = behavior.riskScore ?? 50;
+      const paidInvoices = behavior.paidInvoices ?? 0;
+      
       // Alleen bedrijven met voldoende data (minimaal 3 facturen) en goede score
-      if (behavior.totalInvoices >= 3 && behavior.riskScore <= 40) {
+      if (totalInvoices >= 3 && riskScore <= 40) {
         const company = await this.getCompany(behavior.companyId);
         if (!company) continue;
         
         // Bereken "betrouwbaarheidsscore" (omgekeerde van risico)
-        const trustScore = 100 - behavior.riskScore;
-        const avgDaysLate = parseFloat(behavior.avgDaysLate || '0');
+        const trustScore = 100 - riskScore;
+        const avgDaysLate = parseFloat(behavior.avgDaysLate?.toString() || '0');
         
         entries.push({
           rank: 0,
@@ -1089,11 +1093,11 @@ Wat kunnen wij afspreken?
           userName: company.name,
           profileImageUrl: null,
           companyId: company.id,
-          invoicesUploaded: behavior.totalInvoices,
-          paymentsRegistered: behavior.paidInvoices,
-          totalActivity: trustScore, // Gebruik trust score als "activiteit"
-          currentStreak: Math.max(0, Math.round(30 - avgDaysLate)), // Dagen op tijd
-          longestStreak: behavior.paidInvoices,
+          invoicesUploaded: totalInvoices,
+          paymentsRegistered: paidInvoices,
+          totalActivity: trustScore,
+          currentStreak: Math.max(0, Math.round(30 - avgDaysLate)),
+          longestStreak: paidInvoices,
         });
       }
     }
