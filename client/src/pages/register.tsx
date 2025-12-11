@@ -20,8 +20,9 @@ import {
   ComposedChart,
 } from "recharts";
 
-// 124 companies dataset
+// 124 companies dataset - deterministic data
 const companies = [
+  // 9 Alert companies (non-monitor)
   { id: 1, name: "BuildRight NV", sector: "Construction", exposure: 125000, avgDays: 68, prevAvgDays: 40, action: "escalate" },
   { id: 2, name: "Steel Works BVBA", sector: "Manufacturing", exposure: 89000, avgDays: 62, prevAvgDays: 40, action: "formal_notice" },
   { id: 3, name: "Transport Pro", sector: "Logistics", exposure: 67000, avgDays: 58, prevAvgDays: 40, action: "formal_notice" },
@@ -31,16 +32,38 @@ const companies = [
   { id: 7, name: "FastFreight", sector: "Logistics", exposure: 76000, avgDays: 55, prevAvgDays: 38, action: "inform" },
   { id: 8, name: "TechSupply NV", sector: "IT Services", exposure: 62000, avgDays: 61, prevAvgDays: 35, action: "escalate" },
   { id: 9, name: "MetalWorks", sector: "Manufacturing", exposure: 51000, avgDays: 49, prevAvgDays: 34, action: "inform" },
-  // Remaining 115 companies with monitor status (good payers)
-  ...Array.from({ length: 115 }, (_, i) => ({
-    id: 10 + i,
-    name: `Company ${10 + i}`,
-    sector: ["Retail", "IT Services", "Manufacturing", "Logistics", "Construction"][i % 5],
-    exposure: Math.floor(Math.random() * 50000) + 10000,
-    avgDays: Math.floor(Math.random() * 10) + 22,
-    prevAvgDays: Math.floor(Math.random() * 8) + 25,
-    action: "monitor",
-  })),
+  // 115 Monitor companies (good payers) - deterministic using seeded values
+  { id: 10, name: "AlphaRetail NV", sector: "Retail", exposure: 32000, avgDays: 24, prevAvgDays: 26, action: "monitor" },
+  { id: 11, name: "BetaTech BVBA", sector: "IT Services", exposure: 28000, avgDays: 22, prevAvgDays: 25, action: "monitor" },
+  { id: 12, name: "GammaMetal", sector: "Manufacturing", exposure: 41000, avgDays: 27, prevAvgDays: 28, action: "monitor" },
+  { id: 13, name: "DeltaLogistics", sector: "Logistics", exposure: 35000, avgDays: 25, prevAvgDays: 27, action: "monitor" },
+  { id: 14, name: "EpsilonBuild", sector: "Construction", exposure: 52000, avgDays: 28, prevAvgDays: 29, action: "monitor" },
+  { id: 15, name: "ZetaShop", sector: "Retail", exposure: 19000, avgDays: 23, prevAvgDays: 24, action: "monitor" },
+  { id: 16, name: "EtaSoftware", sector: "IT Services", exposure: 45000, avgDays: 26, prevAvgDays: 27, action: "monitor" },
+  { id: 17, name: "ThetaSteel", sector: "Manufacturing", exposure: 38000, avgDays: 24, prevAvgDays: 26, action: "monitor" },
+  { id: 18, name: "IotaTransport", sector: "Logistics", exposure: 29000, avgDays: 25, prevAvgDays: 26, action: "monitor" },
+  { id: 19, name: "KappaConstruct", sector: "Construction", exposure: 61000, avgDays: 27, prevAvgDays: 28, action: "monitor" },
+  { id: 20, name: "LambdaMart", sector: "Retail", exposure: 22000, avgDays: 22, prevAvgDays: 24, action: "monitor" },
+  { id: 21, name: "MuSystems", sector: "IT Services", exposure: 33000, avgDays: 24, prevAvgDays: 25, action: "monitor" },
+  { id: 22, name: "NuMetals", sector: "Manufacturing", exposure: 47000, avgDays: 26, prevAvgDays: 27, action: "monitor" },
+  { id: 23, name: "XiFreight", sector: "Logistics", exposure: 31000, avgDays: 23, prevAvgDays: 25, action: "monitor" },
+  { id: 24, name: "OmicronBuild", sector: "Construction", exposure: 55000, avgDays: 28, prevAvgDays: 29, action: "monitor" },
+  // Generate remaining 100 companies deterministically
+  ...Array.from({ length: 100 }, (_, i) => {
+    const sectors = ["Retail", "IT Services", "Manufacturing", "Logistics", "Construction"];
+    const prefixes = ["Pro", "Global", "Euro", "Prime", "Core", "Max", "Top", "First", "Best", "Smart"];
+    const suffixes = ["NV", "BVBA", "BV", "SA", ""];
+    const baseId = 25 + i;
+    return {
+      id: baseId,
+      name: `${prefixes[i % 10]}${sectors[i % 5].split(" ")[0]} ${suffixes[i % 5]}`.trim(),
+      sector: sectors[i % 5],
+      exposure: 15000 + (i * 317) % 45000,
+      avgDays: 22 + (i * 3) % 8,
+      prevAvgDays: 24 + (i * 2) % 6,
+      action: "monitor" as const,
+    };
+  }),
 ];
 
 // Filter alerts (non-monitor actions)
