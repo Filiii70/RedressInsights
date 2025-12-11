@@ -1,63 +1,49 @@
-# PayTrend.be - Payment Behavior Monitoring Platform
+# PayTrend.be - Payment Behavior Register
 
 ## Overview
 
-PayTrend.be is a B2B payment behavior monitoring platform for tracking invoice payments and detecting early warning signs when payment patterns change. The app provides a simple, read-only view of payment data with intelligent early alerts.
+PayTrend.be is a B2B payment behavior monitoring platform (betalingsgedragregister) for tracking payment patterns and detecting early warning signs when companies' payment behavior deteriorates.
 
-**Core Concept**: Payment behavior register with early alerts - detect when a company that normally pays within 30 days suddenly starts paying after 30 days.
+**Core Concept**: Early alert system that detects when a company's payment pattern shifts (e.g., from <30 days to >45 days).
+
+## Current State
+
+Single-page dashboard with:
+- **Left Column**: KPIs (124 companies, 9 alerts, exposure) + all alerts visible and clickable
+- **Right Column**: 2x2 chart grid matching professional vendor dashboard design
+- **Alert Dialog**: Click any alert to see detailed info (sector, exposure, payment shift, recommended action)
 
 ## User Preferences
 
 - **UI Language**: English
-- **Design**: Clean, professional, minimal - no clutter
-- **Read-only**: Data comes via external API integration
-- **Fixed-height layouts**: No vertical scrolling
-- **No emojis**: Professional design with Lucide icons only
+- **Design**: Professional, strak (tight/sleek), like vendor payment tracking examples
+- **Layout**: Fixed height, no scrolling, all alerts visible
+- **Colors**: Blue/orange accent colors on white cards, gray background
+- **No emojis**: Professional design only
 
-## Key Features
+## Action Taxonomy
 
-1. **Early Alerts** - Detect payment pattern changes before they become problems
-2. **Dashboard** - Overview of received payments, outstanding amounts, overdue invoices, and alerts
-3. **Invoice Tracking** - View all invoices with status (pending, overdue, paid)
-4. **Company Profiles** - Payment behavior per company with trends
-5. **Trends Visualization** - Historical payment patterns over time
-
-## App Structure
-
-### Pages
-- `/` - Dashboard with early alerts and overdue invoices
-- `/invoices` - Invoice list (read-only)
-- `/companies` - Company list with risk indicators
-- `/companies/:id` - Company detail with invoice history
-- `/trends` - Payment trend charts
-- `/settings` - Notification preferences
-
-### Navigation
-Simple sidebar with:
-- Dashboard
-- Invoices
-- Companies
-- Trends
-- Settings (in footer)
+Based on payment day shift:
+- **Monitor**: ≤10 day shift (good payers)
+- **Inform**: 10-20 day shift
+- **Formal Notice**: 20-25 day shift  
+- **Escalate**: >25 day shift
 
 ## Technical Stack
 
 - **Frontend**: React + TypeScript + Vite
 - **UI**: shadcn/ui + TailwindCSS
-- **Routing**: Wouter
-- **State**: TanStack Query
 - **Charts**: Recharts
 - **Backend**: Express.js
 - **Database**: PostgreSQL (Neon)
 - **ORM**: Drizzle
 
-## Early Alert Logic
+## Data Model
 
-An early alert is triggered when:
-- A company's latest invoice payment time exceeds their historical average by more than 10 days
-- Severity levels:
-  - Warning: +10-20 days above average
-  - Critical: +20 days above average
+124 companies with:
+- id, name, sector, exposure, avgDays, prevAvgDays, action
+- 9 alert companies (non-monitor status)
+- 115 monitor companies (good payers)
 
 ## Target Domain
 - www.paytrend.be
