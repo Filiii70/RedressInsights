@@ -5,11 +5,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Mail, Smartphone, Bell, Clock, AlertTriangle, Save, Send, Settings as SettingsIcon } from "lucide-react";
-import { SiWhatsapp } from "react-icons/si";
+import { Mail, Bell, Save, Settings as SettingsIcon, AlertTriangle } from "lucide-react";
 import type { CompanyContact } from "@shared/schema";
 import { useState, useEffect } from "react";
 
@@ -24,28 +22,18 @@ export default function Settings() {
 
   const [formData, setFormData] = useState({
     email: "",
-    phone: "",
-    whatsapp: "",
     emailEnabled: true,
-    smsEnabled: false,
-    whatsappEnabled: true,
-    weeklyDigest: true,
-    paymentReminders: true,
-    criticalAlerts: true,
+    patternAlerts: true,
+    overdueAlerts: true,
   });
 
   useEffect(() => {
     if (contact) {
       setFormData({
         email: contact.email || "",
-        phone: contact.phone || "",
-        whatsapp: contact.whatsapp || "",
         emailEnabled: contact.emailEnabled ?? true,
-        smsEnabled: contact.smsEnabled ?? false,
-        whatsappEnabled: contact.whatsappEnabled ?? true,
-        weeklyDigest: contact.weeklyDigest ?? true,
-        paymentReminders: contact.paymentReminders ?? true,
-        criticalAlerts: contact.criticalAlerts ?? true,
+        patternAlerts: contact.criticalAlerts ?? true,
+        overdueAlerts: contact.paymentReminders ?? true,
       });
     }
   }, [contact]);
@@ -63,131 +51,67 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts", defaultCompanyId] });
       toast({
-        title: "Opgeslagen",
-        description: "Uw voorkeuren zijn bijgewerkt.",
+        title: "Saved",
+        description: "Your preferences have been updated.",
       });
     },
     onError: () => {
       toast({
-        title: "Fout",
-        description: "Kon niet opslaan.",
+        title: "Error",
+        description: "Could not save preferences.",
         variant: "destructive",
       });
     },
   });
 
-  const testEmailMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/notifications/test", {
-        channel: "email",
-        email: formData.email,
-      });
-    },
-    onSuccess: () => {
-      toast({ title: "Test verzonden", description: `Controleer ${formData.email}` });
-    },
-    onError: () => {
-      toast({ title: "Test mislukt", variant: "destructive" });
-    },
-  });
-
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col gap-3">
-        <h1 className="text-lg font-bold">Instellingen</h1>
+      <div className="h-full flex flex-col gap-4">
+        <h1 className="text-xl font-bold">Settings</h1>
         <Skeleton className="flex-1" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col gap-3">
+    <div className="h-full flex flex-col gap-4">
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
+          <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-page-title">
             <SettingsIcon className="h-5 w-5" />
-            Instellingen
+            Settings
           </h1>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <Bell className="h-3 w-3" />
-            Notificatievoorkeuren
-          </p>
+          <p className="text-sm text-muted-foreground">Notification preferences</p>
         </div>
-        <Button size="sm" onClick={() => saveMutation.mutate(formData)} disabled={saveMutation.isPending} data-testid="button-save-settings">
-          <Save className="h-3 w-3 mr-1" />
-          {saveMutation.isPending ? "..." : "Opslaan"}
+        <Button onClick={() => saveMutation.mutate(formData)} disabled={saveMutation.isPending} data-testid="button-save-settings">
+          <Save className="h-4 w-4 mr-2" />
+          {saveMutation.isPending ? "Saving..." : "Save"}
         </Button>
       </div>
 
-      <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
-        <Card className="overflow-visible flex flex-col">
-          <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <CardTitle className="text-sm flex items-center gap-2">
+      <div className="grid grid-cols-2 gap-4 flex-shrink-0">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              Contact
+              Email Settings
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-3 flex-1">
-            <div className="space-y-1">
-              <Label className="text-xs">E-mail</Label>
-              <div className="flex gap-1">
-                <Input
-                  type="email"
-                  placeholder="uw@bedrijf.be"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="h-8 text-xs"
-                  data-testid="input-email"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => testEmailMutation.mutate()}
-                  disabled={!formData.email}
-                  data-testid="button-test-email"
-                >
-                  <Send className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Telefoon (SMS)</Label>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Email Address</Label>
               <Input
-                type="tel"
-                placeholder="+32 xxx xx xx xx"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="h-8 text-xs"
-                data-testid="input-phone"
+                type="email"
+                placeholder="your@company.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                data-testid="input-email"
               />
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">WhatsApp</Label>
-              <Input
-                type="tel"
-                placeholder="+32 xxx xx xx xx"
-                value={formData.whatsapp}
-                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                className="h-8 text-xs"
-                data-testid="input-whatsapp"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-visible flex flex-col">
-          <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              Kanalen
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-3 flex-1">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">E-mail</span>
+              <div>
+                <p className="text-sm font-medium">Email Notifications</p>
+                <p className="text-xs text-muted-foreground">Receive alerts via email</p>
               </div>
               <Switch
                 checked={formData.emailEnabled}
@@ -195,82 +119,43 @@ export default function Settings() {
                 data-testid="switch-email-enabled"
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">SMS</span>
-              </div>
-              <Switch
-                checked={formData.smsEnabled}
-                onCheckedChange={(checked) => setFormData({ ...formData, smsEnabled: checked })}
-                data-testid="switch-sms-enabled"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <SiWhatsapp className="h-4 w-4 text-green-500" />
-                <span className="text-sm">WhatsApp</span>
-              </div>
-              <Switch
-                checked={formData.whatsappEnabled}
-                onCheckedChange={(checked) => setFormData({ ...formData, whatsappEnabled: checked })}
-                data-testid="switch-whatsapp-enabled"
-              />
-            </div>
           </CardContent>
         </Card>
 
-        <Card className="overflow-visible flex flex-col">
-          <CardHeader className="p-3 pb-2 flex-shrink-0">
-            <CardTitle className="text-sm">Meldingen</CardTitle>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Alert Types
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-3 flex-1">
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-blue-500" />
-                <div>
-                  <p className="text-sm">Wekelijks</p>
-                  <Badge variant="secondary" className="text-[10px] h-4">E-mail</Badge>
-                </div>
+              <div>
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  Pattern Changes
+                </p>
+                <p className="text-xs text-muted-foreground">Alert when payment behavior changes</p>
               </div>
               <Switch
-                checked={formData.weeklyDigest}
-                onCheckedChange={(checked) => setFormData({ ...formData, weeklyDigest: checked })}
-                data-testid="switch-weekly-digest"
+                checked={formData.patternAlerts}
+                onCheckedChange={(checked) => setFormData({ ...formData, patternAlerts: checked })}
+                data-testid="switch-pattern-alerts"
               />
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-orange-500" />
-                <div>
-                  <p className="text-sm">Achterstallig</p>
-                  <div className="flex gap-1">
-                    <Badge variant="secondary" className="text-[10px] h-4">E-mail</Badge>
-                    <Badge variant="secondary" className="text-[10px] h-4">WA</Badge>
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-red-500" />
+                  Overdue Invoices
+                </p>
+                <p className="text-xs text-muted-foreground">Alert when invoices become overdue</p>
               </div>
               <Switch
-                checked={formData.paymentReminders}
-                onCheckedChange={(checked) => setFormData({ ...formData, paymentReminders: checked })}
-                data-testid="switch-payment-reminders"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-                <div>
-                  <p className="text-sm">Kritiek</p>
-                  <div className="flex gap-1">
-                    <Badge variant="destructive" className="text-[10px] h-4">SMS</Badge>
-                    <Badge variant="secondary" className="text-[10px] h-4">WA</Badge>
-                  </div>
-                </div>
-              </div>
-              <Switch
-                checked={formData.criticalAlerts}
-                onCheckedChange={(checked) => setFormData({ ...formData, criticalAlerts: checked })}
-                data-testid="switch-critical-alerts"
+                checked={formData.overdueAlerts}
+                onCheckedChange={(checked) => setFormData({ ...formData, overdueAlerts: checked })}
+                data-testid="switch-overdue-alerts"
               />
             </div>
           </CardContent>

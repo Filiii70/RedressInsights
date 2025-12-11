@@ -3,14 +3,7 @@ import { useParams } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RiskScoreGauge, RiskScoreBadge } from "@/components/risk-score-gauge";
-import { TrendIndicator } from "@/components/trend-indicator";
-import { InvoiceStatusBadge } from "@/components/invoice-status-badge";
-import { ActionPlanPanel } from "@/components/action-plan-panel";
-import { StatCard } from "@/components/stat-card";
-import { QRCodeCard } from "@/components/qr-code-card";
-import { EngagementStats } from "@/components/engagement-stats";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import {
   Table,
@@ -24,11 +17,11 @@ import {
   Building2,
   ArrowLeft,
   FileText,
-  Calendar,
-  MapPin,
   Clock,
   Euro,
   TrendingUp,
+  TrendingDown,
+  Minus,
 } from "lucide-react";
 import {
   LineChart,
@@ -38,24 +31,46 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts";
-import type { CompanyWithBehavior, Invoice, ActionPlan } from "@shared/schema";
+import type { CompanyWithBehavior, Invoice } from "@shared/schema";
 
 function formatCurrency(amount: number | string) {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat("nl-BE", {
+  return new Intl.NumberFormat("en-BE", {
     style: "currency",
     currency: "EUR",
   }).format(num);
 }
 
 function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString("nl-BE", {
+  return new Date(date).toLocaleDateString("en-BE", {
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
     year: "numeric",
   });
+}
+
+function StatusBadge({ status, daysLate }: { status: string; daysLate?: number }) {
+  if (status === "paid") {
+    return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Paid</Badge>;
+  }
+  if (status === "overdue") {
+    return <Badge variant="destructive">{daysLate ? `${daysLate}d late` : "Overdue"}</Badge>;
+  }
+  return <Badge variant="secondary">Pending</Badge>;
+}
+
+function RiskBadge({ score }: { score: number }) {
+  if (score <= 30) {
+    return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Low Risk</Badge>;
+  }
+  if (score <= 60) {
+    return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">Medium Risk</Badge>;
+  }
+  if (score <= 80) {
+    return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">High Risk</Badge>;
+  }
+  return <Badge variant="destructive">Critical</Badge>;
 }
 
 export default function CompanyDetail() {
@@ -70,31 +85,20 @@ export default function CompanyDetail() {
     queryKey: ["/api/companies", companyId, "invoices"],
   });
 
-  const { data: actionPlan, isLoading: actionPlanLoading } = useQuery<ActionPlan>({
-    queryKey: ["/api/companies", companyId, "action-plan"],
-  });
-
   const paymentTrendData = [
     { month: "Jun", daysLate: 15 },
     { month: "Jul", daysLate: 22 },
     { month: "Aug", daysLate: 18 },
     { month: "Sep", daysLate: 28 },
-    { month: "Okt", daysLate: 35 },
+    { month: "Oct", daysLate: 35 },
     { month: "Nov", daysLate: 42 },
   ];
 
-  const sectorBenchmark = 14;
-
   if (companyLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-64 w-full" />
-        <div className="grid gap-4 md:grid-cols-3">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-        </div>
       </div>
     );
   }
@@ -103,11 +107,11 @@ export default function CompanyDetail() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <Building2 className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <h2 className="text-lg font-medium mb-2">Bedrijf niet gevonden</h2>
+        <h2 className="text-lg font-medium mb-2">Company not found</h2>
         <Button asChild variant="outline">
           <Link href="/companies">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Terug naar overzicht
+            Back to companies
           </Link>
         </Button>
       </div>
@@ -116,279 +120,136 @@ export default function CompanyDetail() {
 
   const riskScore = company.paymentBehavior?.riskScore || 50;
   const avgDaysLate = Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"));
-  const trend = (company.paymentBehavior?.trend as "improving" | "stable" | "worsening") || "stable";
+  const trend = company.paymentBehavior?.trend || "stable";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/companies" data-testid="button-back">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-3xl font-bold tracking-tight" data-testid="text-company-name">
-                {company.name}
-              </h1>
-              <RiskScoreBadge score={riskScore} />
-            </div>
-            <div className="flex items-center gap-4 mt-2 text-muted-foreground flex-wrap">
-              <span className="flex items-center gap-1.5 font-mono text-sm">
-                <Building2 className="h-4 w-4" />
-                {company.vatNumber}
-              </span>
-              {company.sector && (
-                <span className="flex items-center gap-1.5 text-sm">
-                  <TrendingUp className="h-4 w-4" />
-                  {company.sector}
-                </span>
-              )}
-              {company.country && (
-                <span className="flex items-center gap-1.5 text-sm">
-                  <MapPin className="h-4 w-4" />
-                  {company.country}
-                </span>
-              )}
-              {company.foundingDate && (
-                <span className="flex items-center gap-1.5 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  Opgericht {company.foundingDate}
-                </span>
-              )}
-            </div>
+    <div className="h-full flex flex-col gap-4">
+      <div className="flex items-center gap-4 flex-shrink-0">
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/companies" data-testid="button-back">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold" data-testid="text-company-name">{company.name}</h1>
+            <RiskBadge score={riskScore} />
           </div>
+          <p className="text-sm text-muted-foreground font-mono">{company.vatNumber}</p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard
-          title="Risicoscore"
-          value={riskScore}
-          icon={
-            <div className="h-5 w-5">
-              <RiskScoreGauge score={riskScore} size="sm" showLabel={false} />
+      <div className="grid grid-cols-4 gap-3 flex-shrink-0">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Risk Score</p>
+            <p className="text-2xl font-bold">{riskScore}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Avg. Days Late</p>
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-bold">{avgDaysLate}</p>
+              {trend === "worsening" && <TrendingUp className="h-4 w-4 text-red-500" />}
+              {trend === "improving" && <TrendingDown className="h-4 w-4 text-green-500" />}
+              {trend === "stable" && <Minus className="h-4 w-4 text-muted-foreground" />}
             </div>
-          }
-        />
-        <StatCard
-          title="Gem. dagen laat"
-          value={`${avgDaysLate} dagen`}
-          subtitle={`Sector: ${sectorBenchmark} dagen`}
-          icon={<Clock className="h-5 w-5" />}
-        />
-        <StatCard
-          title="Totaal facturen"
-          value={company.paymentBehavior?.totalInvoices || 0}
-          icon={<FileText className="h-5 w-5" />}
-        />
-        <StatCard
-          title="Totaal bedrag"
-          value={formatCurrency(company.paymentBehavior?.totalAmount || 0)}
-          icon={<Euro className="h-5 w-5" />}
-        />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Total Invoices</p>
+            <p className="text-2xl font-bold">{company.paymentBehavior?.totalInvoices || 0}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Total Amount</p>
+            <p className="text-2xl font-bold">{formatCurrency(company.paymentBehavior?.totalAmount || 0)}</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Tabs defaultValue="history" className="space-y-4">
-            <TabsList data-testid="tabs-company-detail">
-              <TabsTrigger value="history">Betalingsgeschiedenis</TabsTrigger>
-              <TabsTrigger value="analysis">Risico Analyse</TabsTrigger>
-            </TabsList>
+      <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+        <Card className="flex flex-col min-h-0">
+          <CardHeader className="pb-2 flex-shrink-0">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Invoice History
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0 overflow-auto">
+            {invoicesLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : invoices && invoices.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Invoice #</TableHead>
+                    <TableHead className="text-xs">Amount</TableHead>
+                    <TableHead className="text-xs">Due Date</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoices.map((invoice) => (
+                    <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`}>
+                      <TableCell className="font-mono text-sm">{invoice.invoiceNumber || "-"}</TableCell>
+                      <TableCell className="font-mono">{formatCurrency(invoice.amount)}</TableCell>
+                      <TableCell>{formatDate(invoice.dueDate)}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={invoice.status} daysLate={invoice.daysLate || undefined} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full">
+                <FileText className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                <p className="text-sm text-muted-foreground">No invoices found</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-            <TabsContent value="history">
-              <Card className="overflow-visible">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <CardTitle className="text-lg">Facturen</CardTitle>
-                    <TrendIndicator trend={trend} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {invoicesLoading ? (
-                    <div className="space-y-3">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : invoices && invoices.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Factuurnummer</TableHead>
-                          <TableHead>Bedrag</TableHead>
-                          <TableHead>Vervaldatum</TableHead>
-                          <TableHead>Betaaldatum</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Dagen Laat</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {invoices.map((invoice) => (
-                          <TableRow key={invoice.id} data-testid={`row-invoice-${invoice.id}`}>
-                            <TableCell className="font-mono">
-                              {invoice.invoiceNumber || "-"}
-                            </TableCell>
-                            <TableCell className="font-mono font-medium">
-                              {formatCurrency(invoice.amount)}
-                            </TableCell>
-                            <TableCell>{formatDate(invoice.dueDate)}</TableCell>
-                            <TableCell>
-                              {invoice.paymentDate ? formatDate(invoice.paymentDate) : "-"}
-                            </TableCell>
-                            <TableCell>
-                              <InvoiceStatusBadge
-                                status={invoice.status as "pending" | "paid" | "overdue"}
-                                daysLate={invoice.daysLate || 0}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              {invoice.daysLate && invoice.daysLate > 0 ? (
-                                <span className="font-mono text-red-600 dark:text-red-400">
-                                  +{invoice.daysLate}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <FileText className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                      <p className="text-muted-foreground">Geen facturen gevonden</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="analysis">
-              <Card className="overflow-visible">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg">Betalingstrend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={paymentTrendData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis
-                          dataKey="month"
-                          stroke="hsl(var(--muted-foreground))"
-                          fontSize={12}
-                        />
-                        <YAxis
-                          stroke="hsl(var(--muted-foreground))"
-                          fontSize={12}
-                          tickFormatter={(value) => `${value}d`}
-                        />
-                        <Tooltip
-                          formatter={(value: number) => [`${value} dagen`, "Laat"]}
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <ReferenceLine
-                          y={sectorBenchmark}
-                          stroke="hsl(var(--muted-foreground))"
-                          strokeDasharray="5 5"
-                          label={{
-                            value: `Sector: ${sectorBenchmark}d`,
-                            position: "right",
-                            fill: "hsl(var(--muted-foreground))",
-                            fontSize: 12,
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="daysLate"
-                          name="Dagen laat"
-                          stroke="hsl(var(--primary))"
-                          strokeWidth={2}
-                          dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-lg border p-4">
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Op tijd betaald percentage
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {Math.round(
-                          ((company.paymentBehavior?.paidInvoices || 0) /
-                            Math.max(company.paymentBehavior?.totalInvoices || 1, 1)) *
-                            100
-                        )}%
-                      </p>
-                    </div>
-                    <div className="rounded-lg border p-4">
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Gem. sector afwijking
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {avgDaysLate > sectorBenchmark ? "+" : ""}
-                        {avgDaysLate - sectorBenchmark} dagen
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        <div>
-          {actionPlanLoading ? (
-            <Skeleton className="h-96 w-full" />
-          ) : actionPlan ? (
-            <ActionPlanPanel plan={actionPlan} companyName={company.name} />
-          ) : (
-            <Card className="overflow-visible">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground text-center">
-                  Geen actieplan beschikbaar
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className="mt-6 overflow-visible">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-center">Risicoscore</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center pb-6">
-              <RiskScoreGauge score={riskScore} size="lg" />
-              <p className="mt-4 text-sm text-muted-foreground text-center">
-                Gebaseerd op {company.paymentBehavior?.totalInvoices || 0} facturen
-              </p>
-            </CardContent>
-          </Card>
-
-          <div className="mt-6">
-            <EngagementStats companyId={companyId || ""} />
-          </div>
-
-          {invoices && invoices.length > 0 && (
-            <div className="mt-6">
-              {invoices.filter(inv => inv.status !== "paid")[0] && (
-                <QRCodeCard 
-                  invoiceId={invoices.filter(inv => inv.status !== "paid")[0].id}
-                  invoiceNumber={invoices.filter(inv => inv.status !== "paid")[0].invoiceNumber || undefined}
+        <Card className="flex flex-col min-h-0">
+          <CardHeader className="pb-2 flex-shrink-0">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Payment Trend
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={paymentTrendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" fontSize={12} stroke="hsl(var(--muted-foreground))" />
+                <YAxis fontSize={12} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => `${v}d`} />
+                <Tooltip
+                  formatter={(value: number) => [`${value} days`, "Late"]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                  }}
                 />
-              )}
-            </div>
-          )}
-        </div>
+                <Line
+                  type="monotone"
+                  dataKey="daysLate"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ fill: "hsl(var(--primary))" }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RiskScoreBadge } from "@/components/risk-score-gauge";
-import { TrendIndicator } from "@/components/trend-indicator";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useState } from "react";
 import {
@@ -22,9 +21,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Building2, Upload, ArrowRight, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Search, Building2, ArrowRight, AlertTriangle, CheckCircle } from "lucide-react";
 import type { CompanyWithBehavior } from "@shared/schema";
+
+function RiskBadge({ score }: { score: number }) {
+  if (score <= 30) {
+    return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Low</Badge>;
+  }
+  if (score <= 60) {
+    return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">Medium</Badge>;
+  }
+  if (score <= 80) {
+    return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">High</Badge>;
+  }
+  return <Badge variant="destructive">Critical</Badge>;
+}
+
+function TrendBadge({ trend }: { trend: string }) {
+  if (trend === "improving") {
+    return <span className="text-green-600 text-xs">Improving</span>;
+  }
+  if (trend === "worsening") {
+    return <span className="text-red-600 text-xs">Worsening</span>;
+  }
+  return <span className="text-muted-foreground text-xs">Stable</span>;
+}
 
 export default function Companies() {
   const [search, setSearch] = useState("");
@@ -38,15 +59,13 @@ export default function Companies() {
     const matchesSearch =
       !search ||
       company.name.toLowerCase().includes(search.toLowerCase()) ||
-      company.vatNumber.toLowerCase().includes(search.toLowerCase()) ||
-      company.sector?.toLowerCase().includes(search.toLowerCase());
+      company.vatNumber.toLowerCase().includes(search.toLowerCase());
 
     const riskScore = company.paymentBehavior?.riskScore || 50;
     let matchesRisk = true;
     if (riskFilter === "low") matchesRisk = riskScore <= 30;
     else if (riskFilter === "medium") matchesRisk = riskScore > 30 && riskScore <= 60;
-    else if (riskFilter === "high") matchesRisk = riskScore > 60 && riskScore <= 80;
-    else if (riskFilter === "critical") matchesRisk = riskScore > 80;
+    else if (riskFilter === "high") matchesRisk = riskScore > 60;
 
     return matchesSearch && matchesRisk;
   });
@@ -62,229 +81,123 @@ export default function Companies() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-3">
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div>
-            <h1 className="text-lg font-bold flex items-center gap-2" data-testid="text-page-title">
-              <Building2 className="h-5 w-5 text-primary" />
-              Bedrijven
-            </h1>
-            <p className="text-xs text-muted-foreground">Risicoprofielen van uw klanten</p>
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs text-xs">
-              <p className="font-medium mb-1">Wat is deze pagina?</p>
-              <p>Overzicht van alle bedrijven in uw netwerk met hun betalingsgedrag. Klik op een bedrijf voor gedetailleerde analyse, betalingsgeschiedenis en aanbevolen acties.</p>
-            </TooltipContent>
-          </Tooltip>
+    <div className="h-full flex flex-col gap-4">
+      <div className="flex-shrink-0">
+        <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-page-title">
+          <Building2 className="h-5 w-5" />
+          Companies
+        </h1>
+        <p className="text-sm text-muted-foreground">Payment behavior overview</p>
+      </div>
+
+      <div className="grid grid-cols-4 gap-3 flex-shrink-0">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-lg font-bold" data-testid="stat-total-companies">{stats.total}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <div>
+              <p className="text-xs text-muted-foreground">Low Risk</p>
+              <p className="text-lg font-bold text-green-600" data-testid="stat-low-risk">{stats.lowRisk}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <div>
+              <p className="text-xs text-muted-foreground">High Risk</p>
+              <p className="text-lg font-bold text-red-600" data-testid="stat-high-risk">{stats.highRisk}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="text-muted-foreground font-mono text-sm">Avg</div>
+            <div>
+              <p className="text-xs text-muted-foreground">Days Late</p>
+              <p className="text-lg font-bold" data-testid="stat-avg-days-late">{stats.avgDaysLate}d</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search companies..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+            data-testid="input-search-companies"
+          />
         </div>
-        <Button size="sm" asChild data-testid="button-upload-invoice">
-          <Link href="/upload">
-            <Upload className="mr-1 h-3 w-3" />
-            Uploaden
-          </Link>
-        </Button>
+        <Select value={riskFilter} onValueChange={setRiskFilter}>
+          <SelectTrigger className="w-32" data-testid="select-risk-filter">
+            <SelectValue placeholder="Risk" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 flex-shrink-0">
-        <Card className="overflow-visible">
-          <CardContent className="p-3 flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Totaal
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle className="h-3 w-3 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    Totaal aantal bedrijven in het KMO-Alert netwerk
-                  </TooltipContent>
-                </Tooltip>
-              </p>
-              <p className="text-sm font-bold" data-testid="stat-total-companies">{stats.total}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="overflow-visible">
-          <CardContent className="p-3 flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Laag risico
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle className="h-3 w-3 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    Bedrijven met risicoscore onder 30% - betrouwbare betalers
-                  </TooltipContent>
-                </Tooltip>
-              </p>
-              <p className="text-sm font-bold text-green-600" data-testid="stat-low-risk">{stats.lowRisk}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="overflow-visible">
-          <CardContent className="p-3 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Hoog risico
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle className="h-3 w-3 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    Bedrijven met risicoscore boven 70% - overweeg vooruitbetaling
-                  </TooltipContent>
-                </Tooltip>
-              </p>
-              <p className="text-sm font-bold text-red-600" data-testid="stat-high-risk">{stats.highRisk}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="overflow-visible">
-          <CardContent className="p-3 flex items-center gap-2">
-            <div className="h-4 w-4 text-muted-foreground flex-shrink-0 font-mono text-xs">Ø</div>
-            <div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Gem. laat
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle className="h-3 w-3 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">
-                    Gemiddeld aantal dagen na vervaldatum
-                  </TooltipContent>
-                </Tooltip>
-              </p>
-              <p className="text-sm font-bold" data-testid="stat-avg-days-late">{stats.avgDaysLate}d</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="overflow-visible flex-1 flex flex-col min-h-0">
-        <CardHeader className="p-3 pb-2 flex-shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-sm">Alle bedrijven</CardTitle>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Zoeken..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-7 h-8 w-40 text-xs"
-                  data-testid="input-search-companies"
-                />
-              </div>
-              <Select value={riskFilter} onValueChange={setRiskFilter}>
-                <SelectTrigger className="w-28 h-8 text-xs" data-testid="select-risk-filter">
-                  <SelectValue placeholder="Risico" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle</SelectItem>
-                  <SelectItem value="low">Laag</SelectItem>
-                  <SelectItem value="medium">Gemiddeld</SelectItem>
-                  <SelectItem value="high">Hoog</SelectItem>
-                  <SelectItem value="critical">Kritiek</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-3 pt-0 flex-1 overflow-auto min-h-0">
+      <Card className="flex-1 min-h-0 overflow-hidden">
+        <CardContent className="p-0 h-full overflow-auto">
           {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-8 w-full" />
+            <div className="p-4 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
           ) : filteredCompanies && filteredCompanies.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs py-1">Bedrijf</TableHead>
-                  <TableHead className="text-xs py-1">BTW</TableHead>
-                  <TableHead className="text-xs py-1">Sector</TableHead>
-                  <TableHead className="text-xs py-1">
-                    <Tooltip>
-                      <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        Fact.
-                        <HelpCircle className="h-2.5 w-2.5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">Totaal aantal facturen</TooltipContent>
-                    </Tooltip>
-                  </TableHead>
-                  <TableHead className="text-xs py-1">
-                    <Tooltip>
-                      <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        +dagen
-                        <HelpCircle className="h-2.5 w-2.5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">Gemiddeld dagen na vervaldatum</TooltipContent>
-                    </Tooltip>
-                  </TableHead>
-                  <TableHead className="text-xs py-1">
-                    <Tooltip>
-                      <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        Trend
-                        <HelpCircle className="h-2.5 w-2.5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">Betalingsgedrag trend (verbeterend/stabiel/verslechterend)</TooltipContent>
-                    </Tooltip>
-                  </TableHead>
-                  <TableHead className="text-xs py-1">
-                    <Tooltip>
-                      <TooltipTrigger className="flex items-center gap-0.5 cursor-help">
-                        Risico
-                        <HelpCircle className="h-2.5 w-2.5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">Risicoscore 0-100% gebaseerd op betalingsgeschiedenis</TooltipContent>
-                    </Tooltip>
-                  </TableHead>
-                  <TableHead className="text-xs py-1 w-8"></TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>VAT Number</TableHead>
+                  <TableHead>Invoices</TableHead>
+                  <TableHead>Avg. Days</TableHead>
+                  <TableHead>Trend</TableHead>
+                  <TableHead>Risk</TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCompanies.map((company) => (
-                  <TableRow key={company.id} className="text-xs" data-testid={`row-company-${company.id}`}>
-                    <TableCell className="py-1.5">
-                      <div className="flex items-center gap-1">
-                        <Building2 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                        <span className="font-medium truncate max-w-[100px]">{company.name}</span>
+                  <TableRow key={company.id} data-testid={`row-company-${company.id}`}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{company.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-1.5 font-mono text-[10px] truncate max-w-[80px]">
-                      {company.vatNumber}
+                    <TableCell className="font-mono text-sm">{company.vatNumber}</TableCell>
+                    <TableCell>{company.paymentBehavior?.totalInvoices || 0}</TableCell>
+                    <TableCell>
+                      {Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"))}d
                     </TableCell>
-                    <TableCell className="py-1.5 text-muted-foreground truncate max-w-[60px]">
-                      {company.sector || "-"}
+                    <TableCell>
+                      <TrendBadge trend={company.paymentBehavior?.trend || "stable"} />
                     </TableCell>
-                    <TableCell className="py-1.5 font-mono">
-                      {company.paymentBehavior?.totalInvoices || 0}
+                    <TableCell>
+                      <RiskBadge score={company.paymentBehavior?.riskScore || 50} />
                     </TableCell>
-                    <TableCell className="py-1.5 font-mono">
-                      {Math.round(parseFloat(company.paymentBehavior?.avgDaysLate?.toString() || "0"))}
-                    </TableCell>
-                    <TableCell className="py-1.5">
-                      <TrendIndicator
-                        trend={(company.paymentBehavior?.trend as "improving" | "stable" | "worsening") || "stable"}
-                      />
-                    </TableCell>
-                    <TableCell className="py-1.5">
-                      <RiskScoreBadge score={company.paymentBehavior?.riskScore || 50} />
-                    </TableCell>
-                    <TableCell className="py-1.5">
-                      <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" asChild>
                         <Link href={`/companies/${company.id}`} data-testid={`link-company-detail-${company.id}`}>
-                          <ArrowRight className="h-3 w-3" />
+                          <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
                     </TableCell>
@@ -293,16 +206,9 @@ export default function Companies() {
               </TableBody>
             </Table>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <Building2 className="h-8 w-8 text-muted-foreground/50 mb-2" />
-              <p className="text-xs text-muted-foreground">
-                {search || riskFilter !== "all" ? "Geen resultaten gevonden" : "Nog geen bedrijven"}
-              </p>
-              {!search && riskFilter === "all" && (
-                <Button size="sm" className="mt-2" asChild data-testid="link-upload-first-invoice">
-                  <Link href="/upload">Factuur uploaden</Link>
-                </Button>
-              )}
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Building2 className="h-10 w-10 text-muted-foreground/50 mb-3" />
+              <p className="text-muted-foreground">No companies found</p>
             </div>
           )}
         </CardContent>
