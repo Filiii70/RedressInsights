@@ -90,9 +90,9 @@ function App() {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-900" data-testid="text-brand-name">
-                  Vendor Payment Due Tracking Dashboard
+                  Payment Behavior Register
                 </h1>
-                <p className="text-xs text-slate-500">Track outstanding payments and vendor performance</p>
+                <p className="text-xs text-slate-500">Early warning system for payment pattern changes</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

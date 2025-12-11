@@ -7,108 +7,93 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
   Line,
   Legend,
+  ComposedChart,
 } from "recharts";
 
-const dueByAgeData = [
-  { range: "<30 Days", amount: 84000, color: "#3b82f6" },
-  { range: "30-60 Days", amount: 135000, color: "#3b82f6" },
-  { range: "60-90 Days", amount: 220000, color: "#3b82f6" },
-  { range: "90-120 Days", amount: 167000, color: "#f97316" },
-  { range: ">120 Days", amount: 251000, color: "#f97316" },
+// Payment behavior demo data - 12 companies
+const paymentDaysDistribution = [
+  { range: "<30 Days", count: 4, color: "#3b82f6" },
+  { range: "30-45 Days", count: 3, color: "#3b82f6" },
+  { range: "45-60 Days", count: 3, color: "#f97316" },
+  { range: ">60 Days", count: 2, color: "#ef4444" },
 ];
 
-const topVendorsByPurchase = [
-  { name: "Vendor 1", value: 0.48 },
-  { name: "Vendor 2", value: 0.38 },
-  { name: "Vendor 3", value: 0.18 },
-  { name: "Vendor 4", value: 0.12 },
-  { name: "Vendor 5", value: 0.08 },
+const topAlertCompanies = [
+  { name: "BuildRight NV", shift: 28, action: "Escalate" },
+  { name: "Steel Works BVBA", shift: 22, action: "Formal Notice" },
+  { name: "Transport Pro", shift: 18, action: "Formal Notice" },
+  { name: "Logistics Plus", shift: 15, action: "Inform" },
+  { name: "PackageCo NV", shift: 12, action: "Inform" },
 ];
 
-const invoicesOverTime = [
-  { month: "Jun-21", purchase: 68, paid: 52, avgCredit: 45 },
-  { month: "Jul-21", purchase: 85, paid: 68, avgCredit: 48 },
-  { month: "Aug-21", purchase: 92, paid: 75, avgCredit: 50 },
-  { month: "Sep-21", purchase: 78, paid: 82, avgCredit: 47 },
-  { month: "Oct-21", purchase: 95, paid: 88, avgCredit: 52 },
-  { month: "Nov-21", purchase: 88, paid: 92, avgCredit: 49 },
-  { month: "Dec-21", purchase: 102, paid: 95, avgCredit: 55 },
-  { month: "Jan-22", purchase: 115, paid: 105, avgCredit: 58 },
-  { month: "Feb-22", purchase: 125, paid: 112, avgCredit: 62 },
-  { month: "Mar-22", purchase: 145, paid: 128, avgCredit: 65 },
-  { month: "Apr-22", purchase: 168, paid: 145, avgCredit: 70 },
-  { month: "May-22", purchase: 195, paid: 175, avgCredit: 75 },
+const paymentTrendData = [
+  { month: "Jan", avgDays: 28, target: 30 },
+  { month: "Feb", avgDays: 29, target: 30 },
+  { month: "Mar", avgDays: 31, target: 30 },
+  { month: "Apr", avgDays: 32, target: 30 },
+  { month: "May", avgDays: 35, target: 30 },
+  { month: "Jun", avgDays: 33, target: 30 },
+  { month: "Jul", avgDays: 36, target: 30 },
+  { month: "Aug", avgDays: 38, target: 30 },
+  { month: "Sep", avgDays: 37, target: 30 },
+  { month: "Oct", avgDays: 40, target: 30 },
+  { month: "Nov", avgDays: 42, target: 30 },
+  { month: "Dec", avgDays: 41, target: 30 },
 ];
 
-const topVendorsByAmount = [
-  { name: "Vendor 1", value: 1.2 },
-  { name: "Vendor 2", value: 0.95 },
-  { name: "Vendor 3", value: 0.85 },
-  { name: "Vendor 4", value: 0.72 },
-  { name: "Vendor 5", value: 0.58 },
+const actionDistribution = [
+  { action: "Monitor", count: 4, color: "#3b82f6" },
+  { action: "Inform", count: 3, color: "#f97316" },
+  { action: "Formal Notice", count: 3, color: "#f97316" },
+  { action: "Escalate", count: 2, color: "#ef4444" },
 ];
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-function formatK(value: number) {
-  if (value >= 1000) {
-    return `$${(value / 1000).toFixed(0)}k`;
-  }
-  return `$${value}`;
-}
 
 export default function Register() {
-  const bankBalance = 38575;
-  const totalDue = 386202;
+  const companiesTracked = 12;
+  const activeAlerts = 5;
+  const totalExposure = 857000;
 
   return (
     <div className="h-full flex gap-6 overflow-hidden bg-slate-50">
-      <div className="flex flex-col gap-4 w-48 flex-shrink-0">
+      {/* Left KPI Column - exactly 2 cards like example */}
+      <div className="flex flex-col gap-4 w-44 flex-shrink-0">
         <Card className="bg-white border-0 shadow-sm">
-          <CardContent className="p-5">
-            <p className="text-sm text-slate-500 font-medium mb-1">Bank Balance</p>
-            <p className="text-2xl font-bold text-slate-900 font-mono" data-testid="stat-bank-balance">
-              ${bankBalance.toLocaleString()}
+          <CardContent className="p-6">
+            <p className="text-3xl font-bold text-slate-900 font-mono" data-testid="stat-companies">
+              {companiesTracked}
             </p>
+            <p className="text-sm text-slate-500 mt-1">Companies Tracked</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-0 shadow-sm">
-          <CardContent className="p-5">
-            <p className="text-sm text-slate-500 font-medium mb-1">Total Due</p>
-            <p className="text-2xl font-bold text-slate-900 font-mono" data-testid="stat-total-due">
-              ${totalDue.toLocaleString()}
+        <Card className="bg-white border-0 shadow-sm border-l-4 border-l-orange-500">
+          <CardContent className="p-6">
+            <p className="text-3xl font-bold text-orange-600 font-mono" data-testid="stat-alerts">
+              {activeAlerts}
             </p>
+            <p className="text-sm text-orange-600 mt-1">Active Alerts</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Right Chart Grid - 2x2 */}
       <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4 min-h-0">
+        {/* Chart 1: Payment Days by Category */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Due by Age Summary</CardTitle>
-              <div className="flex items-center gap-1">
-                <div className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
-                  </svg>
-                </div>
+              <CardTitle className="text-sm font-semibold text-slate-700">Payment Days by Category</CardTitle>
+              <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
               </div>
             </div>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dueByAgeData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+              <BarChart data={paymentDaysDistribution} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis 
                   dataKey="range" 
@@ -116,19 +101,19 @@ export default function Register() {
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  angle={-20}
+                  angle={-15}
                   textAnchor="end"
-                  height={50}
+                  height={45}
                 />
                 <YAxis 
                   fontSize={10} 
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={formatK}
+                  allowDecimals={false}
                 />
                 <Tooltip
-                  formatter={(value: number) => [formatCurrency(value), "Amount"]}
+                  formatter={(value: number) => [`${value} companies`, "Count"]}
                   contentStyle={{
                     backgroundColor: "#fff",
                     border: "1px solid #e2e8f0",
@@ -136,28 +121,31 @@ export default function Register() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar 
+                  dataKey="count" 
+                  radius={[4, 4, 0, 0]}
+                  fill="#3b82f6"
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
+        {/* Chart 2: Top Alert Companies */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Top 5 Vendors by Purchase</CardTitle>
-              <div className="flex items-center gap-1">
-                <div className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
-                  </svg>
-                </div>
+              <CardTitle className="text-sm font-semibold text-slate-700">Top Alert Companies</CardTitle>
+              <div className="w-6 h-6 rounded bg-orange-100 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
               </div>
             </div>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topVendorsByPurchase} layout="vertical" margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
+              <BarChart data={topAlertCompanies} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                 <XAxis 
                   type="number" 
@@ -165,7 +153,7 @@ export default function Register() {
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(v) => `$${v}M`}
+                  tickFormatter={(v) => `+${v}d`}
                 />
                 <YAxis 
                   dataKey="name" 
@@ -174,10 +162,10 @@ export default function Register() {
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  width={60}
+                  width={90}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`$${value}M`, "Purchase"]}
+                  formatter={(value: number) => [`+${value} days shift`, "Payment Delay"]}
                   contentStyle={{
                     backgroundColor: "#fff",
                     border: "1px solid #e2e8f0",
@@ -185,47 +173,48 @@ export default function Register() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="shift" fill="#f97316" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
+        {/* Chart 3: Payment Trend Over Time - bar+line combo like example */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Total Invoices vs Paid Invoices</CardTitle>
-              <div className="flex items-center gap-1">
-                <div className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
-                  </svg>
-                </div>
+              <CardTitle className="text-sm font-semibold text-slate-700">Payment Trend Over Time</CardTitle>
+              <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
               </div>
             </div>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={invoicesOverTime} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+              <ComposedChart data={paymentTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis 
                   dataKey="month" 
-                  fontSize={9} 
+                  fontSize={10} 
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  angle={-30}
-                  textAnchor="end"
-                  height={50}
                 />
                 <YAxis 
                   fontSize={10} 
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(v) => `$${v}k`}
+                  domain={[20, 50]}
+                  tickFormatter={(v) => `${v}d`}
                 />
                 <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `${value} days`, 
+                    name === "avgDays" ? "Avg Payment" : "Target"
+                  ]}
                   contentStyle={{
                     backgroundColor: "#fff",
                     border: "1px solid #e2e8f0",
@@ -234,42 +223,45 @@ export default function Register() {
                   }}
                 />
                 <Legend 
-                  wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
+                  wrapperStyle={{ fontSize: "10px", paddingTop: "8px" }}
                   iconType="rect"
                   iconSize={8}
                 />
-                <Bar dataKey="purchase" fill="#3b82f6" name="Purchase" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="paid" fill="#f97316" name="Paid" radius={[2, 2, 0, 0]} />
+                <Bar 
+                  dataKey="avgDays" 
+                  fill="#3b82f6" 
+                  name="Avg Payment Days" 
+                  radius={[4, 4, 0, 0]} 
+                />
                 <Line 
                   type="monotone" 
-                  dataKey="avgCredit" 
-                  stroke="#94a3b8" 
+                  dataKey="target" 
+                  stroke="#f97316" 
                   strokeWidth={2}
                   strokeDasharray="4 4"
                   dot={false}
-                  name="Avg Credit Terms"
+                  name="30-Day Target"
                 />
-              </LineChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
+        {/* Chart 4: Actions Required */}
         <Card className="bg-white border-0 shadow-sm flex flex-col">
           <CardHeader className="pb-2 pt-4 px-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Top 5 Vendors by Amount Due</CardTitle>
-              <div className="flex items-center gap-1">
-                <div className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
-                  </svg>
-                </div>
+              <CardTitle className="text-sm font-semibold text-slate-700">Actions Required</CardTitle>
+              <div className="w-6 h-6 rounded bg-orange-100 flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
               </div>
             </div>
           </CardHeader>
           <CardContent className="flex-1 px-5 pb-4 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topVendorsByAmount} layout="vertical" margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
+              <BarChart data={actionDistribution} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                 <XAxis 
                   type="number" 
@@ -277,19 +269,19 @@ export default function Register() {
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(v) => `$${v}M`}
+                  allowDecimals={false}
                 />
                 <YAxis 
-                  dataKey="name" 
+                  dataKey="action" 
                   type="category" 
                   fontSize={10} 
                   stroke="#64748b" 
                   tickLine={false}
                   axisLine={false}
-                  width={60}
+                  width={85}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`$${value}M`, "Amount Due"]}
+                  formatter={(value: number) => [`${value} companies`, "Count"]}
                   contentStyle={{
                     backgroundColor: "#fff",
                     border: "1px solid #e2e8f0",
@@ -297,7 +289,11 @@ export default function Register() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
+                <Bar 
+                  dataKey="count" 
+                  radius={[0, 4, 4, 0]}
+                  fill="#f97316"
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
