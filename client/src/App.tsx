@@ -82,17 +82,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="flex flex-col h-screen w-full overflow-hidden bg-background">
-          <header className="flex-shrink-0 flex h-14 items-center justify-between border-b px-6">
+        <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-100">
+          <header className="flex-shrink-0 flex h-16 items-center justify-between bg-white border-b border-slate-200 px-6 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <TrendingUp className="h-4 w-4" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <TrendingUp className="h-5 w-5" />
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold tracking-tight" data-testid="text-brand-name">
-                  PayTrend
-                </span>
-                <span className="text-xs text-muted-foreground">.be</span>
+              <div>
+                <h1 className="text-lg font-bold text-slate-900" data-testid="text-brand-name">
+                  Vendor Payment Due Tracking Dashboard
+                </h1>
+                <p className="text-xs text-slate-500">Track outstanding payments and vendor performance</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -100,10 +100,8 @@ function App() {
               <ThemeToggle />
             </div>
           </header>
-          <main className="flex-1 overflow-hidden p-4">
-            <div className="mx-auto max-w-7xl h-full min-h-0">
-              <Register />
-            </div>
+          <main className="flex-1 overflow-hidden p-6">
+            <Register />
           </main>
         </div>
         <Toaster />
